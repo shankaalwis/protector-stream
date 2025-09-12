@@ -4,6 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
 
 serve(async (req) => {
@@ -12,23 +13,58 @@ serve(async (req) => {
   }
 
   try {
-    const alertData = await req.json();
-    console.log('Received Splunk alert:', alertData);
+    const contentType = req.headers.get('content-type') || '';
+    let incoming: any = null;
+
+    try {
+      if (contentType.includes('application/json')) {
+        incoming = await req.json();
+      } else if (contentType.includes('application/x-www-form-urlencoded')) {
+        const form = await req.formData();
+        const obj: Record<string, any> = {};
+        for (const [k, v] of form.entries()) obj[k] = v;
+        if (typeof obj.payload === 'string') {
+          try { obj.payload = JSON.parse(obj.payload); } catch {}
+        }
+        if (typeof obj.result === 'string') {
+          try { obj.result = JSON.parse(obj.result); } catch {}
+        }
+        incoming = obj;
+      } else {
+        // Fallback: try JSON then form
+        try { incoming = await req.json(); }
+        catch {
+          const form = await req.formData();
+          incoming = Object.fromEntries(form.entries());
+        }
+      }
+    } catch (parseErr) {
+      console.error('Failed to parse incoming request body:', parseErr);
+      return new Response(
+        JSON.stringify({ error: 'Invalid payload' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Normalize common Splunk alert shapes
+    const raw = incoming?.payload ?? incoming;
+    const payload = typeof raw === 'string' ? (() => { try { return JSON.parse(raw); } catch { return incoming; } })() : raw;
+    const primary = payload?.result ?? payload?.event ?? payload;
+
+    const get = (obj: any, path: string) => path.split('.').reduce((o, k) => (o && typeof o === 'object') ? o[k] : undefined, obj);
+
+    const client_id = primary?.client_id ?? primary?.clientId ?? get(primary, 'device.client_id') ?? payload?.client_id ?? incoming?.client_id;
+    const ip_address = primary?.ip_address ?? primary?.ip ?? get(primary, 'device.ip_address') ?? payload?.ip_address ?? incoming?.ip_address;
+    const alert_type = payload?.alert_type ?? primary?.alert_type ?? incoming?.alert_type ?? payload?.search_name ?? 'Unknown Threat';
+    const description = payload?.description ?? primary?.description ?? incoming?.description ?? 'Security alert detected by Splunk';
+    const severity = (payload?.severity ?? primary?.severity ?? incoming?.severity ?? 'medium') as string;
+
+    console.log('Received Splunk alert (normalized):', { contentType, incoming, normalized: { client_id, ip_address, alert_type, description, severity } });
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
-
-    // Parse Splunk alert data - adapt based on your Splunk configuration
-    const {
-      client_id,
-      ip_address,
-      alert_type,
-      description,
-      severity = 'medium'
-    } = alertData;
-
     // Find matching device by client_id or ip_address
     const { data: device, error: deviceError } = await supabase
       .from('devices')
