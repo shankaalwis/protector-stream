@@ -61,7 +61,7 @@ export const Dashboard = () => {
     data_transferred_mb: 0,
     network_activity: []
   });
-  const [newDevice, setNewDevice] = useState({ name: '', ip: '', mac: '' });
+  const [newDevice, setNewDevice] = useState({ name: '', ip: '', mac: '', client_id: '' });
   const [showAddDevice, setShowAddDevice] = useState(false);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -164,7 +164,7 @@ export const Dashboard = () => {
         device_name: newDevice.name,
         ip_address: newDevice.ip,
         mac_address: newDevice.mac,
-        client_id: `${newDevice.name}-${Date.now()}`
+        client_id: newDevice.client_id || `${newDevice.name}-${Date.now()}`
       });
 
     if (error) {
@@ -178,7 +178,7 @@ export const Dashboard = () => {
         title: "Success",
         description: "Device added successfully"
       });
-      setNewDevice({ name: '', ip: '', mac: '' });
+      setNewDevice({ name: '', ip: '', mac: '', client_id: '' });
       setShowAddDevice(false);
     }
   };
@@ -411,7 +411,7 @@ export const Dashboard = () => {
             <CardTitle>Add New Device</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="deviceName">Device Name</Label>
                 <Input
@@ -428,6 +428,15 @@ export const Dashboard = () => {
                   value={newDevice.ip}
                   onChange={(e) => setNewDevice({ ...newDevice, ip: e.target.value })}
                   placeholder="192.168.1.1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="clientId">Client ID (Optional)</Label>
+                <Input
+                  id="clientId"
+                  value={newDevice.client_id}
+                  onChange={(e) => setNewDevice({ ...newDevice, client_id: e.target.value })}
+                  placeholder="device_123 (for IoT devices)"
                 />
               </div>
               <div>
