@@ -1,1 +1,10 @@
 project_id = "drwbehbecdrlklqydmbo"
+
+[functions.ai-analysis]
+verify_jwt = false
+
+[functions.splunk-webhook]
+verify_jwt = false
+
+[functions.firewall-control]
+verify_jwt = false
