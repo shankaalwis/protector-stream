@@ -151,6 +151,7 @@ export type Database = {
       }
       users: {
         Row: {
+          client_id: string | null
           created_at: string | null
           email: string
           firewall_api_key: string | null
@@ -159,6 +160,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          client_id?: string | null
           created_at?: string | null
           email: string
           firewall_api_key?: string | null
@@ -167,6 +169,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          client_id?: string | null
           created_at?: string | null
           email?: string
           firewall_api_key?: string | null
