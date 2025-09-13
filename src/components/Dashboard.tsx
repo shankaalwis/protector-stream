@@ -19,7 +19,8 @@ import {
   LogOut,
   Zap,
   X,
-  ShieldCheck
+  ShieldCheck,
+  Edit
 } from 'lucide-react';
 
 interface Device {
@@ -52,6 +53,14 @@ interface NetworkMetrics {
 
 type Page = 'overview' | 'alerts' | 'devices' | 'settings';
 
+interface EditDevice {
+  id: string;
+  device_name: string;
+  ip_address: string;
+  mac_address: string;
+  client_id: string;
+}
+
 export const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState<Page>('overview');
   const [devices, setDevices] = useState<Device[]>([]);
@@ -64,6 +73,8 @@ export const Dashboard = () => {
   });
   const [newDevice, setNewDevice] = useState({ name: '', ip: '', mac: '', client_id: '' });
   const [showAddDevice, setShowAddDevice] = useState(false);
+  const [editingDevice, setEditingDevice] = useState<EditDevice | null>(null);
+  const [showEditDevice, setShowEditDevice] = useState(false);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
 
@@ -245,6 +256,53 @@ export const Dashboard = () => {
         description: "Alert closed successfully"
       });
     }
+  };
+
+  const updateDevice = async () => {
+    if (!editingDevice || !editingDevice.device_name || !editingDevice.ip_address) {
+      toast({
+        title: "Error",
+        description: "Please fill in device name and IP address",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('devices')
+      .update({
+        device_name: editingDevice.device_name,
+        ip_address: editingDevice.ip_address,
+        mac_address: editingDevice.mac_address,
+        client_id: editingDevice.client_id
+      })
+      .eq('id', editingDevice.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Device updated successfully"
+      });
+      setEditingDevice(null);
+      setShowEditDevice(false);
+    }
+  };
+
+  const openEditDevice = (device: Device) => {
+    setEditingDevice({
+      id: device.id,
+      device_name: device.device_name,
+      ip_address: device.ip_address,
+      mac_address: device.mac_address || '',
+      client_id: device.client_id
+    });
+    setShowEditDevice(true);
   };
 
   const getSeverityColor = (severity: string) => {
@@ -609,41 +667,128 @@ export const Dashboard = () => {
         <CardContent>
           <div className="space-y-2">
             {devices.map((device) => (
-              <div key={device.id} className="flex items-center justify-between p-2 border rounded">
-                <div>
-                  <span className="font-medium">{device.device_name}</span>
-                  <span className="text-sm text-muted-foreground ml-2">({device.ip_address})</span>
+              <div key={device.id} className="flex items-center justify-between p-3 border rounded">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-medium">{device.device_name}</span>
+                    {getStatusIcon(device.status)}
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    <div>IP: {device.ip_address}</div>
+                    {device.mac_address && <div>MAC: {device.mac_address}</div>}
+                    {device.client_id && <div>Client ID: {device.client_id}</div>}
+                  </div>
                 </div>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={async () => {
-                    const { error } = await supabase
-                      .from('devices')
-                      .delete()
-                      .eq('id', device.id);
-                    
-                    if (error) {
-                      toast({
-                        title: "Error",
-                        description: error.message,
-                        variant: "destructive"
-                      });
-                    } else {
-                      toast({
-                        title: "Success",
-                        description: "Device removed successfully"
-                      });
-                    }
-                  }}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => openEditDevice(device)}
+                  >
+                    <Edit className="w-4 h-4 mr-1" />
+                    Edit Device
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={async () => {
+                      const { error } = await supabase
+                        .from('devices')
+                        .delete()
+                        .eq('id', device.id);
+                      
+                      if (error) {
+                        toast({
+                          title: "Error",
+                          description: error.message,
+                          variant: "destructive"
+                        });
+                      } else {
+                        toast({
+                          title: "Success",
+                          description: "Device removed successfully"
+                        });
+                      }
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Device Modal */}
+      {showEditDevice && editingDevice && (
+        <Card className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
+          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Edit Device</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowEditDevice(false)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <Label htmlFor="editDeviceName">Device Name</Label>
+                    <Input
+                      id="editDeviceName"
+                      value={editingDevice.device_name}
+                      onChange={(e) => setEditingDevice({ ...editingDevice, device_name: e.target.value })}
+                      placeholder="Enter device name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editIpAddress">IP Address</Label>
+                    <Input
+                      id="editIpAddress"
+                      value={editingDevice.ip_address}
+                      onChange={(e) => setEditingDevice({ ...editingDevice, ip_address: e.target.value })}
+                      placeholder="192.168.1.1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editMacAddress">MAC Address (Optional)</Label>
+                    <Input
+                      id="editMacAddress"
+                      value={editingDevice.mac_address}
+                      onChange={(e) => setEditingDevice({ ...editingDevice, mac_address: e.target.value })}
+                      placeholder="00:11:22:33:44:55"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editClientId">Client ID</Label>
+                    <Input
+                      id="editClientId"
+                      value={editingDevice.client_id}
+                      onChange={(e) => setEditingDevice({ ...editingDevice, client_id: e.target.value })}
+                      placeholder="device_123 (for IoT devices)"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2 mt-6">
+                  <Button variant="outline" onClick={() => setShowEditDevice(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={updateDevice}>
+                    Update Device
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </Card>
+      )}
     </div>
   );
 
