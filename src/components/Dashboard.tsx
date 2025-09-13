@@ -345,7 +345,7 @@ export const Dashboard = () => {
       <h2 className="text-3xl font-bold">Security Alerts</h2>
       
       <div className="grid gap-4">
-        {alerts.map((alert) => {
+        {alerts.filter(alert => alert.status !== 'closed').map((alert) => {
           const alertDevice = devices.find(d => d.id === alert.device_id);
           return (
             <Card key={alert.id}>
