@@ -320,20 +320,34 @@ export const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {alerts.slice(0, 5).map((alert) => (
-              <div key={alert.id} className="flex items-center justify-between p-2 border rounded">
-                <div className="flex items-center space-x-2">
-                  <Badge className={getSeverityColor(alert.severity)}>
-                    {alert.severity.toUpperCase()}
-                  </Badge>
-                  <span className="font-medium">{alert.alert_type}</span>
-                  <span className="text-sm text-muted-foreground">{alert.description}</span>
+            {alerts.slice(0, 5).map((alert) => {
+              const alertDevice = devices.find(d => d.id === alert.device_id);
+              return (
+                <div key={alert.id} className="flex items-center justify-between p-2 border rounded">
+                  <div className="flex items-center space-x-2">
+                    <Badge className={getSeverityColor(alert.severity)}>
+                      {alert.severity.toUpperCase()}
+                    </Badge>
+                    <span className="font-medium">{alert.alert_type}</span>
+                    <span className="text-sm text-muted-foreground">
+                      Security on {alertDevice?.device_name || 'Unknown Device'}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(alert.timestamp).toLocaleTimeString()}
+                    </span>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setCurrentPage('alerts')}
+                    >
+                      Go to Alert
+                    </Button>
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(alert.timestamp).toLocaleTimeString()}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
