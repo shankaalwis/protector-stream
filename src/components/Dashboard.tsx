@@ -18,7 +18,8 @@ import {
   Settings,
   LogOut,
   Zap,
-  X
+  X,
+  ShieldCheck
 } from 'lucide-react';
 
 interface Device {
@@ -344,53 +345,110 @@ export const Dashboard = () => {
       <h2 className="text-3xl font-bold">Security Alerts</h2>
       
       <div className="grid gap-4">
-        {alerts.map((alert) => (
-          <Card key={alert.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Badge className={getSeverityColor(alert.severity)}>
-                    {alert.severity.toUpperCase()}
-                  </Badge>
-                  <CardTitle className="text-lg">{alert.alert_type}</CardTitle>
+        {alerts.map((alert) => {
+          const alertDevice = devices.find(d => d.id === alert.device_id);
+          return (
+            <Card key={alert.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Badge className={getSeverityColor(alert.severity)}>
+                      {alert.severity.toUpperCase()}
+                    </Badge>
+                    <CardTitle className="text-lg">{alert.alert_type}</CardTitle>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {new Date(alert.timestamp).toLocaleString()}
+                  </span>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  {new Date(alert.timestamp).toLocaleString()}
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4">{alert.description}</p>
-              <div className="flex space-x-2">
-                <Button 
-                  size="sm" 
-                  onClick={() => getAIAnalysis(alert.id)}
-                  disabled={alert.status === 'closed'}
-                >
-                  Get AI Analysis
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={() => closeAlert(alert.id)}
-                  disabled={alert.status === 'closed'}
-                >
-                  Close Threat
-                </Button>
-              </div>
-              {alert.ai_analysis_chat.length > 0 && (
-                <div className="mt-4 p-3 bg-muted rounded">
-                  <h4 className="font-semibold mb-2">AI Analysis:</h4>
-                  {alert.ai_analysis_chat.map((chat, idx) => (
-                    <div key={idx} className="text-sm">
-                      <span className="font-medium">{chat.role}:</span> {chat.content}
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4">{alert.description}</p>
+                
+                {/* Device Information */}
+                {alertDevice && (
+                  <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+                    <h4 className="font-semibold mb-2 flex items-center">
+                      <Monitor className="w-4 h-4 mr-2" />
+                      Associated Device
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="font-medium">Name:</span> {alertDevice.device_name}
+                      </div>
+                      <div>
+                        <span className="font-medium">IP:</span> {alertDevice.ip_address}
+                      </div>
+                      {alertDevice.client_id && (
+                        <div>
+                          <span className="font-medium">Client ID:</span> {alertDevice.client_id}
+                        </div>
+                      )}
+                      <div className="flex items-center">
+                        <span className="font-medium mr-2">Status:</span>
+                        <div className="flex items-center space-x-1">
+                          {getStatusIcon(alertDevice.status)}
+                          <Badge variant={alertDevice.status === 'safe' ? 'default' : 'destructive'}>
+                            {alertDevice.status}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
-                  ))}
+                  </div>
+                )}
+                
+                <div className="flex space-x-2">
+                  <Button 
+                    size="sm" 
+                    onClick={() => getAIAnalysis(alert.id)}
+                    disabled={alert.status === 'closed'}
+                  >
+                    Get AI Analysis
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => closeAlert(alert.id)}
+                    disabled={alert.status === 'closed'}
+                  >
+                    Close Threat
+                  </Button>
+                  {alertDevice && alertDevice.status !== 'blocked' && (
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => updateDeviceStatus(alertDevice.id, 'blocked')}
+                      disabled={alert.status === 'closed'}
+                    >
+                      <Shield className="w-4 h-4 mr-1" />
+                      Block Device
+                    </Button>
+                  )}
+                  {alertDevice && alertDevice.status === 'blocked' && (
+                    <Button 
+                      size="sm" 
+                      variant="secondary"
+                      onClick={() => updateDeviceStatus(alertDevice.id, 'safe')}
+                    >
+                      <ShieldCheck className="w-4 h-4 mr-1" />
+                      Unblock Device
+                    </Button>
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                {alert.ai_analysis_chat.length > 0 && (
+                  <div className="mt-4 p-3 bg-muted rounded">
+                    <h4 className="font-semibold mb-2">AI Analysis:</h4>
+                    {alert.ai_analysis_chat.map((chat, idx) => (
+                      <div key={idx} className="text-sm">
+                        <span className="font-medium">{chat.role}:</span> {chat.content}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
