@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatDistanceToNow, format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -391,9 +392,12 @@ export const Dashboard = () => {
                       Security on {alertDevice?.device_name || 'Unknown Device'}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex flex-col items-end space-y-1">
                     <span className="text-xs text-muted-foreground">
-                      {new Date(alert.timestamp).toLocaleTimeString()}
+                      {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(alert.timestamp), 'MMM dd, yyyy HH:mm')}
                     </span>
                     <Button 
                       size="sm" 
