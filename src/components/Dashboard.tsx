@@ -923,8 +923,8 @@ export const Dashboard = () => {
       </header>
 
       {/* Main Content with Professional Spacing */}
-      <main className="main-content spacing-generous">
-        <div className="max-w-7xl mx-auto">
+      <main className="main-content spacing-generous overflow-y-auto">
+        <div className="max-w-7xl mx-auto min-h-full pb-16">
           {currentPage === 'overview' && renderOverview()}
           {currentPage === 'alerts' && renderAlerts()}
           {currentPage === 'devices' && renderDevices()}
