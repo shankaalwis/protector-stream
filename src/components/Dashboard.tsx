@@ -14,14 +14,19 @@ import {
   Monitor, 
   Activity, 
   Plus, 
-  Blocks, 
   CheckCircle, 
+  XCircle,
   Settings,
   LogOut,
   Zap,
   X,
   ShieldCheck,
-  Edit
+  Edit,
+  Menu,
+  Home,
+  Bell,
+  Lock,
+  BarChart3
 } from 'lucide-react';
 
 interface Device {
@@ -308,108 +313,156 @@ export const Dashboard = () => {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'bg-red-500';
-      case 'high': return 'bg-orange-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-blue-500';
-      default: return 'bg-gray-500';
+      case 'critical': return 'status-blocked';
+      case 'high': return 'status-threat';
+      case 'medium': return 'status-threat';
+      case 'low': return 'status-safe';
+      default: return 'status-badge';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'safe': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'threat': return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      case 'blocked': return <Blocks className="h-4 w-4 text-gray-500" />;
+      case 'safe': return <CheckCircle className="h-4 w-4 text-success" />;
+      case 'threat': return <AlertTriangle className="h-4 w-4 text-warning" />;
+      case 'blocked': return <Lock className="h-4 w-4 text-danger" />;
       default: return <Monitor className="h-4 w-4" />;
     }
   };
 
   const renderOverview = () => (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold">Security Overview</h2>
+    <div className="space-y-8">
+      <div className="text-center space-y-2">
+        <h1 className="text-heading text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          Security Overview
+        </h1>
+        <p className="text-muted-foreground text-lg">Monitor your network security in real-time</p>
+      </div>
       
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Devices</CardTitle>
-            <Monitor className="h-4 w-4 text-muted-foreground" />
+      {/* Professional Metrics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="card-professional group hover:scale-105 transition-transform duration-200">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-subheading">Total Devices</CardTitle>
+            <div className="p-3 rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <Monitor className="h-6 w-6 text-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{devices.length}</div>
+            <div className="text-3xl font-bold text-foreground">{devices.length}</div>
+            <p className="text-sm text-muted-foreground mt-2">Connected devices</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Threats Detected</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+        <Card className="card-professional group hover:scale-105 transition-transform duration-200">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-subheading">Active Threats</CardTitle>
+            <div className="p-3 rounded-2xl bg-warning/10 group-hover:bg-warning/20 transition-colors">
+              <AlertTriangle className="h-6 w-6 text-warning" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{alerts.filter(a => a.status === 'unresolved').length}</div>
+            <div className="text-3xl font-bold text-foreground">
+              {alerts.filter(a => a.status === 'unresolved').length}
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">Unresolved alerts</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Data Transferred</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+        <Card className="card-professional group hover:scale-105 transition-transform duration-200">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-subheading">Data Transfer</CardTitle>
+            <div className="p-3 rounded-2xl bg-success/10 group-hover:bg-success/20 transition-colors">
+              <Activity className="h-6 w-6 text-success" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.data_transferred_mb} MB</div>
+            <div className="text-3xl font-bold text-foreground">{metrics.data_transferred_mb}</div>
+            <p className="text-sm text-muted-foreground mt-2">MB transferred</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Network Activity</CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
+        <Card className="card-professional group hover:scale-105 transition-transform duration-200">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-subheading">Network Status</CardTitle>
+            <div className="p-3 rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <Zap className="h-6 w-6 text-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Active</div>
+            <div className="text-3xl font-bold text-success">Active</div>
+            <p className="text-sm text-muted-foreground mt-2">All systems operational</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Alerts */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Security Alerts</CardTitle>
+      {/* Recent Security Alerts */}
+      <Card className="card-professional">
+        <CardHeader className="spacing-generous">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-heading flex items-center">
+              <Bell className="h-6 w-6 text-warning mr-3" />
+              Recent Security Alerts
+            </CardTitle>
+            <Button 
+              className="btn-primary"
+              onClick={() => setCurrentPage('alerts')}
+            >
+              View All Alerts
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {alerts.slice(0, 5).map((alert) => {
-              const alertDevice = devices.find(d => d.id === alert.device_id);
-              return (
-                <div key={alert.id} className="flex items-center justify-between p-2 border rounded">
-                  <div className="flex items-center space-x-2">
-                    <Badge className={getSeverityColor(alert.severity)}>
-                      {alert.severity.toUpperCase()}
-                    </Badge>
-                    <span className="font-medium">{alert.alert_type}</span>
-                    <span className="text-sm text-muted-foreground">
-                      Security on {alertDevice?.device_name || 'Unknown Device'}
-                    </span>
+        <CardContent className="spacing-generous">
+          <div className="space-y-4">
+            {alerts.slice(0, 5).length > 0 ? (
+              alerts.slice(0, 5).map((alert) => {
+                const alertDevice = devices.find(d => d.id === alert.device_id);
+                return (
+                  <div key={alert.id} className="card-professional p-6 hover:shadow-professional-lg transition-shadow duration-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-4 flex-1">
+                        <div className={`${getSeverityColor(alert.severity)} rounded-full p-1`}>
+                          <AlertTriangle className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <span className={`${getSeverityColor(alert.severity)} text-xs font-semibold`}>
+                              {alert.severity.toUpperCase()}
+                            </span>
+                            <span className="font-semibold text-foreground">{alert.alert_type}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Security incident on {alertDevice?.device_name || 'Unknown Device'}
+                          </p>
+                          <p className="text-sm text-foreground">{alert.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end space-y-2 ml-4">
+                        <span className="text-xs font-medium text-primary">
+                          {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(alert.timestamp), 'MMM dd, yyyy HH:mm')}
+                        </span>
+                        <Button 
+                          className="btn-primary"
+                          size="sm"
+                          onClick={() => setCurrentPage('alerts')}
+                        >
+                          Investigate
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end space-y-1">
-                    <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {format(new Date(alert.timestamp), 'MMM dd, yyyy HH:mm')}
-                    </span>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => setCurrentPage('alerts')}
-                    >
-                      Go to Alert
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            ) : (
+              <div className="text-center py-12">
+                <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
+                <h3 className="text-subheading mb-2">All Clear!</h3>
+                <p className="text-muted-foreground">No security alerts detected. Your network is secure.</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -417,8 +470,11 @@ export const Dashboard = () => {
   );
 
   const renderAlerts = () => (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold">Security Alerts</h2>
+    <div className="space-y-8">
+      <div className="text-center space-y-2">
+        <h1 className="text-heading text-4xl font-bold text-warning">Security Alerts</h1>
+        <p className="text-muted-foreground text-lg">Monitor and respond to security threats</p>
+      </div>
       
       <div className="grid gap-4">
         {alerts.filter(alert => alert.status !== 'closed').map((alert) => {
@@ -460,34 +516,41 @@ export const Dashboard = () => {
                           <span className="font-medium">Client ID:</span> {alertDevice.client_id}
                         </div>
                       )}
-                      <div className="flex items-center">
-                        <span className="font-medium mr-2">Status:</span>
-                        <div className="flex items-center space-x-1">
-                          {getStatusIcon(alertDevice.status)}
-                          <Badge variant={alertDevice.status === 'safe' ? 'default' : 'destructive'}>
-                            {alertDevice.status}
-                          </Badge>
+                        <div className="flex items-center">
+                          <span className="font-medium mr-2">Status:</span>
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(alertDevice.status)}
+                            <span className={
+                              alertDevice.status === 'safe' ? 'status-safe' :
+                              alertDevice.status === 'threat' ? 'status-threat' :
+                              'status-blocked'
+                            }>
+                              {alertDevice.status.toUpperCase()}
+                            </span>
+                          </div>
                         </div>
-                      </div>
                     </div>
                   </div>
                 )}
                 
-                <div className="flex space-x-2">
+                <div className="flex space-x-3 mt-4">
                   <Button 
+                    className="btn-primary"
                     size="sm" 
                     onClick={() => getAIAnalysis(alert.id)}
                     disabled={alert.status === 'closed'}
                   >
-                    Get AI Analysis
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    AI Analysis
                   </Button>
                   <Button 
-                    size="sm" 
-                    variant="outline" 
+                    className="btn-success"
+                    size="sm"
                     onClick={() => closeAlert(alert.id)}
                     disabled={alert.status === 'closed'}
                   >
-                    Close Threat
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Resolve Alert
                   </Button>
                   {alertDevice && alertDevice.status !== 'blocked' && (
                     <Button 
@@ -797,58 +860,76 @@ export const Dashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b">
-        <div className="flex h-16 items-center px-4">
+    <div className="min-h-screen bg-background font-inter">
+      {/* Professional Header */}
+      <header className="header-professional backdrop-blur-sm">
+        <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <Shield className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">Security Monitor</span>
-          </div>
-          
-          <div className="ml-8 flex space-x-4">
-            <Button
-              variant={currentPage === 'overview' ? 'default' : 'ghost'}
-              onClick={() => setCurrentPage('overview')}
-            >
-              Overview
-            </Button>
-            <Button
-              variant={currentPage === 'alerts' ? 'default' : 'ghost'}
-              onClick={() => setCurrentPage('alerts')}
-            >
-              Alerts ({alerts.filter(a => a.status === 'unresolved').length})
-            </Button>
-            <Button
-              variant={currentPage === 'devices' ? 'default' : 'ghost'}
-              onClick={() => setCurrentPage('devices')}
-            >
-              Devices
-            </Button>
-            <Button
-              variant={currentPage === 'settings' ? 'default' : 'ghost'}
-              onClick={() => setCurrentPage('settings')}
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </Button>
-          </div>
-
-          <div className="ml-auto">
-            <Button variant="ghost" onClick={signOut}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </Button>
+            <Shield className="h-8 w-8 text-primary" />
+            <span className="text-heading text-2xl">Security Monitor</span>
           </div>
         </div>
-      </nav>
+        
+        <nav className="hidden md:flex space-x-1">
+          <Button
+            className={`btn-professional ${currentPage === 'overview' ? 'btn-primary' : 'hover:bg-accent/50'}`}
+            variant="ghost"
+            onClick={() => setCurrentPage('overview')}
+          >
+            <Home className="w-4 h-4 mr-2" />
+            Overview
+          </Button>
+          <Button
+            className={`btn-professional ${currentPage === 'alerts' ? 'btn-primary' : 'hover:bg-accent/50'}`}
+            variant="ghost"
+            onClick={() => setCurrentPage('alerts')}
+          >
+            <Bell className="w-4 h-4 mr-2" />
+            Alerts
+            {alerts.filter(a => a.status === 'unresolved').length > 0 && (
+              <span className="status-blocked ml-2 px-2 py-0.5 text-xs rounded-full">
+                {alerts.filter(a => a.status === 'unresolved').length}
+              </span>
+            )}
+          </Button>
+          <Button
+            className={`btn-professional ${currentPage === 'devices' ? 'btn-primary' : 'hover:bg-accent/50'}`}
+            variant="ghost"
+            onClick={() => setCurrentPage('devices')}
+          >
+            <Monitor className="w-4 h-4 mr-2" />
+            Devices
+          </Button>
+          <Button
+            className={`btn-professional ${currentPage === 'settings' ? 'btn-primary' : 'hover:bg-accent/50'}`}
+            variant="ghost"
+            onClick={() => setCurrentPage('settings')}
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            Settings
+          </Button>
+        </nav>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {currentPage === 'overview' && renderOverview()}
-        {currentPage === 'alerts' && renderAlerts()}
-        {currentPage === 'devices' && renderDevices()}
-        {currentPage === 'settings' && renderSettings()}
+        <div className="flex items-center space-x-4">
+          <Button 
+            className="btn-professional hover:bg-accent/50" 
+            variant="ghost" 
+            onClick={signOut}
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
+          </Button>
+        </div>
+      </header>
+
+      {/* Main Content with Professional Spacing */}
+      <main className="main-content spacing-generous">
+        <div className="max-w-7xl mx-auto">
+          {currentPage === 'overview' && renderOverview()}
+          {currentPage === 'alerts' && renderAlerts()}
+          {currentPage === 'devices' && renderDevices()}
+          {currentPage === 'settings' && renderSettings()}
+        </div>
       </main>
     </div>
   );

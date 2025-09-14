@@ -2,41 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Professional Design System - Clean, modern interface */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Professional Color Palette */
+    --background: 0 0% 100%;                    /* Pure white */
+    --background-subtle: 240 20% 99%;           /* Very subtle light gray */
+    --foreground: 0 0% 20%;                     /* Dark gray #333333 */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 20%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Professional Blue Accent (#007BFF) */
+    --primary: 211 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 211 100% 45%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Status Colors */
+    --success: 134 61% 41%;                     /* Neon green #28A745 */
+    --success-foreground: 0 0% 100%;
+    --warning: 45 100% 51%;                     /* Warm orange #FFC107 */
+    --warning-foreground: 0 0% 20%;
+    --danger: 354 70% 54%;                      /* Stark red #DC3545 */
+    --danger-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 0 0% 20%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --accent: 211 100% 50%;
+    --accent-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: 354 70% 54%;
+    --destructive-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --input-focus: 211 100% 50%;
+    --ring: 211 100% 50%;
+
+    /* Professional Radius */
+    --radius: 1rem;                             /* rounded-2xl for modern look */
+
+    /* Shadows for depth */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    /* Gradient backgrounds */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-hover)));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(134 61% 35%));
+    --gradient-warning: linear-gradient(135deg, hsl(var(--warning)), hsl(45 100% 45%));
+    --gradient-danger: linear-gradient(135deg, hsl(var(--danger)), hsl(354 70% 48%));
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +125,141 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
+  }
+}
+
+@layer components {
+  /* Professional Button Styles */
+  .btn-professional {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-8 py-3 text-sm font-medium;
+    @apply transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+    @apply shadow-sm hover:shadow-md;
+  }
+
+  .btn-primary {
+    @apply btn-professional bg-primary text-primary-foreground hover:bg-primary/90;
+    @apply active:scale-95 transform;
+  }
+
+  .btn-success {
+    @apply btn-professional bg-success text-success-foreground hover:bg-success/90;
+  }
+
+  .btn-warning {
+    @apply btn-professional bg-warning text-warning-foreground hover:bg-warning/90;
+  }
+
+  .btn-danger {
+    @apply btn-professional bg-danger text-danger-foreground hover:bg-danger/90;
+  }
+
+  /* Professional Card Styles */
+  .card-professional {
+    @apply rounded-2xl border bg-card text-card-foreground shadow-md hover:shadow-lg transition-shadow duration-200;
+  }
+
+  /* Status Badge with Pulse Animation */
+  .status-badge {
+    @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold;
+    @apply transition-all duration-200;
+  }
+
+  .status-safe {
+    @apply status-badge bg-success text-success-foreground;
+    animation: pulse-green 2s infinite;
+  }
+
+  .status-threat {
+    @apply status-badge bg-warning text-warning-foreground;
+    animation: pulse-orange 2s infinite;
+  }
+
+  .status-blocked {
+    @apply status-badge bg-danger text-danger-foreground;
+    animation: pulse-red 2s infinite;
+  }
+
+  /* Professional Input Styles */
+  .input-professional {
+    @apply flex h-12 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm;
+    @apply ring-offset-background placeholder:text-muted-foreground;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-focus focus-visible:ring-offset-2;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+    @apply transition-all duration-200;
+  }
+
+  /* Header Styles */
+  .header-professional {
+    @apply fixed top-0 left-0 right-0 z-50 h-16 bg-background border-b shadow-sm;
+    @apply flex items-center justify-between px-8;
+  }
+
+  /* Sidebar Styles */
+  .sidebar-professional {
+    @apply fixed left-0 top-16 bottom-0 w-64 bg-background border-r shadow-lg;
+    @apply transition-transform duration-300 ease-in-out;
+  }
+
+  .sidebar-collapsed {
+    @apply -translate-x-full;
+  }
+
+  /* Main Content Area */
+  .main-content {
+    @apply pt-16 pl-0 min-h-screen transition-all duration-300;
+  }
+
+  .main-content-with-sidebar {
+    @apply pl-64;
+  }
+}
+
+@layer utilities {
+  /* Custom Keyframes for Status Animations */
+  @keyframes pulse-green {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+    }
+  }
+
+  @keyframes pulse-orange {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+    }
+  }
+
+  @keyframes pulse-red {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+  }
+
+  /* Spacing utilities for generous padding */
+  .spacing-generous {
+    @apply p-8;
+  }
+
+  .spacing-generous-x {
+    @apply px-12;
+  }
+
+  /* Typography utilities */
+  .text-heading {
+    @apply text-xl font-semibold text-primary;
+  }
+
+  .text-subheading {
+    @apply text-lg font-medium text-foreground;
   }
 }
