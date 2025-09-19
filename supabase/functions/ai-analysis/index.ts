@@ -31,33 +31,40 @@ serve(async (req) => {
       throw new Error(`Failed to fetch alert: ${alertError.message}`);
     }
 
-    // System prompt integrated into the user prompt for better JSON formatting
-    const userPrompt = `You are a cybersecurity expert explaining security issues to non-technical business users. Analyze this security alert and provide a clear, easy-to-understand explanation.
+    // Context-aware prompt that analyzes specific alert types
+    const userPrompt = `You are a cybersecurity expert explaining security issues to non-technical business users. Analyze this SPECIFIC security alert and provide a tailored, context-aware explanation based on the exact alert type and details provided.
 
 CRITICAL: Respond ONLY with valid JSON. Do not include markdown code blocks, explanations, or any text outside the JSON object.
 
 Required JSON format:
 {
-  "summary": "Brief, easy-to-understand explanation using simple language that any business user can understand",
+  "summary": "Specific explanation of what happened based on the alert type and details - not generic",
   "threat_level": "One word: Low, Medium, High, or Critical", 
-  "potential_causes": ["List of potential causes in simple, non-technical terms"],
-  "mitigation_steps": ["List of clear, actionable steps that anyone can follow"]
+  "potential_causes": ["List of specific causes related to this exact alert type"],
+  "mitigation_steps": ["List of specific actionable steps for this exact alert type and situation"]
 }
 
-IMPORTANT GUIDELINES FOR YOUR RESPONSE:
+CONTEXT-AWARE ANALYSIS REQUIREMENTS:
+- Your analysis must be SPECIFIC to the alert type provided
+- For "HIGH VOLUME ALERT": Explain that someone is sending unusually large amounts of traffic/requests
+- For device-specific alerts: Reference the specific device or system mentioned
+- Make the summary directly address what this specific alert means
+- Potential causes should be specific to the alert type (e.g., for high volume: "Automated bot attacks", "Someone trying to crash the system", "Malicious users flooding with requests")
+- Mitigation steps should be specific to the alert type (e.g., for high volume: "Block the source of excessive traffic", "Set limits on how many requests are allowed", "Monitor traffic patterns closely")
+
+LANGUAGE GUIDELINES:
 - Use simple, everyday language - avoid technical jargon
 - Explain things as if talking to someone who doesn't know about cybersecurity
-- For potential causes, use plain English (e.g., "Someone trying to overwhelm your system" instead of "DDoS attack")
-- For mitigation steps, provide clear actions (e.g., "Block suspicious IP addresses" instead of "Implement rate limiting")
-- Make the summary understandable to business managers, not just IT staff
+- Use plain English descriptions (e.g., "Someone flooding your system with requests" instead of "DDoS attack")
+- Provide clear, actionable steps that anyone can understand
 
-Security Alert Details:
+Security Alert Details to Analyze:
 - Alert Type: ${alert.alert_type}
 - Description: ${alert.description}
 - Severity: ${alert.severity}
 - Timestamp: ${alert.timestamp}
 
-Respond with JSON only:`;
+Analyze this SPECIFIC alert type and provide tailored responses. Respond with JSON only:`;
 
     // Get Gemini API key from environment
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
