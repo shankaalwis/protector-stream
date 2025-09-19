@@ -19,23 +19,23 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 20%;
 
-    /* Professional Blue Accent (#007BFF) */
-    --primary: 211 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 211 100% 45%;
+    /* Dark Sky Blue Primary Theme */
+    --primary: 200 100% 30%;                       /* Dark Sky Blue primary */
+    --primary-foreground: 0 0% 100%;               /* White text */
+    --primary-hover: 200 100% 25%;                 /* Darker on hover */
 
     /* Dark Sky Blue Banner Colors */
     --banner-blue: 200 100% 30%;                   /* Dark Sky Blue for banners */
     --banner-blue-light: 200 100% 35%;            /* Lighter Dark Sky Blue */
     --banner-blue-foreground: 0 0% 100%;          /* White text on Dark Sky Blue */
     
-    /* Enhanced Blue Palette for Visual Appeal */
-    --deep-blue: 220 100% 25%;                     /* Deep blue for depth */
-    --ocean-blue: 210 100% 40%;                    /* Ocean blue for primary elements */
-    --azure-blue: 195 100% 50%;                    /* Azure blue for highlights */
-    --cerulean-blue: 185 100% 60%;                 /* Cerulean blue for accents */
-    --ice-blue: 190 50% 85%;                       /* Ice blue for subtle backgrounds */
-    --electric-blue: 210 100% 55%;                 /* Electric blue for interactive elements */
+    /* Unified Dark Sky Blue Palette */
+    --dark-sky-blue: 200 100% 30%;                 /* Main dark sky blue */
+    --dark-sky-blue-light: 200 100% 35%;          /* Light variant */
+    --dark-sky-blue-dark: 200 100% 25%;           /* Dark variant */
+    --dark-sky-blue-lighter: 200 100% 40%;        /* Lighter variant */
+    --dark-sky-blue-subtle: 200 50% 85%;          /* Subtle backgrounds */
+    --dark-sky-blue-muted: 200 30% 70%;           /* Muted variant */
 
     /* Status Colors */
     --success: 134 61% 41%;                     /* Neon green #28A745 */
@@ -51,7 +51,7 @@
     --muted: 240 5% 96%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 211 100% 50%;
+    --accent: 200 100% 30%;                        /* Dark sky blue accent */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 354 70% 54%;
@@ -59,8 +59,8 @@
 
     --border: 240 6% 75%;                           /* Darker borders */
     --input: 240 6% 75%;                            /* Darker input borders */
-    --input-focus: 211 100% 50%;
-    --ring: 211 100% 50%;
+    --input-focus: 200 100% 30%;                   /* Dark sky blue focus */
+    --ring: 200 100% 30%;                          /* Dark sky blue ring */
 
     /* Professional Radius */
     --radius: 1rem;                             /* rounded-2xl for modern look */
@@ -70,8 +70,8 @@
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
-    /* Gradient backgrounds */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-hover)));
+    /* Dark Sky Blue gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--dark-sky-blue)), hsl(var(--dark-sky-blue-dark)));
     --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(134 61% 35%));
     --gradient-warning: linear-gradient(135deg, hsl(var(--warning)), hsl(45 100% 45%));
     --gradient-danger: linear-gradient(135deg, hsl(var(--danger)), hsl(354 70% 48%));
@@ -103,21 +103,23 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Dark Sky Blue Primary Theme for Dark Mode */
+    --primary: 200 100% 45%;                       /* Lighter dark sky blue for dark mode */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 200 100% 40%;
 
     /* Dark Sky Blue Banner Colors for dark mode */
     --banner-blue: 200 100% 45%;                   /* Lighter Dark Sky Blue for dark mode */
     --banner-blue-light: 200 100% 50%;            /* Even lighter Dark Sky Blue */
     --banner-blue-foreground: 0 0% 100%;          /* White text on Dark Sky Blue */
     
-    /* Enhanced Blue Palette for Dark Mode */
-    --deep-blue: 220 100% 35%;                     /* Brighter deep blue for dark mode */
-    --ocean-blue: 210 100% 50%;                    /* Brighter ocean blue */
-    --azure-blue: 195 100% 60%;                    /* Brighter azure blue */
-    --cerulean-blue: 185 100% 70%;                 /* Brighter cerulean blue */
-    --ice-blue: 190 50% 90%;                       /* Lighter ice blue */
-    --electric-blue: 210 100% 65%;                 /* Brighter electric blue */
+    /* Unified Dark Sky Blue Palette for Dark Mode */
+    --dark-sky-blue: 200 100% 45%;                 /* Main dark sky blue for dark mode */
+    --dark-sky-blue-light: 200 100% 50%;          /* Light variant */
+    --dark-sky-blue-dark: 200 100% 40%;           /* Dark variant */
+    --dark-sky-blue-lighter: 200 100% 55%;        /* Lighter variant */
+    --dark-sky-blue-subtle: 200 50% 90%;          /* Subtle backgrounds */
+    --dark-sky-blue-muted: 200 30% 80%;           /* Muted variant */
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -125,23 +127,23 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 200 100% 45%;                        /* Dark sky blue accent for dark mode */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 25%;                      /* Darker borders in dark mode */
     --input: 217.2 32.6% 25%;                       /* Darker input borders */
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 200 100% 45%;                           /* Dark sky blue ring for dark mode */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 200 100% 45%;               /* Dark sky blue sidebar */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 200 100% 45%;                  /* Dark sky blue sidebar ring */
   }
 }
 
@@ -282,10 +284,10 @@
 
   /* Typography utilities */
   .text-heading {
-    @apply text-xl font-semibold text-primary;
+    @apply text-xl font-semibold text-[hsl(var(--dark-sky-blue))];
   }
 
   .text-subheading {
-    @apply text-lg font-medium text-foreground;
+    @apply text-lg font-medium text-[hsl(var(--dark-sky-blue))];
   }
 }
