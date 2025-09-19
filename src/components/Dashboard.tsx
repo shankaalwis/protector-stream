@@ -424,11 +424,22 @@ export const Dashboard = () => {
 
   const renderOverview = () => (
     <div className="space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-heading text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-          Security Overview
-        </h1>
-        <p className="text-muted-foreground text-lg">Monitor your network security in real-time</p>
+      {/* Banner-like header for Security Overview */}
+      <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 shadow-professional-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent"></div>
+        <div className="relative text-center space-y-3">
+          <div className="flex items-center justify-center space-x-3">
+            <Shield className="h-6 w-6 text-primary" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              Security Overview
+            </h1>
+            <Shield className="h-6 w-6 text-primary" />
+          </div>
+          <p className="text-lg font-medium text-foreground/80">Monitor your network security in real-time</p>
+          <div className="flex items-center justify-center space-x-2 pt-2">
+            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full"></div>
+          </div>
+        </div>
       </div>
       
       {/* Professional Metrics Cards */}
@@ -568,19 +579,19 @@ export const Dashboard = () => {
     return (
     <div className="space-y-8">
       {/* Banner-like header */}
-      <div className="relative overflow-hidden rounded-2xl border-2 border-warning/20 bg-gradient-to-r from-warning/10 via-warning/5 to-transparent p-8 shadow-professional-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-warning/5 to-transparent"></div>
-        <div className="relative text-center space-y-4">
+      <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 shadow-professional-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent"></div>
+        <div className="relative text-center space-y-3">
           <div className="flex items-center justify-center space-x-3">
-            <AlertTriangle className="h-8 w-8 text-warning" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-warning to-warning/70 bg-clip-text text-transparent">
+            <AlertTriangle className="h-6 w-6 text-primary" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               Security Alerts
             </h1>
-            <AlertTriangle className="h-8 w-8 text-warning" />
+            <AlertTriangle className="h-6 w-6 text-primary" />
           </div>
-          <p className="text-xl font-medium text-foreground/80">Monitor and respond to security threats</p>
+          <p className="text-lg font-medium text-foreground/80">Monitor and respond to security threats</p>
           <div className="flex items-center justify-center space-x-2 pt-2">
-            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-warning to-transparent rounded-full"></div>
+            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full"></div>
           </div>
         </div>
       </div>
@@ -729,95 +740,95 @@ export const Dashboard = () => {
                   };
                   
                   return (
-                    <div className="mt-6 space-y-4">
-                      {/* AI Analysis Response */}
-                      <div className="p-8 bg-background border-2 border-primary/20 rounded-xl shadow-professional-lg space-y-6">
-                        <div className="flex items-center justify-between border-b border-border/30 pb-4">
-                          <h4 className="font-bold text-foreground text-2xl flex items-center gap-3">
-                            <BarChart3 className="w-6 h-6 text-primary" />
-                            AI Security Analysis
-                          </h4>
-                          <Badge className={`${getThreatLevelColor(analysisData.threat_level)} font-semibold text-base px-4 py-2 border-2`}>
-                            {analysisData.threat_level || 'Unknown'}
-                          </Badge>
-                        </div>
-                        
-                        <div className="space-y-6">
-                          {/* Always show summary */}
-                          <div className="p-4 bg-muted/20 border border-border/30 rounded-lg">
-                            <h5 className="font-bold text-foreground mb-3 text-lg flex items-center gap-2">
-                              <div className="w-2 h-2 bg-primary rounded-full"></div>
-                              Summary
-                            </h5>
-                            <p className="text-base text-foreground font-medium leading-relaxed">{analysisData.summary}</p>
-                          </div>
+                     <div className="mt-4 space-y-3">
+                       {/* AI Analysis Response */}
+                       <div className="p-5 bg-background border-2 border-primary/20 rounded-xl shadow-professional-lg space-y-4">
+                         <div className="flex items-center justify-between border-b border-border/30 pb-3">
+                           <h4 className="font-bold text-foreground text-xl flex items-center gap-3">
+                             <BarChart3 className="w-5 h-5 text-primary" />
+                             AI Security Analysis
+                           </h4>
+                           <Badge className={`${getThreatLevelColor(analysisData.threat_level)} font-semibold text-sm px-3 py-1 border-2`}>
+                             {analysisData.threat_level || 'Unknown'}
+                           </Badge>
+                         </div>
+                         
+                         <div className="space-y-4">
+                           {/* Always show summary */}
+                           <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
+                             <h5 className="font-bold text-foreground mb-2 text-base flex items-center gap-2">
+                               <div className="w-2 h-2 bg-primary rounded-full"></div>
+                               Summary
+                             </h5>
+                             <p className="text-sm text-foreground font-medium leading-snug">{analysisData.summary}</p>
+                           </div>
 
-                          {/* Expandable sections with better styling */}
-                          <div className="space-y-4">
-                            {analysisData.potential_causes && analysisData.potential_causes.length > 0 && (
-                              <div className="border border-border/30 rounded-lg overflow-hidden">
-                                <Button
-                                  variant="ghost"
-                                  size="lg"
-                                  onClick={() => toggleSection('causes')}
-                                  className="w-full justify-start gap-3 p-4 h-auto border-b border-border/20 hover:bg-muted/30"
-                                >
-                                  {currentExpanded.causes ? (
-                                    <ChevronDown className="w-5 h-5 text-primary" />
-                                  ) : (
-                                    <ChevronRight className="w-5 h-5 text-primary" />
-                                  )}
-                                  <span className="font-semibold text-foreground text-lg">Potential Causes</span>
-                                </Button>
-                                
-                                {currentExpanded.causes && (
-                                  <div className="p-6 bg-muted/10">
-                                    <ul className="text-base text-foreground font-medium space-y-3">
-                                      {analysisData.potential_causes.map((cause: string, idx: number) => (
-                                        <li key={idx} className="flex items-start gap-3 p-3 bg-background border border-border/20 rounded-lg">
-                                          <span className="text-primary font-bold text-lg mt-0.5">•</span>
-                                          <span>{cause}</span>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            
-                            {analysisData.mitigation_steps && analysisData.mitigation_steps.length > 0 && (
-                              <div className="border border-border/30 rounded-lg overflow-hidden">
-                                <Button
-                                  variant="ghost"
-                                  size="lg"
-                                  onClick={() => toggleSection('actions')}
-                                  className="w-full justify-start gap-3 p-4 h-auto border-b border-border/20 hover:bg-muted/30"
-                                >
-                                  {currentExpanded.actions ? (
-                                    <ChevronDown className="w-5 h-5 text-primary" />
-                                  ) : (
-                                    <ChevronRight className="w-5 h-5 text-primary" />
-                                  )}
-                                  <span className="font-semibold text-foreground text-lg">Recommended Actions</span>
-                                </Button>
-                                
-                                {currentExpanded.actions && (
-                                  <div className="p-6 bg-muted/10">
-                                    <ol className="text-base text-foreground font-medium space-y-4">
-                                      {analysisData.mitigation_steps.map((step: string, idx: number) => (
-                                        <li key={idx} className="flex items-start gap-4 p-4 bg-background border border-border/20 rounded-lg">
-                                          <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold border-2 border-primary/30">
-                                            {idx + 1}
-                                          </span>
-                                          <span className="pt-1">{step}</span>
-                                        </li>
-                                      ))}
-                                    </ol>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
+                           {/* Expandable sections with better styling */}
+                           <div className="space-y-3">
+                             {analysisData.potential_causes && analysisData.potential_causes.length > 0 && (
+                               <div className="border border-border/30 rounded-lg overflow-hidden">
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   onClick={() => toggleSection('causes')}
+                                   className="w-full justify-start gap-2 p-3 h-auto border-b border-border/20 hover:bg-muted/30"
+                                 >
+                                   {currentExpanded.causes ? (
+                                     <ChevronDown className="w-4 h-4 text-primary" />
+                                   ) : (
+                                     <ChevronRight className="w-4 h-4 text-primary" />
+                                   )}
+                                   <span className="font-semibold text-foreground text-base">Potential Causes</span>
+                                 </Button>
+                                 
+                                 {currentExpanded.causes && (
+                                   <div className="p-4 bg-muted/10">
+                                     <ul className="text-sm text-foreground font-medium space-y-2">
+                                       {analysisData.potential_causes.map((cause: string, idx: number) => (
+                                         <li key={idx} className="flex items-start gap-2 p-2 bg-background border border-border/20 rounded-lg">
+                                           <span className="text-primary font-bold text-base mt-0.5">•</span>
+                                           <span className="leading-snug">{cause}</span>
+                                         </li>
+                                       ))}
+                                     </ul>
+                                   </div>
+                                 )}
+                               </div>
+                             )}
+                             
+                             {analysisData.mitigation_steps && analysisData.mitigation_steps.length > 0 && (
+                               <div className="border border-border/30 rounded-lg overflow-hidden">
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   onClick={() => toggleSection('actions')}
+                                   className="w-full justify-start gap-2 p-3 h-auto border-b border-border/20 hover:bg-muted/30"
+                                 >
+                                   {currentExpanded.actions ? (
+                                     <ChevronDown className="w-4 h-4 text-primary" />
+                                   ) : (
+                                     <ChevronRight className="w-4 h-4 text-primary" />
+                                   )}
+                                   <span className="font-semibold text-foreground text-base">Recommended Actions</span>
+                                 </Button>
+                                 
+                                 {currentExpanded.actions && (
+                                   <div className="p-4 bg-muted/10">
+                                     <ol className="text-sm text-foreground font-medium space-y-2">
+                                       {analysisData.mitigation_steps.map((step: string, idx: number) => (
+                                         <li key={idx} className="flex items-start gap-3 p-3 bg-background border border-border/20 rounded-lg">
+                                           <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold border-2 border-primary/30">
+                                             {idx + 1}
+                                           </span>
+                                           <span className="pt-0.5 leading-snug">{step}</span>
+                                         </li>
+                                       ))}
+                                     </ol>
+                                   </div>
+                                 )}
+                               </div>
+                             )}
+                           </div>
                         </div>
                       </div>
 
