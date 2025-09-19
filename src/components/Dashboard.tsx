@@ -702,146 +702,154 @@ export const Dashboard = () => {
                   };
                   
                   return (
-                    <div className="mt-4 p-6 bg-background border border-border rounded-lg space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-heading text-lg">🤖 AI Security Analysis</h4>
-                        <Badge className={`${getThreatLevelColor(analysisData.threat_level)} font-medium`}>
-                          {analysisData.threat_level || 'Unknown'}
-                        </Badge>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        {/* Always show summary */}
-                        <div>
-                          <h5 className="font-medium text-subheading mb-2">📋 Summary</h5>
-                          <p className="text-sm text-foreground leading-relaxed">{analysisData.summary}</p>
+                    <div className="mt-4 space-y-4">
+                      {/* AI Analysis Response */}
+                      <div className="p-6 bg-background border border-border rounded-lg space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-heading text-lg">🤖 AI Security Analysis</h4>
+                          <Badge className={`${getThreatLevelColor(analysisData.threat_level)} font-medium`}>
+                            {analysisData.threat_level || 'Unknown'}
+                          </Badge>
                         </div>
+                        
+                        <div className="space-y-4">
+                          {/* Always show summary */}
+                          <div>
+                            <h5 className="font-medium text-subheading mb-2">📋 Summary</h5>
+                            <p className="text-sm text-foreground leading-relaxed">{analysisData.summary}</p>
+                          </div>
 
-                        {/* Expandable sections with buttons */}
-                        <div className="space-y-3">
-                          {analysisData.potential_causes && analysisData.potential_causes.length > 0 && (
-                            <div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => toggleSection('causes')}
-                                className="flex items-center gap-2 mb-3"
-                              >
-                                {currentExpanded.causes ? (
-                                  <ChevronDown className="w-4 h-4" />
-                                ) : (
-                                  <ChevronRight className="w-4 h-4" />
+                          {/* Expandable sections with buttons */}
+                          <div className="space-y-3">
+                            {analysisData.potential_causes && analysisData.potential_causes.length > 0 && (
+                              <div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => toggleSection('causes')}
+                                  className="flex items-center gap-2 mb-3"
+                                >
+                                  {currentExpanded.causes ? (
+                                    <ChevronDown className="w-4 h-4" />
+                                  ) : (
+                                    <ChevronRight className="w-4 h-4" />
+                                  )}
+                                  🔍 Potential Causes
+                                </Button>
+                                
+                                {currentExpanded.causes && (
+                                  <div className="ml-6 pl-4 border-l-2 border-border">
+                                    <ul className="text-sm text-foreground space-y-1">
+                                      {analysisData.potential_causes.map((cause: string, idx: number) => (
+                                        <li key={idx} className="flex items-start gap-2">
+                                          <span className="text-muted-foreground mt-0.5">•</span>
+                                          <span>{cause}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
                                 )}
-                                🔍 Potential Causes
-                              </Button>
-                              
-                              {currentExpanded.causes && (
-                                <div className="ml-6 pl-4 border-l-2 border-border">
-                                  <ul className="text-sm text-foreground space-y-1">
-                                    {analysisData.potential_causes.map((cause: string, idx: number) => (
-                                      <li key={idx} className="flex items-start gap-2">
-                                        <span className="text-muted-foreground mt-0.5">•</span>
-                                        <span>{cause}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
+                              </div>
+                            )}
+                            
+                            {analysisData.mitigation_steps && analysisData.mitigation_steps.length > 0 && (
+                              <div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => toggleSection('actions')}
+                                  className="flex items-center gap-2 mb-3"
+                                >
+                                  {currentExpanded.actions ? (
+                                    <ChevronDown className="w-4 h-4" />
+                                  ) : (
+                                    <ChevronRight className="w-4 h-4" />
+                                  )}
+                                  ⚡ Recommended Actions
+                                </Button>
+                                
+                                {currentExpanded.actions && (
+                                  <div className="ml-6 pl-4 border-l-2 border-border">
+                                    <ol className="text-sm text-foreground space-y-2">
+                                      {analysisData.mitigation_steps.map((step: string, idx: number) => (
+                                        <li key={idx} className="flex items-start gap-3">
+                                          <span className="flex-shrink-0 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+                                            {idx + 1}
+                                          </span>
+                                          <span className="pt-0.5">{step}</span>
+                                        </li>
+                                      ))}
+                                    </ol>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Alert-specific Chat Interface - appears AFTER AI analysis */}
+                      {alertChatVisible[alert.id] && (
+                        <div className="p-4 bg-muted/30 border border-border rounded-lg space-y-4">
+                          <h5 className="font-medium text-subheading flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4" />
+                            Continue Discussion
+                          </h5>
+                          
+                          {/* Chat Messages */}
+                          {alertChatMessages[alert.id] && alertChatMessages[alert.id].length > 0 && (
+                            <div className="max-h-48 overflow-y-auto space-y-2 p-3 bg-background rounded-lg">
+                              {alertChatMessages[alert.id].map((message, idx) => (
+                                <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                  <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+                                    message.role === 'user' 
+                                      ? 'bg-primary text-primary-foreground' 
+                                      : 'bg-muted text-foreground border'
+                                  }`}>
+                                    <div className="flex items-start gap-2">
+                                      {message.role === 'assistant' && (
+                                        <MessageSquare className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                      )}
+                                      <div>
+                                        <p>{message.content}</p>
+                                        <p className="text-xs opacity-70 mt-1">
+                                          {format(message.timestamp, 'HH:mm')}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
-                              )}
+                              ))}
                             </div>
                           )}
                           
-                          {analysisData.mitigation_steps && analysisData.mitigation_steps.length > 0 && (
-                            <div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => toggleSection('actions')}
-                                className="flex items-center gap-2 mb-3"
-                              >
-                                {currentExpanded.actions ? (
-                                  <ChevronDown className="w-4 h-4" />
-                                ) : (
-                                  <ChevronRight className="w-4 h-4" />
-                                )}
-                                ⚡ Recommended Actions
-                              </Button>
-                              
-                              {currentExpanded.actions && (
-                                <div className="ml-6 pl-4 border-l-2 border-border">
-                                  <ol className="text-sm text-foreground space-y-2">
-                                    {analysisData.mitigation_steps.map((step: string, idx: number) => (
-                                      <li key={idx} className="flex items-start gap-3">
-                                        <span className="flex-shrink-0 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
-                                          {idx + 1}
-                                        </span>
-                                        <span className="pt-0.5">{step}</span>
-                                      </li>
-                                    ))}
-                                  </ol>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                          {/* Chat Input */}
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              value={alertChatInputs[alert.id] || ''}
+                              onChange={(e) => setAlertChatInputs(prev => ({
+                                ...prev,
+                                [alert.id]: e.target.value
+                              }))}
+                              onKeyPress={(e) => handleAlertKeyPress(e, alert.id)}
+                              placeholder="Ask about this specific alert..."
+                              className="flex-1"
+                            />
+                            <Button
+                              onClick={() => sendAlertMessage(alert.id)}
+                              disabled={!alertChatInputs[alert.id]?.trim()}
+                              size="sm"
+                              className="flex items-center gap-1"
+                            >
+                              <Send className="w-3 h-3" />
+                              Send
+                            </Button>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   );
                 })()}
-
-                {/* Alert-specific Chat Interface */}
-                {alertChatVisible[alert.id] && (
-                  <div className="mt-4 border-t border-border pt-4 space-y-4">
-                    {/* Chat Messages */}
-                    {alertChatMessages[alert.id] && alertChatMessages[alert.id].length > 0 && (
-                      <div className="max-h-48 overflow-y-auto space-y-2 p-3 bg-muted/30 rounded-lg">
-                        {alertChatMessages[alert.id].map((message, idx) => (
-                          <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
-                              message.role === 'user' 
-                                ? 'bg-primary text-primary-foreground' 
-                                : 'bg-background text-foreground border'
-                            }`}>
-                              <div className="flex items-start gap-2">
-                                {message.role === 'assistant' && (
-                                  <MessageSquare className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                )}
-                                <div>
-                                  <p>{message.content}</p>
-                                  <p className="text-xs opacity-70 mt-1">
-                                    {format(message.timestamp, 'HH:mm')}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Chat Input */}
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        value={alertChatInputs[alert.id] || ''}
-                        onChange={(e) => setAlertChatInputs(prev => ({
-                          ...prev,
-                          [alert.id]: e.target.value
-                        }))}
-                        onKeyPress={(e) => handleAlertKeyPress(e, alert.id)}
-                        placeholder="Ask about this specific alert..."
-                        className="flex-1"
-                      />
-                      <Button
-                        onClick={() => sendAlertMessage(alert.id)}
-                        disabled={!alertChatInputs[alert.id]?.trim()}
-                        size="sm"
-                        className="flex items-center gap-1"
-                      >
-                        <Send className="w-3 h-3" />
-                        Send
-                      </Button>
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
           );
