@@ -239,6 +239,7 @@ export const Dashboard = () => {
     console.log('Current alertChatVisible state:', alertChatVisible);
     
     // Toggle the chat visibility for this specific alert
+    const wasVisible = alertChatVisible[alertId];
     setAlertChatVisible(prev => {
       const newState = {
         ...prev,
@@ -249,31 +250,36 @@ export const Dashboard = () => {
     });
 
     // If chat is becoming visible and we haven't called AI analysis yet, call it
-    if (!alertChatVisible[alertId]) {
-      try {
-        console.log('Calling AI analysis function...');
-        const response = await supabase.functions.invoke('ai-analysis', {
-          body: { alertId }
-        });
-        
-        if (response.error) {
-          throw new Error(response.error.message);
+    if (!wasVisible) {
+      const currentAlert = alerts.find(alert => alert.id === alertId);
+      
+      // Only call AI analysis if we don't have analysis data yet
+      if (!currentAlert?.ai_analysis_chat || currentAlert.ai_analysis_chat.length === 0) {
+        try {
+          console.log('Calling AI analysis function...');
+          const response = await supabase.functions.invoke('ai-analysis', {
+            body: { alertId }
+          });
+          
+          if (response.error) {
+            throw new Error(response.error.message);
+          }
+          
+          // Refresh alerts data to get the updated AI analysis
+          await fetchAlerts();
+          
+          toast({
+            title: "AI Analysis",
+            description: "Analysis completed and saved"
+          });
+        } catch (error) {
+          console.error('AI Analysis error:', error);
+          toast({
+            title: "Error",
+            description: "Failed to get AI analysis",
+            variant: "destructive"
+          });
         }
-        
-        // Refresh alerts data to get the updated AI analysis
-        await fetchAlerts();
-        
-        toast({
-          title: "AI Analysis",
-          description: "Analysis completed and saved"
-        });
-      } catch (error) {
-        console.error('AI Analysis error:', error);
-        toast({
-          title: "Error",
-          description: "Failed to get AI analysis",
-          variant: "destructive"
-        });
       }
     }
   };
@@ -561,54 +567,70 @@ export const Dashboard = () => {
     
     return (
     <div className="space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-heading text-4xl font-bold text-warning">Security Alerts</h1>
-        <p className="text-muted-foreground text-lg">Monitor and respond to security threats</p>
+      {/* Banner-like header */}
+      <div className="relative overflow-hidden rounded-2xl border-2 border-warning/20 bg-gradient-to-r from-warning/10 via-warning/5 to-transparent p-8 shadow-professional-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-warning/5 to-transparent"></div>
+        <div className="relative text-center space-y-4">
+          <div className="flex items-center justify-center space-x-3">
+            <AlertTriangle className="h-8 w-8 text-warning" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-warning to-warning/70 bg-clip-text text-transparent">
+              Security Alerts
+            </h1>
+            <AlertTriangle className="h-8 w-8 text-warning" />
+          </div>
+          <p className="text-xl font-medium text-foreground/80">Monitor and respond to security threats</p>
+          <div className="flex items-center justify-center space-x-2 pt-2">
+            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-warning to-transparent rounded-full"></div>
+          </div>
+        </div>
       </div>
       
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         {alerts.filter(alert => alert.status !== 'closed').map((alert) => {
           const alertDevice = devices.find(d => d.id === alert.device_id);
           console.log('Rendering alert:', alert.id, 'Chat visible:', alertChatVisible[alert.id]);
           return (
-            <Card key={alert.id}>
-              <CardHeader>
+            <Card key={alert.id} className="border-2 border-border/50 shadow-professional hover:shadow-professional-lg transition-all duration-200">
+              <CardHeader className="border-b border-border/30 bg-background/50">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Badge className={getSeverityColor(alert.severity)}>
+                  <div className="flex items-center space-x-3">
+                    <Badge className={`${getSeverityColor(alert.severity)} border`}>
                       {alert.severity.toUpperCase()}
                     </Badge>
-                    <CardTitle className="text-lg">{alert.alert_type}</CardTitle>
+                    <CardTitle className="text-xl font-semibold text-foreground">{alert.alert_type}</CardTitle>
                   </div>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm font-medium text-muted-foreground border border-border/30 px-3 py-1 rounded-lg bg-muted/30">
                     {new Date(alert.timestamp).toLocaleString()}
                   </span>
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className="mb-4">{alert.description}</p>
+              <CardContent className="p-6">
+                <p className="mb-6 text-foreground font-medium text-base">{alert.description}</p>
                 
                 {/* Device Information */}
                 {alertDevice && (
-                  <div className="mb-4 p-3 bg-muted/50 rounded-lg">
-                    <h4 className="font-semibold mb-2 flex items-center">
-                      <Monitor className="w-4 h-4 mr-2" />
+                  <div className="mb-6 p-4 bg-muted/30 border border-border/40 rounded-xl">
+                    <h4 className="font-semibold mb-3 flex items-center text-foreground text-base">
+                      <Monitor className="w-5 h-5 mr-2 text-primary" />
                       Associated Device
                     </h4>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <span className="font-medium">Name:</span> {alertDevice.device_name}
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold text-foreground">Name:</span> 
+                        <span className="text-foreground/80">{alertDevice.device_name}</span>
                       </div>
-                      <div>
-                        <span className="font-medium">IP:</span> {alertDevice.ip_address}
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold text-foreground">IP:</span>
+                        <span className="text-foreground/80 font-mono">{alertDevice.ip_address}</span>
                       </div>
                       {alertDevice.client_id && (
-                        <div>
-                          <span className="font-medium">Client ID:</span> {alertDevice.client_id}
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold text-foreground">Client ID:</span>
+                          <span className="text-foreground/80 font-mono">{alertDevice.client_id}</span>
                         </div>
                       )}
-                        <div className="flex items-center">
-                          <span className="font-medium mr-2">Status:</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold text-foreground">Status:</span>
                           <div className="flex items-center space-x-2">
                             {getStatusIcon(alertDevice.status)}
                             <span className={
@@ -624,18 +646,18 @@ export const Dashboard = () => {
                   </div>
                 )}
                 
-                <div className="flex space-x-3 mt-4">
+                <div className="flex space-x-3 mt-6 pb-4 border-b border-border/30">
                   <Button 
-                    className="btn-primary"
+                    className="btn-primary border border-primary/20"
                     size="sm" 
                     onClick={() => getAIAnalysis(alert.id)}
                     disabled={alert.status === 'closed'}
                   >
                     <BarChart3 className="w-4 h-4 mr-2" />
-                    AI Analysis
+                    {alertChatVisible[alert.id] ? 'Hide Analysis' : 'AI Analysis'}
                   </Button>
                   <Button 
-                    className="btn-success"
+                    className="btn-success border border-success/20"
                     size="sm"
                     onClick={() => closeAlert(alert.id)}
                     disabled={alert.status === 'closed'}
@@ -647,6 +669,7 @@ export const Dashboard = () => {
                     <Button 
                       size="sm" 
                       variant="destructive"
+                      className="border border-destructive/20"
                       onClick={() => updateDeviceStatus(alertDevice.id, 'blocked')}
                       disabled={alert.status === 'closed'}
                     >
@@ -658,6 +681,7 @@ export const Dashboard = () => {
                     <Button 
                       size="sm" 
                       variant="secondary"
+                      className="border border-border/40"
                       onClick={() => updateDeviceStatus(alertDevice.id, 'safe')}
                     >
                       <ShieldCheck className="w-4 h-4 mr-1" />
@@ -665,7 +689,7 @@ export const Dashboard = () => {
                     </Button>
                   )}
                 </div>
-                {alert.ai_analysis_chat.length > 0 && (() => {
+                {alert.ai_analysis_chat.length > 0 && alertChatVisible[alert.id] && (() => {
                   // Find the AI's response (not the user's prompt)
                   const aiResponse = alert.ai_analysis_chat.find(chat => chat.role === 'ai')?.content;
                   if (!aiResponse) return null;
@@ -675,20 +699,20 @@ export const Dashboard = () => {
                     analysisData = JSON.parse(aiResponse);
                   } catch {
                     return (
-                      <div className="mt-4 p-4 bg-muted rounded-lg">
-                        <h4 className="font-semibold mb-2 text-heading">AI Analysis:</h4>
-                        <p className="text-sm text-muted-foreground">{aiResponse}</p>
+                      <div className="mt-6 p-6 bg-background border-2 border-primary/20 rounded-xl shadow-professional">
+                        <h4 className="font-bold mb-3 text-xl text-foreground">AI Security Analysis</h4>
+                        <p className="text-base text-foreground font-medium">{aiResponse}</p>
                       </div>
                     );
                   }
                   
                   const getThreatLevelColor = (level: string) => {
                     switch (level?.toLowerCase()) {
-                      case 'critical': return 'bg-destructive text-destructive-foreground';
-                      case 'high': return 'bg-warning text-warning-foreground';
-                      case 'medium': return 'bg-warning/70 text-warning-foreground';
-                      case 'low': return 'bg-success text-success-foreground';
-                      default: return 'bg-muted text-muted-foreground';
+                      case 'critical': return 'bg-destructive text-destructive-foreground border-destructive/30';
+                      case 'high': return 'bg-warning text-warning-foreground border-warning/30';
+                      case 'medium': return 'bg-warning/70 text-warning-foreground border-warning/30';
+                      case 'low': return 'bg-success text-success-foreground border-success/30';
+                      default: return 'bg-muted text-foreground border-border/30';
                     }
                   };
 
@@ -705,47 +729,53 @@ export const Dashboard = () => {
                   };
                   
                   return (
-                    <div className="mt-4 space-y-4">
+                    <div className="mt-6 space-y-4">
                       {/* AI Analysis Response */}
-                      <div className="p-6 bg-background border border-border rounded-lg space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-semibold text-heading text-lg">🤖 AI Security Analysis</h4>
-                          <Badge className={`${getThreatLevelColor(analysisData.threat_level)} font-medium`}>
+                      <div className="p-8 bg-background border-2 border-primary/20 rounded-xl shadow-professional-lg space-y-6">
+                        <div className="flex items-center justify-between border-b border-border/30 pb-4">
+                          <h4 className="font-bold text-foreground text-2xl flex items-center gap-3">
+                            <BarChart3 className="w-6 h-6 text-primary" />
+                            AI Security Analysis
+                          </h4>
+                          <Badge className={`${getThreatLevelColor(analysisData.threat_level)} font-semibold text-base px-4 py-2 border-2`}>
                             {analysisData.threat_level || 'Unknown'}
                           </Badge>
                         </div>
                         
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           {/* Always show summary */}
-                          <div>
-                            <h5 className="font-medium text-subheading mb-2">📋 Summary</h5>
-                            <p className="text-sm text-foreground leading-relaxed">{analysisData.summary}</p>
+                          <div className="p-4 bg-muted/20 border border-border/30 rounded-lg">
+                            <h5 className="font-bold text-foreground mb-3 text-lg flex items-center gap-2">
+                              <div className="w-2 h-2 bg-primary rounded-full"></div>
+                              Summary
+                            </h5>
+                            <p className="text-base text-foreground font-medium leading-relaxed">{analysisData.summary}</p>
                           </div>
 
-                          {/* Expandable sections with buttons */}
-                          <div className="space-y-3">
+                          {/* Expandable sections with better styling */}
+                          <div className="space-y-4">
                             {analysisData.potential_causes && analysisData.potential_causes.length > 0 && (
-                              <div>
+                              <div className="border border-border/30 rounded-lg overflow-hidden">
                                 <Button
-                                  variant="outline"
-                                  size="sm"
+                                  variant="ghost"
+                                  size="lg"
                                   onClick={() => toggleSection('causes')}
-                                  className="flex items-center gap-2 mb-3"
+                                  className="w-full justify-start gap-3 p-4 h-auto border-b border-border/20 hover:bg-muted/30"
                                 >
                                   {currentExpanded.causes ? (
-                                    <ChevronDown className="w-4 h-4" />
+                                    <ChevronDown className="w-5 h-5 text-primary" />
                                   ) : (
-                                    <ChevronRight className="w-4 h-4" />
+                                    <ChevronRight className="w-5 h-5 text-primary" />
                                   )}
-                                  🔍 Potential Causes
+                                  <span className="font-semibold text-foreground text-lg">Potential Causes</span>
                                 </Button>
                                 
                                 {currentExpanded.causes && (
-                                  <div className="ml-6 pl-4 border-l-2 border-border">
-                                    <ul className="text-sm text-foreground space-y-1">
+                                  <div className="p-6 bg-muted/10">
+                                    <ul className="text-base text-foreground font-medium space-y-3">
                                       {analysisData.potential_causes.map((cause: string, idx: number) => (
-                                        <li key={idx} className="flex items-start gap-2">
-                                          <span className="text-muted-foreground mt-0.5">•</span>
+                                        <li key={idx} className="flex items-start gap-3 p-3 bg-background border border-border/20 rounded-lg">
+                                          <span className="text-primary font-bold text-lg mt-0.5">•</span>
                                           <span>{cause}</span>
                                         </li>
                                       ))}
@@ -756,30 +786,30 @@ export const Dashboard = () => {
                             )}
                             
                             {analysisData.mitigation_steps && analysisData.mitigation_steps.length > 0 && (
-                              <div>
+                              <div className="border border-border/30 rounded-lg overflow-hidden">
                                 <Button
-                                  variant="outline"
-                                  size="sm"
+                                  variant="ghost"
+                                  size="lg"
                                   onClick={() => toggleSection('actions')}
-                                  className="flex items-center gap-2 mb-3"
+                                  className="w-full justify-start gap-3 p-4 h-auto border-b border-border/20 hover:bg-muted/30"
                                 >
                                   {currentExpanded.actions ? (
-                                    <ChevronDown className="w-4 h-4" />
+                                    <ChevronDown className="w-5 h-5 text-primary" />
                                   ) : (
-                                    <ChevronRight className="w-4 h-4" />
+                                    <ChevronRight className="w-5 h-5 text-primary" />
                                   )}
-                                  ⚡ Recommended Actions
+                                  <span className="font-semibold text-foreground text-lg">Recommended Actions</span>
                                 </Button>
                                 
                                 {currentExpanded.actions && (
-                                  <div className="ml-6 pl-4 border-l-2 border-border">
-                                    <ol className="text-sm text-foreground space-y-2">
+                                  <div className="p-6 bg-muted/10">
+                                    <ol className="text-base text-foreground font-medium space-y-4">
                                       {analysisData.mitigation_steps.map((step: string, idx: number) => (
-                                        <li key={idx} className="flex items-start gap-3">
-                                          <span className="flex-shrink-0 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+                                        <li key={idx} className="flex items-start gap-4 p-4 bg-background border border-border/20 rounded-lg">
+                                          <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold border-2 border-primary/30">
                                             {idx + 1}
                                           </span>
-                                          <span className="pt-0.5">{step}</span>
+                                          <span className="pt-1">{step}</span>
                                         </li>
                                       ))}
                                     </ol>
@@ -792,64 +822,62 @@ export const Dashboard = () => {
                       </div>
 
                       {/* Alert-specific Chat Interface - appears AFTER AI analysis */}
-                      {alertChatVisible[alert.id] && (
-                        <div className="p-4 bg-muted/30 border border-border rounded-lg space-y-4">
-                          <h5 className="font-medium text-subheading flex items-center gap-2">
-                            <MessageSquare className="w-4 h-4" />
-                            Continue Discussion
-                          </h5>
-                          
-                          {/* Chat Messages */}
-                          {alertChatMessages[alert.id] && alertChatMessages[alert.id].length > 0 && (
-                            <div className="max-h-48 overflow-y-auto space-y-2 p-3 bg-background rounded-lg">
-                              {alertChatMessages[alert.id].map((message, idx) => (
-                                <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                  <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
-                                    message.role === 'user' 
-                                      ? 'bg-primary text-primary-foreground' 
-                                      : 'bg-muted text-foreground border'
-                                  }`}>
-                                    <div className="flex items-start gap-2">
-                                      {message.role === 'assistant' && (
-                                        <MessageSquare className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                      )}
-                                      <div>
-                                        <p>{message.content}</p>
-                                        <p className="text-xs opacity-70 mt-1">
-                                          {format(message.timestamp, 'HH:mm')}
-                                        </p>
-                                      </div>
+                      <div className="p-6 bg-muted/20 border-2 border-border/30 rounded-xl shadow-professional space-y-4">
+                        <h5 className="font-bold text-foreground text-lg flex items-center gap-3 border-b border-border/30 pb-3">
+                          <MessageSquare className="w-5 h-5 text-primary" />
+                          Continue Discussion
+                        </h5>
+                        
+                        {/* Chat Messages */}
+                        {alertChatMessages[alert.id] && alertChatMessages[alert.id].length > 0 && (
+                          <div className="max-h-48 overflow-y-auto space-y-3 p-4 bg-background border border-border/30 rounded-lg">
+                            {alertChatMessages[alert.id].map((message, idx) => (
+                              <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-xs px-4 py-3 rounded-xl text-sm border-2 ${
+                                  message.role === 'user' 
+                                    ? 'bg-primary text-primary-foreground border-primary/30' 
+                                    : 'bg-muted text-foreground border-border/40'
+                                }`}>
+                                  <div className="flex items-start gap-2">
+                                    {message.role === 'assistant' && (
+                                      <MessageSquare className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary" />
+                                    )}
+                                    <div>
+                                      <p className="font-medium">{message.content}</p>
+                                      <p className="text-xs opacity-70 mt-1 font-medium">
+                                        {format(message.timestamp, 'HH:mm')}
+                                      </p>
                                     </div>
                                   </div>
                                 </div>
-                              ))}
-                            </div>
-                          )}
-                          
-                          {/* Chat Input */}
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              value={alertChatInputs[alert.id] || ''}
-                              onChange={(e) => setAlertChatInputs(prev => ({
-                                ...prev,
-                                [alert.id]: e.target.value
-                              }))}
-                              onKeyPress={(e) => handleAlertKeyPress(e, alert.id)}
-                              placeholder="Ask about this specific alert..."
-                              className="flex-1"
-                            />
-                            <Button
-                              onClick={() => sendAlertMessage(alert.id)}
-                              disabled={!alertChatInputs[alert.id]?.trim()}
-                              size="sm"
-                              className="flex items-center gap-1"
-                            >
-                              <Send className="w-3 h-3" />
-                              Send
-                            </Button>
+                              </div>
+                            ))}
                           </div>
+                        )}
+                        
+                        {/* Chat Input */}
+                        <div className="flex items-center space-x-3 p-3 bg-background border border-border/30 rounded-lg">
+                          <Input
+                            value={alertChatInputs[alert.id] || ''}
+                            onChange={(e) => setAlertChatInputs(prev => ({
+                              ...prev,
+                              [alert.id]: e.target.value
+                            }))}
+                            onKeyPress={(e) => handleAlertKeyPress(e, alert.id)}
+                            placeholder="Ask about this specific alert..."
+                            className="flex-1 border-border/30 focus:border-primary"
+                          />
+                          <Button
+                            onClick={() => sendAlertMessage(alert.id)}
+                            disabled={!alertChatInputs[alert.id]?.trim()}
+                            size="sm"
+                            className="flex items-center gap-2 border border-primary/20"
+                          >
+                            <Send className="w-4 h-4" />
+                            Send
+                          </Button>
                         </div>
-                      )}
+                      </div>
                     </div>
                   );
                 })()}
@@ -863,62 +891,97 @@ export const Dashboard = () => {
   };
 
   const renderDevices = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">My Devices</h2>
-        <Button onClick={() => setShowAddDevice(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Device
-        </Button>
+    <div className="space-y-8">
+      {/* Banner-like header for Devices */}
+      <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-8 shadow-professional-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent"></div>
+        <div className="relative">
+          <div className="flex justify-between items-center">
+            <div className="text-center space-y-4 flex-1">
+              <div className="flex items-center justify-center space-x-3">
+                <Monitor className="h-8 w-8 text-primary" />
+                <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  My Devices
+                </h1>
+                <Monitor className="h-8 w-8 text-primary" />
+              </div>
+              <p className="text-xl font-medium text-foreground/80">Manage and monitor all connected devices</p>
+              <div className="flex items-center justify-center space-x-2 pt-2">
+                <div className="h-1 w-20 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full"></div>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setShowAddDevice(true)}
+              className="btn-primary border border-primary/20 shadow-professional"
+              size="lg"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Add Device
+            </Button>
+          </div>
+        </div>
       </div>
 
       {showAddDevice && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Add New Device</CardTitle>
+        <Card className="border-2 border-primary/30 shadow-professional-lg">
+          <CardHeader className="border-b border-border/30 bg-primary/5">
+            <CardTitle className="text-xl font-bold text-foreground">Add New Device</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="deviceName">Device Name</Label>
+                <Label htmlFor="deviceName" className="text-base font-semibold text-foreground">Device Name</Label>
                 <Input
                   id="deviceName"
                   value={newDevice.name}
                   onChange={(e) => setNewDevice({ ...newDevice, name: e.target.value })}
                   placeholder="Enter device name"
+                  className="mt-2 border-border/40 focus:border-primary"
                 />
               </div>
               <div>
-                <Label htmlFor="ipAddress">IP Address</Label>
+                <Label htmlFor="ipAddress" className="text-base font-semibold text-foreground">IP Address</Label>
                 <Input
                   id="ipAddress"
                   value={newDevice.ip}
                   onChange={(e) => setNewDevice({ ...newDevice, ip: e.target.value })}
                   placeholder="192.168.1.1"
+                  className="mt-2 border-border/40 focus:border-primary"
                 />
               </div>
               <div>
-                <Label htmlFor="clientId">Client ID (Optional)</Label>
+                <Label htmlFor="clientId" className="text-base font-semibold text-foreground">Client ID (Optional)</Label>
                 <Input
                   id="clientId"
                   value={newDevice.client_id}
                   onChange={(e) => setNewDevice({ ...newDevice, client_id: e.target.value })}
                   placeholder="device_123 (for IoT devices)"
+                  className="mt-2 border-border/40 focus:border-primary"
                 />
               </div>
               <div>
-                <Label htmlFor="macAddress">MAC Address (Optional)</Label>
+                <Label htmlFor="macAddress" className="text-base font-semibold text-foreground">MAC Address (Optional)</Label>
                 <Input
                   id="macAddress"
                   value={newDevice.mac}
                   onChange={(e) => setNewDevice({ ...newDevice, mac: e.target.value })}
                   placeholder="00:00:00:00:00:00"
+                  className="mt-2 border-border/40 focus:border-primary"
                 />
               </div>
             </div>
-            <div className="flex space-x-2 mt-4">
-              <Button onClick={addDevice}>Add Device</Button>
-              <Button variant="outline" onClick={() => setShowAddDevice(false)}>
+            <div className="flex space-x-3 mt-6 pt-4 border-t border-border/30">
+              <Button 
+                onClick={addDevice}
+                className="btn-primary border border-primary/20"
+              >
+                Add Device
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowAddDevice(false)}
+                className="border border-border/40"
+              >
                 Cancel
               </Button>
             </div>
@@ -926,46 +989,70 @@ export const Dashboard = () => {
         </Card>
       )}
       
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         {devices.map((device) => (
-          <Card key={device.id}>
-            <CardHeader>
+          <Card key={device.id} className="border-2 border-border/50 shadow-professional hover:shadow-professional-lg transition-all duration-200">
+            <CardHeader className="border-b border-border/30 bg-background/50">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
                   {getStatusIcon(device.status)}
-                  <CardTitle className="text-lg">{device.device_name}</CardTitle>
-                  <Badge variant="outline">{device.status.toUpperCase()}</Badge>
+                  <CardTitle className="text-xl font-semibold text-foreground">{device.device_name}</CardTitle>
+                  <Badge 
+                    variant="outline" 
+                    className={`${
+                      device.status === 'safe' ? 'border-success/40 bg-success/10 text-success' :
+                      device.status === 'threat' ? 'border-warning/40 bg-warning/10 text-warning' :
+                      'border-danger/40 bg-danger/10 text-danger'
+                    } font-semibold`}
+                  >
+                    {device.status.toUpperCase()}
+                  </Badge>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  Connected since: {new Date(device.connected_since).toLocaleDateString()}
+                <span className="text-sm font-medium text-muted-foreground border border-border/30 px-3 py-1 rounded-lg bg-muted/30">
+                  Connected: {new Date(device.connected_since).toLocaleDateString()}
                 </span>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <span className="font-medium">IP Address:</span> {device.ip_address}
+            <CardContent className="p-6">
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
+                  <span className="font-semibold text-foreground">IP Address:</span>
+                  <p className="text-foreground/80 font-mono mt-1">{device.ip_address}</p>
                 </div>
-                <div>
-                  <span className="font-medium">MAC Address:</span> {device.mac_address || 'N/A'}
+                <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
+                  <span className="font-semibold text-foreground">MAC Address:</span>
+                  <p className="text-foreground/80 font-mono mt-1">{device.mac_address || 'N/A'}</p>
                 </div>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex space-x-3 pt-4 border-t border-border/30">
                 <Button 
                   size="sm" 
                   variant="destructive"
+                  className="border border-destructive/20"
                   onClick={() => updateDeviceStatus(device.id, 'blocked')}
                   disabled={device.status === 'blocked'}
                 >
+                  <Shield className="w-4 h-4 mr-1" />
                   Block
                 </Button>
                 <Button 
                   size="sm" 
                   variant="outline"
+                  className="border border-border/40"
                   onClick={() => updateDeviceStatus(device.id, 'safe')}
                   disabled={device.status === 'safe'}
                 >
+                  <ShieldCheck className="w-4 h-4 mr-1" />
                   Unblock
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="secondary"
+                  className="border border-border/40"
+                  onClick={() => openEditDevice(device)}
+                >
+                  <Edit className="w-4 h-4 mr-1" />
+                  Edit
                 </Button>
               </div>
             </CardContent>
@@ -976,58 +1063,106 @@ export const Dashboard = () => {
   );
 
   const renderSettings = () => (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold">Settings</h2>
+    <div className="space-y-8">
+      {/* Banner-like header for Settings */}
+      <div className="relative overflow-hidden rounded-2xl border-2 border-muted/30 bg-gradient-to-r from-muted/10 via-muted/5 to-transparent p-8 shadow-professional-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-muted/5 to-transparent"></div>
+        <div className="relative text-center space-y-4">
+          <div className="flex items-center justify-center space-x-3">
+            <Settings className="h-8 w-8 text-foreground" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Settings
+            </h1>
+            <Settings className="h-8 w-8 text-foreground" />
+          </div>
+          <p className="text-xl font-medium text-foreground/80">Manage your account and device preferences</p>
+          <div className="flex items-center justify-center space-x-2 pt-2">
+            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-foreground/50 to-transparent rounded-full"></div>
+          </div>
+        </div>
+      </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Information</CardTitle>
+      <Card className="border-2 border-border/50 shadow-professional">
+        <CardHeader className="border-b border-border/30 bg-background/50">
+          <CardTitle className="text-xl font-bold text-foreground">Account Information</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="p-6">
+          <div className="space-y-6">
             <div>
-              <Label>Email</Label>
-              <Input value={user?.email || ''} disabled />
+              <Label className="text-base font-semibold text-foreground">Email</Label>
+              <Input 
+                value={user?.email || ''} 
+                disabled 
+                className="mt-2 border-border/40 bg-muted/20"
+              />
             </div>
             <div>
-              <Label>User ID</Label>
-              <Input value={user?.id || ''} disabled />
+              <Label className="text-base font-semibold text-foreground">User ID</Label>
+              <Input 
+                value={user?.id || ''} 
+                disabled 
+                className="mt-2 border-border/40 bg-muted/20 font-mono"
+              />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Registered Devices</CardTitle>
+      <Card className="border-2 border-border/50 shadow-professional">
+        <CardHeader className="border-b border-border/30 bg-background/50">
+          <CardTitle className="text-xl font-bold text-foreground">Registered Devices</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
+        <CardContent className="p-6">
+          <div className="space-y-4">
             {devices.map((device) => (
-              <div key={device.id} className="flex items-center justify-between p-3 border rounded">
+              <div key={device.id} className="flex items-center justify-between p-4 border-2 border-border/30 rounded-xl bg-background/50 hover:shadow-professional transition-all duration-200">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium">{device.device_name}</span>
+                  <div className="flex items-center space-x-3 mb-2">
+                    <span className="font-semibold text-foreground text-lg">{device.device_name}</span>
                     {getStatusIcon(device.status)}
+                    <Badge 
+                      className={`${
+                        device.status === 'safe' ? 'border-success/40 bg-success/10 text-success' :
+                        device.status === 'threat' ? 'border-warning/40 bg-warning/10 text-warning' :
+                        'border-danger/40 bg-danger/10 text-danger'
+                      } font-semibold border`}
+                    >
+                      {device.status.toUpperCase()}
+                    </Badge>
                   </div>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    <div>IP: {device.ip_address}</div>
-                    {device.mac_address && <div>MAC: {device.mac_address}</div>}
-                    {device.client_id && <div>Client ID: {device.client_id}</div>}
+                  <div className="text-sm font-medium text-foreground/70 space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <span>IP:</span>
+                      <span className="font-mono text-foreground">{device.ip_address}</span>
+                    </div>
+                    {device.mac_address && (
+                      <div className="flex items-center space-x-2">
+                        <span>MAC:</span>
+                        <span className="font-mono text-foreground">{device.mac_address}</span>
+                      </div>
+                    )}
+                    {device.client_id && (
+                      <div className="flex items-center space-x-2">
+                        <span>Client ID:</span>
+                        <span className="font-mono text-foreground">{device.client_id}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
                   <Button
                     size="sm"
                     variant="outline"
+                    className="border border-border/40"
                     onClick={() => openEditDevice(device)}
                   >
-                    <Edit className="w-4 h-4 mr-1" />
+                    <Edit className="w-4 h-4 mr-2" />
                     Edit Device
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
+                    className="border border-destructive/20"
                     onClick={async () => {
                       const { error } = await supabase
                         .from('devices')
