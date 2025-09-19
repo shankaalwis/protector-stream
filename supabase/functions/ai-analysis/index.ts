@@ -45,27 +45,44 @@ Please provide:
 3. Recommended mitigation strategies
 4. Prevention measures`;
 
-    // Mock AI response for now - replace with actual AI service call
-    const aiResponse = `Based on the ${alert.severity} severity ${alert.alert_type} alert, here's my analysis:
+    // Get Gemini API key from environment
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!geminiApiKey) {
+      throw new Error('GEMINI_API_KEY not found in environment variables');
+    }
 
-1. Risk Assessment: This alert indicates a potential security breach that requires immediate attention.
+    // Call Gemini API for AI analysis
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        }
+      })
+    });
 
-2. Potential Causes:
-   - Unauthorized access attempt
-   - Malware or suspicious software activity
-   - Network intrusion or reconnaissance
+    if (!geminiResponse.ok) {
+      const errorText = await geminiResponse.text();
+      console.error('Gemini API error:', errorText);
+      throw new Error(`Gemini API error: ${geminiResponse.status} - ${errorText}`);
+    }
 
-3. Recommended Mitigation Strategies:
-   - Immediately isolate the affected device
-   - Review and update firewall rules
-   - Conduct a full system scan
-   - Monitor network traffic for unusual patterns
+    const geminiData = await geminiResponse.json();
+    console.log('Gemini API response:', geminiData);
 
-4. Prevention Measures:
-   - Implement multi-factor authentication
-   - Keep systems and software updated
-   - Regular security audits and penetration testing
-   - Employee security training`;
+    // Extract the AI response from Gemini's response format
+    const aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate analysis at this time.';
 
     // Update alert with AI analysis
     const aiAnalysisChat = [
