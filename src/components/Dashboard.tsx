@@ -257,6 +257,8 @@ export const Dashboard = () => {
         variant: "destructive"
       });
     } else {
+      // Update local state to remove the closed alert
+      setAlerts(prevAlerts => prevAlerts.filter(alert => alert.id !== alertId));
       toast({
         title: "Success",
         description: "Alert closed successfully"
