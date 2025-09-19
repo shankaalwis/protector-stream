@@ -24,10 +24,10 @@
     --primary-foreground: 0 0% 100%;
     --primary-hover: 211 100% 45%;
 
-    /* Dark Blue Banner Colors */
-    --banner-blue: 224 100% 25%;                    /* Dark blue for banners */
-    --banner-blue-light: 224 100% 30%;             /* Slightly lighter dark blue */
-    --banner-blue-foreground: 0 0% 100%;           /* White text on dark blue */
+    /* Oxford Blue Banner Colors */
+    --banner-blue: 224 71% 15%;                     /* Oxford Blue for banners */
+    --banner-blue-light: 224 71% 20%;              /* Slightly lighter Oxford Blue */
+    --banner-blue-foreground: 0 0% 100%;           /* White text on Oxford Blue */
 
     /* Status Colors */
     --success: 134 61% 41%;                     /* Neon green #28A745 */
@@ -98,10 +98,10 @@
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    /* Dark Blue Banner Colors for dark mode */
-    --banner-blue: 224 100% 35%;                    /* Lighter dark blue for dark mode */
-    --banner-blue-light: 224 100% 40%;             /* Even lighter for dark mode */
-    --banner-blue-foreground: 0 0% 100%;           /* White text on dark blue */
+    /* Oxford Blue Banner Colors for dark mode */
+    --banner-blue: 224 71% 25%;                     /* Lighter Oxford Blue for dark mode */
+    --banner-blue-light: 224 71% 30%;              /* Even lighter Oxford Blue for dark mode */
+    --banner-blue-foreground: 0 0% 100%;           /* White text on Oxford Blue */
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
