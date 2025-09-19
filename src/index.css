@@ -24,6 +24,11 @@
     --primary-foreground: 0 0% 100%;
     --primary-hover: 211 100% 45%;
 
+    /* Dark Blue Banner Colors */
+    --banner-blue: 224 100% 25%;                    /* Dark blue for banners */
+    --banner-blue-light: 224 100% 30%;             /* Slightly lighter dark blue */
+    --banner-blue-foreground: 0 0% 100%;           /* White text on dark blue */
+
     /* Status Colors */
     --success: 134 61% 41%;                     /* Neon green #28A745 */
     --success-foreground: 0 0% 100%;
@@ -44,8 +49,8 @@
     --destructive: 354 70% 54%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
+    --border: 240 6% 75%;                           /* Darker borders */
+    --input: 240 6% 75%;                            /* Darker input borders */
     --input-focus: 211 100% 50%;
     --ring: 211 100% 50%;
 
@@ -93,6 +98,11 @@
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
+    /* Dark Blue Banner Colors for dark mode */
+    --banner-blue: 224 100% 35%;                    /* Lighter dark blue for dark mode */
+    --banner-blue-light: 224 100% 40%;             /* Even lighter for dark mode */
+    --banner-blue-foreground: 0 0% 100%;           /* White text on dark blue */
+
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
@@ -105,8 +115,8 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 217.2 32.6% 25%;                      /* Darker borders in dark mode */
+    --input: 217.2 32.6% 25%;                       /* Darker input borders */
     --ring: 212.7 26.8% 83.9%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
