@@ -63,17 +63,19 @@ Required JSON format:
 
 CONTEXT-AWARE ANALYSIS REQUIREMENTS:
 - Your analysis must be SPECIFIC to the alert type provided
-- For "HIGH VOLUME ALERT": Explain that someone is sending unusually large amounts of traffic/requests
+- For "HIGH VOLUME ALERT": Explain that someone is sending unusually large amounts of traffic/requests to the specific topic/system mentioned
 - For device-specific alerts: Reference the specific device or system mentioned
-- Make the summary directly address what this specific alert means
-- Potential causes should be specific to the alert type (e.g., for high volume: "Automated bot attacks", "Someone trying to crash the system", "Malicious users flooding with requests")
-- Mitigation steps should be specific to the alert type (e.g., for high volume: "Block the source of excessive traffic", "Set limits on how many requests are allowed", "Monitor traffic patterns closely")
+- For topic-specific alerts (e.g., smart_home/living_room/light_control): Explain that traffic is targeting that specific control system
+- Make the summary directly address what this specific alert means for the exact device and topic involved
+- Potential causes should be specific to the alert type and topic (e.g., for high volume on light control: "Someone trying to repeatedly turn lights on/off", "Malicious attempts to control your smart lights", "Automated attacks targeting your light switches")
+- Mitigation steps should be specific to the alert type and affected system (e.g., for light control: "Check your smart light bulbs for unusual behavior", "Temporarily disconnect the affected light from the network", "Review who has access to control your lights")
 
 LANGUAGE GUIDELINES:
 - Use simple, everyday language - avoid technical jargon
 - Explain things as if talking to someone who doesn't know about cybersecurity
-- Use plain English descriptions (e.g., "Someone flooding your system with requests" instead of "DDoS attack")
+- Use plain English descriptions (e.g., "Someone flooding your light control system with commands" instead of "DDoS attack on IoT endpoint")
 - Provide clear, actionable steps that anyone can understand
+- When mentioning topics like "smart_home/living_room/light_control", explain it as "your living room light control system"
 
 Security Alert Details to Analyze:
 - Alert Type: ${alert.alert_type}
