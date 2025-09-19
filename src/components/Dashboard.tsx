@@ -260,6 +260,9 @@ export const Dashboard = () => {
           throw new Error(response.error.message);
         }
         
+        // Refresh alerts data to get the updated AI analysis
+        await fetchAlerts();
+        
         toast({
           title: "AI Analysis",
           description: "Analysis completed and saved"
