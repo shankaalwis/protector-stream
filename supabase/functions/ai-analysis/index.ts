@@ -31,19 +31,23 @@ serve(async (req) => {
       throw new Error(`Failed to fetch alert: ${alertError.message}`);
     }
 
-    // Prepare AI prompt
-    const prompt = `Analyze this security alert and provide mitigation strategies:
+    // System prompt for structured analysis
+    const systemPrompt = `You are a highly-specialized cybersecurity analyst.
+Your task is to analyze a security alert and provide a concise security analysis.
+You must respond strictly in JSON format. Do not include any extra text, conversation, or greetings.
+Your JSON must have the following four keys:
+1. "summary": A brief, non-technical explanation of the alert.
+2. "threat_level": A single word from the list ("Low", "Medium", "High", "Critical").
+3. "potential_causes": A list of strings, each being a potential cause of this alert.
+4. "mitigation_steps": A list of strings, each string being a specific, actionable step to mitigate the threat.`;
+
+    // User prompt with alert details
+    const userPrompt = `Analyze the following security alert:
 
 Alert Type: ${alert.alert_type}
-Description: ${alert.description}  
+Description: ${alert.description}
 Severity: ${alert.severity}
-Timestamp: ${alert.timestamp}
-
-Please provide:
-1. Risk assessment
-2. Potential causes
-3. Recommended mitigation strategies
-4. Prevention measures`;
+Timestamp: ${alert.timestamp}`;
 
     // Get Gemini API key from environment
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
@@ -51,23 +55,28 @@ Please provide:
       throw new Error('GEMINI_API_KEY not found in environment variables');
     }
 
-    // Call Gemini API for AI analysis
+    // Call Gemini API for AI analysis with system instruction
     const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        system_instruction: {
+          parts: [{
+            text: systemPrompt
+          }]
+        },
         contents: [{
           parts: [{
-            text: prompt
+            text: userPrompt
           }]
         }],
         generationConfig: {
-          temperature: 0.7,
+          temperature: 0.3,
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 2048,
+          maxOutputTokens: 1024,
         }
       })
     });
@@ -81,15 +90,30 @@ Please provide:
     const geminiData = await geminiResponse.json();
     console.log('Gemini API response:', geminiData);
 
-    // Extract the AI response from Gemini's response format
-    const aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate analysis at this time.';
+    // Extract and parse the AI response from Gemini's response format
+    let aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate analysis at this time.';
+    
+    // Try to parse as JSON, fallback to raw text if parsing fails
+    let parsedAnalysis;
+    try {
+      parsedAnalysis = JSON.parse(aiResponse);
+    } catch (parseError) {
+      console.warn('Failed to parse AI response as JSON:', parseError);
+      parsedAnalysis = {
+        summary: 'AI analysis completed but format was unexpected',
+        threat_level: alert.severity || 'Medium',
+        potential_causes: ['Analysis format error'],
+        mitigation_steps: ['Review alert manually', 'Check system logs']
+      };
+      aiResponse = JSON.stringify(parsedAnalysis);
+    }
 
     // Update alert with AI analysis
     const aiAnalysisChat = [
       ...(alert.ai_analysis_chat || []),
       {
         role: 'user',
-        content: prompt
+        content: userPrompt
       },
       {
         role: 'ai',
