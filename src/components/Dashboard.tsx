@@ -235,15 +235,23 @@ export const Dashboard = () => {
   };
 
   const getAIAnalysis = async (alertId: string) => {
+    console.log('AI Analysis button clicked for alert:', alertId);
+    console.log('Current alertChatVisible state:', alertChatVisible);
+    
     // Toggle the chat visibility for this specific alert
-    setAlertChatVisible(prev => ({
-      ...prev,
-      [alertId]: !prev[alertId]
-    }));
+    setAlertChatVisible(prev => {
+      const newState = {
+        ...prev,
+        [alertId]: !prev[alertId]
+      };
+      console.log('New alertChatVisible state:', newState);
+      return newState;
+    });
 
     // If chat is becoming visible and we haven't called AI analysis yet, call it
     if (!alertChatVisible[alertId]) {
       try {
+        console.log('Calling AI analysis function...');
         const response = await supabase.functions.invoke('ai-analysis', {
           body: { alertId }
         });
@@ -257,6 +265,7 @@ export const Dashboard = () => {
           description: "Analysis completed and saved"
         });
       } catch (error) {
+        console.error('AI Analysis error:', error);
         toast({
           title: "Error",
           description: "Failed to get AI analysis",
@@ -543,7 +552,11 @@ export const Dashboard = () => {
     </div>
   );
 
-  const renderAlerts = () => (
+  const renderAlerts = () => {
+    console.log('Rendering alerts, total alerts:', alerts.length);
+    console.log('Alerts data:', alerts);
+    
+    return (
     <div className="space-y-8">
       <div className="text-center space-y-2">
         <h1 className="text-heading text-4xl font-bold text-warning">Security Alerts</h1>
@@ -553,6 +566,7 @@ export const Dashboard = () => {
       <div className="grid gap-4">
         {alerts.filter(alert => alert.status !== 'closed').map((alert) => {
           const alertDevice = devices.find(d => d.id === alert.device_id);
+          console.log('Rendering alert:', alert.id, 'Chat visible:', alertChatVisible[alert.id]);
           return (
             <Card key={alert.id}>
               <CardHeader>
@@ -834,7 +848,8 @@ export const Dashboard = () => {
         })}
       </div>
     </div>
-  );
+    );
+  };
 
   const renderDevices = () => (
     <div className="space-y-6">
