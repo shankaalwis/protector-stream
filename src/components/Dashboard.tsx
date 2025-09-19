@@ -26,7 +26,11 @@ import {
   Home,
   Bell,
   Lock,
-  BarChart3
+  BarChart3,
+  ChevronDown,
+  ChevronRight,
+  Send,
+  MessageSquare
 } from 'lucide-react';
 
 interface Device {
@@ -81,6 +85,14 @@ export const Dashboard = () => {
   const [showAddDevice, setShowAddDevice] = useState(false);
   const [editingDevice, setEditingDevice] = useState<EditDevice | null>(null);
   const [showEditDevice, setShowEditDevice] = useState(false);
+  
+  // New state for expandable AI analysis sections
+  const [expandedSections, setExpandedSections] = useState<{[alertId: string]: {causes: boolean; actions: boolean}}>({});
+  
+  // Chat interface state
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant'; content: string; timestamp: Date}>>([]);
+  
   const { user, signOut } = useAuth();
   const { toast } = useToast();
 
@@ -602,6 +614,18 @@ export const Dashboard = () => {
                       default: return 'bg-muted text-muted-foreground';
                     }
                   };
+
+                  const currentExpanded = expandedSections[alert.id] || { causes: false, actions: false };
+                  
+                  const toggleSection = (section: 'causes' | 'actions') => {
+                    setExpandedSections(prev => ({
+                      ...prev,
+                      [alert.id]: {
+                        ...currentExpanded,
+                        [section]: !currentExpanded[section]
+                      }
+                    }));
+                  };
                   
                   return (
                     <div className="mt-4 p-6 bg-background border border-border rounded-lg space-y-4">
@@ -613,40 +637,78 @@ export const Dashboard = () => {
                       </div>
                       
                       <div className="space-y-4">
+                        {/* Always show summary */}
                         <div>
                           <h5 className="font-medium text-subheading mb-2">📋 Summary</h5>
                           <p className="text-sm text-foreground leading-relaxed">{analysisData.summary}</p>
                         </div>
-                        
-                        {analysisData.potential_causes && analysisData.potential_causes.length > 0 && (
-                          <div>
-                            <h5 className="font-medium text-subheading mb-2">🔍 Potential Causes</h5>
-                            <ul className="text-sm text-foreground space-y-1">
-                              {analysisData.potential_causes.map((cause: string, idx: number) => (
-                                <li key={idx} className="flex items-start gap-2">
-                                  <span className="text-muted-foreground mt-0.5">•</span>
-                                  <span>{cause}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {analysisData.mitigation_steps && analysisData.mitigation_steps.length > 0 && (
-                          <div>
-                            <h5 className="font-medium text-subheading mb-2">⚡ Recommended Actions</h5>
-                            <ol className="text-sm text-foreground space-y-2">
-                              {analysisData.mitigation_steps.map((step: string, idx: number) => (
-                                <li key={idx} className="flex items-start gap-3">
-                                  <span className="flex-shrink-0 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
-                                    {idx + 1}
-                                  </span>
-                                  <span className="pt-0.5">{step}</span>
-                                </li>
-                              ))}
-                            </ol>
-                          </div>
-                        )}
+
+                        {/* Expandable sections with buttons */}
+                        <div className="space-y-3">
+                          {analysisData.potential_causes && analysisData.potential_causes.length > 0 && (
+                            <div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => toggleSection('causes')}
+                                className="flex items-center gap-2 mb-3"
+                              >
+                                {currentExpanded.causes ? (
+                                  <ChevronDown className="w-4 h-4" />
+                                ) : (
+                                  <ChevronRight className="w-4 h-4" />
+                                )}
+                                🔍 Potential Causes
+                              </Button>
+                              
+                              {currentExpanded.causes && (
+                                <div className="ml-6 pl-4 border-l-2 border-border">
+                                  <ul className="text-sm text-foreground space-y-1">
+                                    {analysisData.potential_causes.map((cause: string, idx: number) => (
+                                      <li key={idx} className="flex items-start gap-2">
+                                        <span className="text-muted-foreground mt-0.5">•</span>
+                                        <span>{cause}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {analysisData.mitigation_steps && analysisData.mitigation_steps.length > 0 && (
+                            <div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => toggleSection('actions')}
+                                className="flex items-center gap-2 mb-3"
+                              >
+                                {currentExpanded.actions ? (
+                                  <ChevronDown className="w-4 h-4" />
+                                ) : (
+                                  <ChevronRight className="w-4 h-4" />
+                                )}
+                                ⚡ Recommended Actions
+                              </Button>
+                              
+                              {currentExpanded.actions && (
+                                <div className="ml-6 pl-4 border-l-2 border-border">
+                                  <ol className="text-sm text-foreground space-y-2">
+                                    {analysisData.mitigation_steps.map((step: string, idx: number) => (
+                                      <li key={idx} className="flex items-start gap-3">
+                                        <span className="flex-shrink-0 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+                                          {idx + 1}
+                                        </span>
+                                        <span className="pt-0.5">{step}</span>
+                                      </li>
+                                    ))}
+                                  </ol>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -926,78 +988,154 @@ export const Dashboard = () => {
     </div>
   );
 
+  // Chat functionality
+  const sendMessage = async () => {
+    if (!chatInput.trim()) return;
+    
+    const userMessage = {
+      role: 'user' as const,
+      content: chatInput,
+      timestamp: new Date()
+    };
+    
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput('');
+    
+    // Simulate AI response - replace with actual AI integration
+    setTimeout(() => {
+      const aiMessage = {
+        role: 'assistant' as const,
+        content: `I understand you said: "${userMessage.content}". How can I help you with your security concerns?`,
+        timestamp: new Date()
+      };
+      setChatMessages(prev => [...prev, aiMessage]);
+    }, 1000);
+    
+    toast({
+      title: "Message sent",
+      description: "Your message has been sent to the AI assistant."
+    });
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background font-inter">
-      {/* Professional Header */}
-      <header className="header-professional backdrop-blur-sm">
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
-            <Shield className="h-8 w-8 text-primary" />
-            <span className="text-heading text-2xl">Security Monitor</span>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Professional Navigation Header */}
+      <nav className="bg-card border-b border-border sticky top-0 z-40 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 flex items-center">
+                <Shield className="h-8 w-8 text-primary mr-3" />
+                <span className="text-xl font-bold text-foreground">SecureNet Dashboard</span>
+              </div>
+              <div className="hidden md:ml-8 md:flex md:space-x-1">
+                {[
+                  { id: 'overview', label: 'Overview', icon: Home },
+                  { id: 'alerts', label: 'Alerts', icon: Bell },
+                  { id: 'devices', label: 'Devices', icon: Monitor },
+                  { id: 'settings', label: 'Settings', icon: Settings }
+                ].map(({ id, label, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setCurrentPage(id as Page)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                      currentPage === id
+                        ? 'bg-primary text-primary-foreground shadow-lg'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-muted-foreground">
+                Welcome, {user?.email}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={signOut}
+                className="flex items-center space-x-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </Button>
+            </div>
           </div>
         </div>
-        
-        <nav className="hidden md:flex space-x-1">
-          <Button
-            className={`btn-professional ${currentPage === 'overview' ? 'btn-primary' : 'hover:bg-accent/50'}`}
-            variant="ghost"
-            onClick={() => setCurrentPage('overview')}
-          >
-            <Home className="w-4 h-4 mr-2" />
-            Overview
-          </Button>
-          <Button
-            className={`btn-professional ${currentPage === 'alerts' ? 'btn-primary' : 'hover:bg-accent/50'}`}
-            variant="ghost"
-            onClick={() => setCurrentPage('alerts')}
-          >
-            <Bell className="w-4 h-4 mr-2" />
-            Alerts
-            {alerts.filter(a => a.status === 'unresolved').length > 0 && (
-              <span className="status-blocked ml-2 px-2 py-0.5 text-xs rounded-full">
-                {alerts.filter(a => a.status === 'unresolved').length}
-              </span>
-            )}
-          </Button>
-          <Button
-            className={`btn-professional ${currentPage === 'devices' ? 'btn-primary' : 'hover:bg-accent/50'}`}
-            variant="ghost"
-            onClick={() => setCurrentPage('devices')}
-          >
-            <Monitor className="w-4 h-4 mr-2" />
-            Devices
-          </Button>
-          <Button
-            className={`btn-professional ${currentPage === 'settings' ? 'btn-primary' : 'hover:bg-accent/50'}`}
-            variant="ghost"
-            onClick={() => setCurrentPage('settings')}
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            Settings
-          </Button>
-        </nav>
+      </nav>
 
-        <div className="flex items-center space-x-4">
-          <Button 
-            className="btn-professional hover:bg-accent/50" 
-            variant="ghost" 
-            onClick={signOut}
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
-        </div>
-      </header>
-
-      {/* Main Content with Professional Spacing */}
-      <main className="pt-24 px-8 min-h-screen overflow-y-auto">
-        <div className="max-w-7xl mx-auto pb-16">
-          {currentPage === 'overview' && renderOverview()}
-          {currentPage === 'alerts' && renderAlerts()}
-          {currentPage === 'devices' && renderDevices()}
-          {currentPage === 'settings' && renderSettings()}
-        </div>
+      {/* Main Content Area */}
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {currentPage === 'overview' && renderOverview()}
+        {currentPage === 'alerts' && renderAlerts()}
+        {currentPage === 'devices' && renderDevices()}
+        {currentPage === 'settings' && renderSettings()}
       </main>
+
+      {/* Chat Interface */}
+      <div className="border-t border-border bg-card">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Chat Messages Area */}
+          {chatMessages.length > 0 && (
+            <div className="max-h-64 overflow-y-auto py-4 space-y-3 border-b border-border">
+              {chatMessages.map((message, idx) => (
+                <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                    message.role === 'user' 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-muted text-foreground'
+                  }`}>
+                    <div className="flex items-start gap-2">
+                      {message.role === 'assistant' && (
+                        <MessageSquare className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      )}
+                      <div>
+                        <p className="text-sm">{message.content}</p>
+                        <p className="text-xs opacity-70 mt-1">
+                          {format(message.timestamp, 'HH:mm')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Chat Input */}
+          <div className="py-4 flex items-center space-x-3">
+            <div className="flex-1 flex items-center space-x-2">
+              <Input
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about security alerts, device status, or get help..."
+                className="flex-1"
+              />
+              <Button
+                onClick={sendMessage}
+                disabled={!chatInput.trim()}
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                Send
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
