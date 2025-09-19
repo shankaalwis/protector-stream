@@ -452,73 +452,73 @@ export const Dashboard = () => {
         </div>
       </div>
       
-      {/* Professional Metrics Cards with Blue Shades */}
+      {/* Enhanced Metrics Cards with Blue Shades & Animations */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="card-professional group hover:scale-105 transition-transform duration-200 border-[hsl(var(--royal-blue))]/30">
+        <Card className="card-professional group hover:scale-105 hover:-translate-y-1 transition-all duration-300 border-[hsl(var(--deep-blue))]/40 bg-gradient-to-br from-[hsl(var(--ice-blue))]/20 to-[hsl(var(--azure-blue))]/10 animate-fade-in">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-subheading">Total Devices</CardTitle>
-            <div className="p-3 rounded-2xl bg-[hsl(var(--royal-blue))]/15 group-hover:bg-[hsl(var(--royal-blue))]/25 transition-colors">
-              <Monitor className="h-6 w-6 text-[hsl(var(--royal-blue))]" />
+            <CardTitle className="text-subheading text-[hsl(var(--deep-blue))]">Total Devices</CardTitle>
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-[hsl(var(--deep-blue))]/20 to-[hsl(var(--ocean-blue))]/15 group-hover:from-[hsl(var(--deep-blue))]/30 group-hover:to-[hsl(var(--ocean-blue))]/25 transition-all duration-300 group-hover:rotate-12">
+              <Monitor className="h-6 w-6 text-[hsl(var(--deep-blue))] group-hover:scale-110 transition-transform duration-300" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-[hsl(var(--royal-blue))]">{devices.length}</div>
+            <div className="text-3xl font-bold text-[hsl(var(--deep-blue))] group-hover:text-[hsl(var(--electric-blue))] transition-colors duration-300">{devices.length}</div>
             <p className="text-sm text-muted-foreground mt-2">Connected devices</p>
           </CardContent>
         </Card>
         
-        <Card className="card-professional group hover:scale-105 transition-transform duration-200 border-[hsl(var(--steel-blue))]/30">
+        <Card className="card-professional group hover:scale-105 hover:-translate-y-1 transition-all duration-300 border-[hsl(var(--ocean-blue))]/40 bg-gradient-to-br from-[hsl(var(--ice-blue))]/20 to-[hsl(var(--cerulean-blue))]/10 animate-fade-in [animation-delay:100ms]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-subheading">Active Threats</CardTitle>
-            <div className="p-3 rounded-2xl bg-[hsl(var(--steel-blue))]/15 group-hover:bg-[hsl(var(--steel-blue))]/25 transition-colors">
-              <AlertTriangle className="h-6 w-6 text-[hsl(var(--steel-blue))]" />
+            <CardTitle className="text-subheading text-[hsl(var(--ocean-blue))]">Active Threats</CardTitle>
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-[hsl(var(--ocean-blue))]/20 to-[hsl(var(--azure-blue))]/15 group-hover:from-[hsl(var(--ocean-blue))]/30 group-hover:to-[hsl(var(--azure-blue))]/25 transition-all duration-300 group-hover:rotate-12">
+              <AlertTriangle className="h-6 w-6 text-[hsl(var(--ocean-blue))] group-hover:scale-110 transition-transform duration-300" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-[hsl(var(--steel-blue))]">
+            <div className="text-3xl font-bold text-[hsl(var(--ocean-blue))] group-hover:text-[hsl(var(--electric-blue))] transition-colors duration-300">
               {alerts.filter(a => a.status === 'unresolved').length}
             </div>
             <p className="text-sm text-muted-foreground mt-2">Unresolved alerts</p>
           </CardContent>
         </Card>
         
-        <Card className="card-professional group hover:scale-105 transition-transform duration-200 border-[hsl(var(--sky-blue))]/30">
+        <Card className="card-professional group hover:scale-105 hover:-translate-y-1 transition-all duration-300 border-[hsl(var(--azure-blue))]/40 bg-gradient-to-br from-[hsl(var(--ice-blue))]/20 to-[hsl(var(--electric-blue))]/10 animate-fade-in [animation-delay:200ms]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-subheading">Data Transfer</CardTitle>
-            <div className="p-3 rounded-2xl bg-[hsl(var(--sky-blue))]/15 group-hover:bg-[hsl(var(--sky-blue))]/25 transition-colors">
-              <Activity className="h-6 w-6 text-[hsl(var(--sky-blue))]" />
+            <CardTitle className="text-subheading text-[hsl(var(--azure-blue))]">Data Transfer</CardTitle>
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-[hsl(var(--azure-blue))]/20 to-[hsl(var(--cerulean-blue))]/15 group-hover:from-[hsl(var(--azure-blue))]/30 group-hover:to-[hsl(var(--cerulean-blue))]/25 transition-all duration-300 group-hover:rotate-12">
+              <Activity className="h-6 w-6 text-[hsl(var(--azure-blue))] group-hover:scale-110 transition-transform duration-300" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-[hsl(var(--sky-blue))]">{metrics.data_transferred_mb}</div>
+            <div className="text-3xl font-bold text-[hsl(var(--azure-blue))] group-hover:text-[hsl(var(--electric-blue))] transition-colors duration-300">{metrics.data_transferred_mb}</div>
             <p className="text-sm text-muted-foreground mt-2">MB transferred</p>
           </CardContent>
         </Card>
         
-        <Card className="card-professional group hover:scale-105 transition-transform duration-200 border-[hsl(var(--midnight-blue))]/30">
+        <Card className="card-professional group hover:scale-105 hover:-translate-y-1 transition-all duration-300 border-[hsl(var(--cerulean-blue))]/40 bg-gradient-to-br from-[hsl(var(--ice-blue))]/20 to-[hsl(var(--deep-blue))]/10 animate-fade-in [animation-delay:300ms]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-subheading">Network Status</CardTitle>
-            <div className="p-3 rounded-2xl bg-[hsl(var(--midnight-blue))]/15 group-hover:bg-[hsl(var(--midnight-blue))]/25 transition-colors">
-              <Zap className="h-6 w-6 text-[hsl(var(--midnight-blue))]" />
+            <CardTitle className="text-subheading text-[hsl(var(--cerulean-blue))]">Network Status</CardTitle>
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-[hsl(var(--cerulean-blue))]/20 to-[hsl(var(--electric-blue))]/15 group-hover:from-[hsl(var(--cerulean-blue))]/30 group-hover:to-[hsl(var(--electric-blue))]/25 transition-all duration-300 group-hover:rotate-12">
+              <Zap className="h-6 w-6 text-[hsl(var(--cerulean-blue))] group-hover:scale-110 transition-transform duration-300" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-[hsl(var(--midnight-blue))]">Active</div>
+            <div className="text-3xl font-bold text-[hsl(var(--cerulean-blue))] group-hover:text-[hsl(var(--electric-blue))] transition-colors duration-300">Active</div>
             <p className="text-sm text-muted-foreground mt-2">All systems operational</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Security Alerts */}
-      <Card className="card-professional border-[hsl(var(--powder-blue))]/40">
-        <CardHeader className="spacing-generous bg-gradient-to-r from-[hsl(var(--powder-blue))]/10 to-transparent">
+      {/* Enhanced Recent Security Alerts Section */}
+      <Card className="card-professional border-[hsl(var(--ice-blue))]/60 shadow-2xl animate-fade-in [animation-delay:400ms]">
+        <CardHeader className="spacing-generous bg-gradient-to-r from-[hsl(var(--ice-blue))]/30 via-[hsl(var(--cerulean-blue))]/10 to-transparent border-b border-[hsl(var(--azure-blue))]/30">
           <div className="flex items-center justify-between">
             <CardTitle className="text-heading flex items-center">
-              <Bell className="h-6 w-6 text-[hsl(var(--steel-blue))] mr-3" />
-              Recent Security Alerts
+              <Bell className="h-6 w-6 text-[hsl(var(--ocean-blue))] mr-3 animate-pulse" />
+              <span className="bg-gradient-to-r from-[hsl(var(--deep-blue))] to-[hsl(var(--electric-blue))] bg-clip-text text-transparent">Recent Security Alerts</span>
             </CardTitle>
             <Button 
-              className="btn-primary bg-[hsl(var(--royal-blue))] hover:bg-[hsl(var(--royal-blue))]/90 border border-[hsl(var(--royal-blue))]/30"
+              className="btn-primary bg-gradient-to-r from-[hsl(var(--ocean-blue))] to-[hsl(var(--electric-blue))] hover:from-[hsl(var(--deep-blue))] hover:to-[hsl(var(--azure-blue))] border border-[hsl(var(--ocean-blue))]/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               onClick={() => setCurrentPage('alerts')}
             >
               View All Alerts
@@ -531,10 +531,10 @@ export const Dashboard = () => {
               alerts.slice(0, 5).map((alert) => {
                 const alertDevice = devices.find(d => d.id === alert.device_id);
                 return (
-                  <div key={alert.id} className="card-professional p-6 hover:shadow-professional-lg transition-shadow duration-200 border-[hsl(var(--sky-blue))]/30 bg-gradient-to-r from-[hsl(var(--powder-blue))]/5 to-transparent">
+                  <div key={alert.id} className="card-professional p-6 hover:shadow-2xl transition-all duration-300 border-[hsl(var(--azure-blue))]/40 bg-gradient-to-r from-[hsl(var(--ice-blue))]/20 via-[hsl(var(--cerulean-blue))]/5 to-transparent hover:from-[hsl(var(--ice-blue))]/30 hover:border-[hsl(var(--electric-blue))]/60 animate-fade-in hover:scale-[1.02]">
                      <div className="flex items-start justify-between">
                        <div className="flex items-start space-x-4 flex-1">
-                         <div className={`${getSeverityColor(alert.severity)} rounded-full p-1`}>
+                         <div className={`${getSeverityColor(alert.severity)} rounded-full p-1 animate-pulse`}>
                            <AlertTriangle className="h-4 w-4" />
                          </div>
                          <div className="flex-1">
@@ -542,23 +542,23 @@ export const Dashboard = () => {
                              <span className={`${getSeverityColor(alert.severity)} text-xs font-semibold`}>
                                {alert.severity.toUpperCase()}
                              </span>
-                             <span className="font-semibold text-[hsl(var(--midnight-blue))]">{alert.alert_type}</span>
+                             <span className="font-semibold text-[hsl(var(--deep-blue))] group-hover:text-[hsl(var(--electric-blue))] transition-colors">{alert.alert_type}</span>
                            </div>
                            <p className="text-sm text-muted-foreground mb-2">
-                             Security incident on {alertDevice?.device_name || 'Unknown Device'}
+                             Security incident on <span className="font-medium text-[hsl(var(--ocean-blue))]">{alertDevice?.device_name || 'Unknown Device'}</span>
                            </p>
                            <p className="text-sm text-foreground">{cleanAlertDescription(alert.description)}</p>
                          </div>
                        </div>
                        <div className="flex flex-col items-end space-y-2 ml-4">
-                         <span className="text-xs font-medium text-[hsl(var(--royal-blue))]">
+                         <span className="text-xs font-medium text-[hsl(var(--ocean-blue))]">
                            {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
                          </span>
                          <span className="text-xs text-muted-foreground">
                            {format(new Date(alert.timestamp), 'MMM dd, yyyy HH:mm')}
                          </span>
                          <Button 
-                           className="btn-primary bg-[hsl(var(--steel-blue))] hover:bg-[hsl(var(--steel-blue))]/90"
+                           className="btn-primary bg-gradient-to-r from-[hsl(var(--azure-blue))] to-[hsl(var(--cerulean-blue))] hover:from-[hsl(var(--ocean-blue))] hover:to-[hsl(var(--electric-blue))] shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                            size="sm"
                            onClick={() => setCurrentPage('alerts')}
                          >
@@ -570,9 +570,9 @@ export const Dashboard = () => {
                 );
               })
             ) : (
-               <div className="text-center py-12">
-                 <CheckCircle className="h-16 w-16 text-[hsl(var(--sky-blue))] mx-auto mb-4" />
-                 <h3 className="text-subheading mb-2 text-[hsl(var(--midnight-blue))]">All Clear!</h3>
+               <div className="text-center py-12 animate-fade-in">
+                 <CheckCircle className="h-16 w-16 text-[hsl(var(--azure-blue))] mx-auto mb-4 animate-pulse" />
+                 <h3 className="text-subheading mb-2 text-[hsl(var(--deep-blue))] font-bold">All Clear!</h3>
                  <p className="text-muted-foreground">No security alerts detected. Your network is secure.</p>
                </div>
             )}
@@ -611,16 +611,16 @@ export const Dashboard = () => {
           const alertDevice = devices.find(d => d.id === alert.device_id);
           console.log('Rendering alert:', alert.id, 'Chat visible:', alertChatVisible[alert.id]);
           return (
-            <Card key={alert.id} className="border-2 border-[hsl(var(--steel-blue))]/30 shadow-professional hover:shadow-professional-lg transition-all duration-200 bg-gradient-to-r from-[hsl(var(--powder-blue))]/5 to-transparent">
-              <CardHeader className="border-b border-[hsl(var(--sky-blue))]/20 bg-gradient-to-r from-[hsl(var(--powder-blue))]/10 to-transparent">
+            <Card key={alert.id} className="border-2 border-[hsl(var(--ocean-blue))]/40 shadow-2xl hover:shadow-[0_25px_50px_-12px_hsl(var(--azure-blue))]/25 transition-all duration-500 bg-gradient-to-r from-[hsl(var(--ice-blue))]/15 via-background to-[hsl(var(--cerulean-blue))]/5 hover:from-[hsl(var(--ice-blue))]/25 animate-fade-in hover:scale-[1.01] hover:border-[hsl(var(--electric-blue))]/60">
+              <CardHeader className="border-b border-[hsl(var(--azure-blue))]/30 bg-gradient-to-r from-[hsl(var(--ice-blue))]/20 via-[hsl(var(--cerulean-blue))]/5 to-transparent">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <Badge className={`${getSeverityColor(alert.severity)} border`}>
+                    <Badge className={`${getSeverityColor(alert.severity)} border animate-pulse`}>
                       {alert.severity.toUpperCase()}
                     </Badge>
-                    <CardTitle className="text-xl font-semibold text-[hsl(var(--midnight-blue))]">{alert.alert_type}</CardTitle>
+                    <CardTitle className="text-xl font-semibold text-[hsl(var(--deep-blue))] group-hover:text-[hsl(var(--electric-blue))] transition-colors">{alert.alert_type}</CardTitle>
                   </div>
-                  <span className="text-sm font-medium text-muted-foreground border border-[hsl(var(--sky-blue))]/30 px-3 py-1 rounded-lg bg-[hsl(var(--powder-blue))]/20">
+                  <span className="text-sm font-medium text-muted-foreground border border-[hsl(var(--azure-blue))]/40 px-3 py-1 rounded-lg bg-gradient-to-r from-[hsl(var(--ice-blue))]/30 to-[hsl(var(--cerulean-blue))]/20">
                     {new Date(alert.timestamp).toLocaleString()}
                   </span>
                 </div>
@@ -628,12 +628,12 @@ export const Dashboard = () => {
               <CardContent className="p-6">
                  <p className="mb-6 text-foreground font-medium text-base">{cleanAlertDescription(alert.description)}</p>
                 
-                 {/* Device Information */}
+                 {/* Enhanced Device Information */}
                  {alertDevice && (
-                   <div className="mb-6 p-4 bg-[hsl(var(--powder-blue))]/20 border border-[hsl(var(--sky-blue))]/40 rounded-xl">
-                     <h4 className="font-semibold mb-3 flex items-center text-[hsl(var(--midnight-blue))] text-base">
-                       <Monitor className="w-5 h-5 mr-2 text-[hsl(var(--royal-blue))]" />
-                       Associated Device
+                   <div className="mb-6 p-4 bg-gradient-to-r from-[hsl(var(--ice-blue))]/25 to-[hsl(var(--cerulean-blue))]/10 border border-[hsl(var(--azure-blue))]/50 rounded-xl shadow-lg animate-fade-in">
+                     <h4 className="font-semibold mb-3 flex items-center text-[hsl(var(--deep-blue))] text-base">
+                       <Monitor className="w-5 h-5 mr-2 text-[hsl(var(--ocean-blue))] animate-pulse" />
+                       <span className="bg-gradient-to-r from-[hsl(var(--deep-blue))] to-[hsl(var(--electric-blue))] bg-clip-text text-transparent">Associated Device</span>
                      </h4>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div className="flex items-center space-x-2">
@@ -667,9 +667,9 @@ export const Dashboard = () => {
                   </div>
                 )}
                 
-                 <div className="flex space-x-3 mt-6 pb-4 border-b border-[hsl(var(--sky-blue))]/20">
+                 <div className="flex space-x-3 mt-6 pb-4 border-b border-[hsl(var(--azure-blue))]/30">
                    <Button 
-                     className="btn-primary bg-[hsl(var(--royal-blue))] hover:bg-[hsl(var(--royal-blue))]/90 border border-[hsl(var(--royal-blue))]/30"
+                     className="btn-primary bg-gradient-to-r from-[hsl(var(--ocean-blue))] to-[hsl(var(--electric-blue))] hover:from-[hsl(var(--deep-blue))] hover:to-[hsl(var(--azure-blue))] border border-[hsl(var(--ocean-blue))]/40 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                      size="sm" 
                      onClick={() => getAIAnalysis(alert.id)}
                      disabled={alert.status === 'closed'}
@@ -943,65 +943,69 @@ export const Dashboard = () => {
         </div>
       </div>
 
+      {/* Enhanced Add Device Form */}
       {showAddDevice && (
-        <Card className="border-2 border-primary/30 shadow-professional-lg">
-          <CardHeader className="border-b border-border/30 bg-primary/5">
-            <CardTitle className="text-xl font-bold text-foreground">Add New Device</CardTitle>
+        <Card className="border-2 border-[hsl(var(--ocean-blue))]/50 shadow-2xl bg-gradient-to-r from-[hsl(var(--ice-blue))]/20 to-[hsl(var(--cerulean-blue))]/10 animate-scale-in">
+          <CardHeader className="border-b border-[hsl(var(--azure-blue))]/40 bg-gradient-to-r from-[hsl(var(--ice-blue))]/30 to-[hsl(var(--cerulean-blue))]/15">
+            <CardTitle className="text-xl font-bold text-[hsl(var(--deep-blue))] flex items-center gap-3">
+              <Plus className="w-6 h-6 text-[hsl(var(--ocean-blue))] animate-pulse" />
+              <span className="bg-gradient-to-r from-[hsl(var(--deep-blue))] to-[hsl(var(--electric-blue))] bg-clip-text text-transparent">Add New Device</span>
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="deviceName" className="text-base font-semibold text-foreground">Device Name</Label>
+              <div className="animate-fade-in [animation-delay:100ms]">
+                <Label htmlFor="deviceName" className="text-base font-semibold text-[hsl(var(--deep-blue))]">Device Name</Label>
                 <Input
                   id="deviceName"
                   value={newDevice.name}
                   onChange={(e) => setNewDevice({ ...newDevice, name: e.target.value })}
                   placeholder="Enter device name"
-                  className="mt-2 border-border/40 focus:border-primary"
+                  className="mt-2 border-[hsl(var(--azure-blue))]/40 focus:border-[hsl(var(--electric-blue))] bg-gradient-to-r from-[hsl(var(--ice-blue))]/15 to-transparent"
                 />
               </div>
-              <div>
-                <Label htmlFor="ipAddress" className="text-base font-semibold text-foreground">IP Address</Label>
+              <div className="animate-fade-in [animation-delay:200ms]">
+                <Label htmlFor="ipAddress" className="text-base font-semibold text-[hsl(var(--deep-blue))]">IP Address</Label>
                 <Input
                   id="ipAddress"
                   value={newDevice.ip}
                   onChange={(e) => setNewDevice({ ...newDevice, ip: e.target.value })}
                   placeholder="192.168.1.1"
-                  className="mt-2 border-border/40 focus:border-primary"
+                  className="mt-2 border-[hsl(var(--azure-blue))]/40 focus:border-[hsl(var(--electric-blue))] bg-gradient-to-r from-[hsl(var(--ice-blue))]/15 to-transparent"
                 />
               </div>
-              <div>
-                <Label htmlFor="clientId" className="text-base font-semibold text-foreground">Client ID (Optional)</Label>
+              <div className="animate-fade-in [animation-delay:300ms]">
+                <Label htmlFor="clientId" className="text-base font-semibold text-[hsl(var(--deep-blue))]">Client ID (Optional)</Label>
                 <Input
                   id="clientId"
                   value={newDevice.client_id}
                   onChange={(e) => setNewDevice({ ...newDevice, client_id: e.target.value })}
                   placeholder="device_123 (for IoT devices)"
-                  className="mt-2 border-border/40 focus:border-primary"
+                  className="mt-2 border-[hsl(var(--azure-blue))]/40 focus:border-[hsl(var(--electric-blue))] bg-gradient-to-r from-[hsl(var(--ice-blue))]/15 to-transparent"
                 />
               </div>
-              <div>
-                <Label htmlFor="macAddress" className="text-base font-semibold text-foreground">MAC Address (Optional)</Label>
+              <div className="animate-fade-in [animation-delay:400ms]">
+                <Label htmlFor="macAddress" className="text-base font-semibold text-[hsl(var(--deep-blue))]">MAC Address (Optional)</Label>
                 <Input
                   id="macAddress"
                   value={newDevice.mac}
                   onChange={(e) => setNewDevice({ ...newDevice, mac: e.target.value })}
                   placeholder="00:00:00:00:00:00"
-                  className="mt-2 border-border/40 focus:border-primary"
+                  className="mt-2 border-[hsl(var(--azure-blue))]/40 focus:border-[hsl(var(--electric-blue))] bg-gradient-to-r from-[hsl(var(--ice-blue))]/15 to-transparent"
                 />
               </div>
             </div>
-            <div className="flex space-x-3 mt-6 pt-4 border-t border-border/30">
+            <div className="flex space-x-3 mt-6 pt-4 border-t border-[hsl(var(--azure-blue))]/30 animate-fade-in [animation-delay:500ms]">
               <Button 
                 onClick={addDevice}
-                className="btn-primary border border-primary/20"
+                className="btn-primary bg-gradient-to-r from-[hsl(var(--ocean-blue))] to-[hsl(var(--electric-blue))] hover:from-[hsl(var(--deep-blue))] hover:to-[hsl(var(--azure-blue))] border border-[hsl(var(--ocean-blue))]/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 Add Device
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => setShowAddDevice(false)}
-                className="border border-border/40"
+                className="border border-[hsl(var(--azure-blue))]/60 bg-gradient-to-r from-[hsl(var(--ice-blue))]/20 to-[hsl(var(--cerulean-blue))]/10 text-[hsl(var(--ocean-blue))] hover:bg-gradient-to-r hover:from-[hsl(var(--azure-blue))]/25 hover:to-[hsl(var(--cerulean-blue))]/20 transition-all duration-300 hover:scale-105"
               >
                 Cancel
               </Button>
@@ -1010,46 +1014,48 @@ export const Dashboard = () => {
         </Card>
       )}
       
-      <div className="grid gap-6">
+        <div className="grid gap-6">
         {devices.map((device) => (
-          <Card key={device.id} className="border-2 border-border/50 shadow-professional hover:shadow-professional-lg transition-all duration-200">
-            <CardHeader className="border-b border-border/30 bg-background/50">
+          <Card key={device.id} className="border-2 border-[hsl(var(--azure-blue))]/40 shadow-2xl hover:shadow-[0_25px_50px_-12px_hsl(var(--cerulean-blue))]/25 transition-all duration-500 bg-gradient-to-r from-[hsl(var(--ice-blue))]/15 to-[hsl(var(--cerulean-blue))]/5 hover:from-[hsl(var(--ice-blue))]/25 animate-fade-in hover:scale-[1.02]">
+            <CardHeader className="border-b border-[hsl(var(--azure-blue))]/30 bg-gradient-to-r from-[hsl(var(--ice-blue))]/20 to-transparent">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  {getStatusIcon(device.status)}
-                  <CardTitle className="text-xl font-semibold text-foreground">{device.device_name}</CardTitle>
+                  <div className="p-2 rounded-full bg-gradient-to-br from-[hsl(var(--ocean-blue))]/20 to-[hsl(var(--electric-blue))]/10">
+                    {getStatusIcon(device.status)}
+                  </div>
+                  <CardTitle className="text-xl font-semibold text-[hsl(var(--deep-blue))] group-hover:text-[hsl(var(--electric-blue))] transition-colors">{device.device_name}</CardTitle>
                   <Badge 
                     variant="outline" 
                     className={`${
-                      device.status === 'safe' ? 'border-success/40 bg-success/10 text-success' :
+                      device.status === 'safe' ? 'border-[hsl(var(--azure-blue))]/60 bg-[hsl(var(--ice-blue))]/30 text-[hsl(var(--ocean-blue))]' :
                       device.status === 'threat' ? 'border-warning/40 bg-warning/10 text-warning' :
                       'border-danger/40 bg-danger/10 text-danger'
-                    } font-semibold`}
+                    } font-semibold animate-pulse`}
                   >
                     {device.status.toUpperCase()}
                   </Badge>
                 </div>
-                <span className="text-sm font-medium text-muted-foreground border border-border/30 px-3 py-1 rounded-lg bg-muted/30">
+                <span className="text-sm font-medium text-muted-foreground border border-[hsl(var(--azure-blue))]/40 px-3 py-1 rounded-lg bg-gradient-to-r from-[hsl(var(--ice-blue))]/30 to-[hsl(var(--cerulean-blue))]/20">
                   Connected: {new Date(device.connected_since).toLocaleDateString()}
                 </span>
               </div>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
-                  <span className="font-semibold text-foreground">IP Address:</span>
-                  <p className="text-foreground/80 font-mono mt-1">{device.ip_address}</p>
+                <div className="p-3 bg-gradient-to-r from-[hsl(var(--ice-blue))]/25 to-[hsl(var(--cerulean-blue))]/10 border border-[hsl(var(--azure-blue))]/40 rounded-lg">
+                  <span className="font-semibold text-[hsl(var(--deep-blue))]">IP Address:</span>
+                  <p className="text-[hsl(var(--ocean-blue))] font-mono mt-1 font-medium">{device.ip_address}</p>
                 </div>
-                <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
-                  <span className="font-semibold text-foreground">MAC Address:</span>
-                  <p className="text-foreground/80 font-mono mt-1">{device.mac_address || 'N/A'}</p>
+                <div className="p-3 bg-gradient-to-r from-[hsl(var(--ice-blue))]/25 to-[hsl(var(--cerulean-blue))]/10 border border-[hsl(var(--azure-blue))]/40 rounded-lg">
+                  <span className="font-semibold text-[hsl(var(--deep-blue))]">MAC Address:</span>
+                  <p className="text-[hsl(var(--ocean-blue))] font-mono mt-1 font-medium">{device.mac_address || 'N/A'}</p>
                 </div>
               </div>
-              <div className="flex space-x-3 pt-4 border-t border-border/30">
+              <div className="flex space-x-3 pt-4 border-t border-[hsl(var(--azure-blue))]/30">
                 <Button 
                   size="sm" 
                   variant="destructive"
-                  className="border border-destructive/20"
+                  className="border border-destructive/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   onClick={() => updateDeviceStatus(device.id, 'blocked')}
                   disabled={device.status === 'blocked'}
                 >
@@ -1059,7 +1065,7 @@ export const Dashboard = () => {
                 <Button 
                   size="sm" 
                   variant="outline"
-                  className="border border-border/40"
+                  className="border border-[hsl(var(--azure-blue))]/60 bg-gradient-to-r from-[hsl(var(--ice-blue))]/20 to-[hsl(var(--cerulean-blue))]/10 text-[hsl(var(--ocean-blue))] hover:bg-gradient-to-r hover:from-[hsl(var(--azure-blue))]/20 hover:to-[hsl(var(--electric-blue))]/15 transition-all duration-300 hover:scale-105"
                   onClick={() => updateDeviceStatus(device.id, 'safe')}
                   disabled={device.status === 'safe'}
                 >
@@ -1069,7 +1075,7 @@ export const Dashboard = () => {
                 <Button 
                   size="sm" 
                   variant="secondary"
-                  className="border border-border/40"
+                  className="border border-[hsl(var(--azure-blue))]/40 bg-gradient-to-r from-[hsl(var(--ocean-blue))]/15 to-[hsl(var(--electric-blue))]/10 text-[hsl(var(--deep-blue))] hover:bg-gradient-to-r hover:from-[hsl(var(--azure-blue))]/25 hover:to-[hsl(var(--cerulean-blue))]/20 transition-all duration-300 hover:scale-105"
                   onClick={() => openEditDevice(device)}
                 >
                   <Edit className="w-4 h-4 mr-1" />
@@ -1103,18 +1109,21 @@ export const Dashboard = () => {
         </div>
       </div>
       
-      <Card className="border-2 border-border/50 shadow-professional">
-        <CardHeader className="border-b border-border/30 bg-background/50">
-          <CardTitle className="text-xl font-bold text-foreground">Account Information</CardTitle>
+      <Card className="border-2 border-[hsl(var(--ocean-blue))]/40 shadow-2xl bg-gradient-to-r from-[hsl(var(--ice-blue))]/15 to-transparent animate-fade-in">
+        <CardHeader className="border-b border-[hsl(var(--azure-blue))]/30 bg-gradient-to-r from-[hsl(var(--ice-blue))]/25 to-[hsl(var(--cerulean-blue))]/10">
+          <CardTitle className="text-xl font-bold text-[hsl(var(--deep-blue))] flex items-center gap-3">
+            <Settings className="w-6 h-6 text-[hsl(var(--ocean-blue))] animate-pulse" />
+            <span className="bg-gradient-to-r from-[hsl(var(--deep-blue))] to-[hsl(var(--electric-blue))] bg-clip-text text-transparent">Account Information</span>
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-6">
-            <div>
-              <Label className="text-base font-semibold text-foreground">Email</Label>
+            <div className="animate-fade-in [animation-delay:100ms]">
+              <Label className="text-base font-semibold text-[hsl(var(--deep-blue))]">Email</Label>
               <Input 
                 value={user?.email || ''} 
                 disabled 
-                className="mt-2 border-border/40 bg-muted/20"
+                className="mt-2 border-[hsl(var(--azure-blue))]/40 bg-gradient-to-r from-[hsl(var(--ice-blue))]/20 to-[hsl(var(--cerulean-blue))]/10 text-[hsl(var(--ocean-blue))] font-medium"
               />
             </div>
             <div>
