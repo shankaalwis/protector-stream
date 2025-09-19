@@ -20,16 +20,33 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get alert details
+    // Get alert details with device information
     const { data: alert, error: alertError } = await supabase
       .from('security_alerts')
-      .select('*')
+      .select(`
+        *,
+        devices:device_id (
+          device_name,
+          client_id,
+          ip_address,
+          status
+        )
+      `)
       .eq('id', alertId)
       .single();
 
     if (alertError) {
       throw new Error(`Failed to fetch alert: ${alertError.message}`);
     }
+
+    // Extract device information for context
+    const device = alert.devices;
+    const deviceContext = device ? {
+      name: device.device_name,
+      clientId: device.client_id,
+      ipAddress: device.ip_address,
+      status: device.status
+    } : null;
 
     // Context-aware prompt that analyzes specific alert types
     const userPrompt = `You are a cybersecurity expert explaining security issues to non-technical business users. Analyze this SPECIFIC security alert and provide a tailored, context-aware explanation based on the exact alert type and details provided.
@@ -62,7 +79,17 @@ Security Alert Details to Analyze:
 - Alert Type: ${alert.alert_type}
 - Description: ${alert.description}
 - Severity: ${alert.severity}
-- Timestamp: ${alert.timestamp}
+- Timestamp: ${alert.timestamp}${deviceContext ? `
+- Device Name: ${deviceContext.name}
+- Client ID: ${deviceContext.clientId}
+- Device IP Address: ${deviceContext.ipAddress}
+- Device Status: ${deviceContext.status}
+
+DEVICE-SPECIFIC REQUIREMENTS:
+- Reference the specific device "${deviceContext.name}" (Client ID: ${deviceContext.clientId}) in your analysis
+- Make your summary explain what's happening to this specific device
+- Tailor mitigation steps to actions that can be taken for this particular device
+- Use the device name and type in your explanations to make it personal and actionable` : ''}
 
 Analyze this SPECIFIC alert type and provide tailored responses. Respond with JSON only:`;
 
