@@ -82,29 +82,34 @@ Respond with JSON only:`;
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
       console.error('Gemini API error:', errorText);
+      console.error('Gemini API status:', geminiResponse.status);
+      console.error('Gemini API headers:', Object.fromEntries(geminiResponse.headers.entries()));
       throw new Error(`Gemini API error: ${geminiResponse.status} - ${errorText}`);
     }
 
     const geminiData = await geminiResponse.json();
-    console.log('Gemini API response:', geminiData);
+    console.log('Gemini API response:', JSON.stringify(geminiData, null, 2));
 
     // Extract and parse the AI response from Gemini's response format
     let aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate analysis at this time.';
+    console.log('Raw AI response before processing:', aiResponse);
     
     // Strip markdown code blocks if present
-    aiResponse = aiResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim();
+    aiResponse = aiResponse.replace(/^```json\s*/m, '').replace(/\s*```$/m, '').trim();
+    console.log('AI response after stripping markdown:', aiResponse);
     
     // Try to parse as JSON, fallback to structured response if parsing fails
     let parsedAnalysis;
     try {
       parsedAnalysis = JSON.parse(aiResponse);
+      console.log('Successfully parsed JSON:', parsedAnalysis);
       // Ensure the response has the required structure
       if (!parsedAnalysis.summary || !parsedAnalysis.threat_level || !parsedAnalysis.mitigation_steps) {
         throw new Error('Missing required fields in AI response');
       }
     } catch (parseError) {
-      console.warn('Failed to parse AI response as JSON:', parseError);
-      console.warn('Raw AI response:', aiResponse);
+      console.error('Failed to parse AI response as JSON:', parseError);
+      console.error('Raw AI response that failed to parse:', aiResponse);
       parsedAnalysis = {
         summary: 'AI analysis completed but response format needs improvement',
         threat_level: alert.severity || 'Medium',
