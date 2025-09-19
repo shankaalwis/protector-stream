@@ -89,9 +89,10 @@ export const Dashboard = () => {
   // New state for expandable AI analysis sections
   const [expandedSections, setExpandedSections] = useState<{[alertId: string]: {causes: boolean; actions: boolean}}>({});
   
-  // Chat interface state
-  const [chatInput, setChatInput] = useState('');
-  const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant'; content: string; timestamp: Date}>>([]);
+  // Alert-specific chat state
+  const [alertChatVisible, setAlertChatVisible] = useState<{[alertId: string]: boolean}>({});
+  const [alertChatMessages, setAlertChatMessages] = useState<{[alertId: string]: Array<{role: 'user' | 'assistant'; content: string; timestamp: Date}>}>({});
+  const [alertChatInputs, setAlertChatInputs] = useState<{[alertId: string]: string}>({});
   
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -234,25 +235,34 @@ export const Dashboard = () => {
   };
 
   const getAIAnalysis = async (alertId: string) => {
-    try {
-      const response = await supabase.functions.invoke('ai-analysis', {
-        body: { alertId }
-      });
-      
-      if (response.error) {
-        throw new Error(response.error.message);
+    // Toggle the chat visibility for this specific alert
+    setAlertChatVisible(prev => ({
+      ...prev,
+      [alertId]: !prev[alertId]
+    }));
+
+    // If chat is becoming visible and we haven't called AI analysis yet, call it
+    if (!alertChatVisible[alertId]) {
+      try {
+        const response = await supabase.functions.invoke('ai-analysis', {
+          body: { alertId }
+        });
+        
+        if (response.error) {
+          throw new Error(response.error.message);
+        }
+        
+        toast({
+          title: "AI Analysis",
+          description: "Analysis completed and saved"
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to get AI analysis",
+          variant: "destructive"
+        });
       }
-      
-      toast({
-        title: "AI Analysis",
-        description: "Analysis completed and saved"
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to get AI analysis",
-        variant: "destructive"
-      });
     }
   };
 
@@ -275,6 +285,56 @@ export const Dashboard = () => {
         title: "Success",
         description: "Alert closed successfully"
       });
+    }
+  };
+
+  // Alert-specific chat functionality
+  const sendAlertMessage = async (alertId: string) => {
+    const currentInput = alertChatInputs[alertId]?.trim();
+    if (!currentInput) return;
+    
+    const userMessage = {
+      role: 'user' as const,
+      content: currentInput,
+      timestamp: new Date()
+    };
+    
+    // Add user message
+    setAlertChatMessages(prev => ({
+      ...prev,
+      [alertId]: [...(prev[alertId] || []), userMessage]
+    }));
+    
+    // Clear input
+    setAlertChatInputs(prev => ({
+      ...prev,
+      [alertId]: ''
+    }));
+    
+    // Simulate AI response - replace with actual AI integration
+    setTimeout(() => {
+      const aiMessage = {
+        role: 'assistant' as const,
+        content: `I understand your concern about this alert: "${currentInput}". Based on the alert details, I can help you investigate further or suggest next steps.`,
+        timestamp: new Date()
+      };
+      
+      setAlertChatMessages(prev => ({
+        ...prev,
+        [alertId]: [...(prev[alertId] || []), aiMessage]
+      }));
+    }, 1000);
+    
+    toast({
+      title: "Message sent",
+      description: "Your message has been sent to the AI assistant."
+    });
+  };
+
+  const handleAlertKeyPress = (e: React.KeyboardEvent, alertId: string) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendAlertMessage(alertId);
     }
   };
 
@@ -713,6 +773,61 @@ export const Dashboard = () => {
                     </div>
                   );
                 })()}
+
+                {/* Alert-specific Chat Interface */}
+                {alertChatVisible[alert.id] && (
+                  <div className="mt-4 border-t border-border pt-4 space-y-4">
+                    {/* Chat Messages */}
+                    {alertChatMessages[alert.id] && alertChatMessages[alert.id].length > 0 && (
+                      <div className="max-h-48 overflow-y-auto space-y-2 p-3 bg-muted/30 rounded-lg">
+                        {alertChatMessages[alert.id].map((message, idx) => (
+                          <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+                              message.role === 'user' 
+                                ? 'bg-primary text-primary-foreground' 
+                                : 'bg-background text-foreground border'
+                            }`}>
+                              <div className="flex items-start gap-2">
+                                {message.role === 'assistant' && (
+                                  <MessageSquare className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                )}
+                                <div>
+                                  <p>{message.content}</p>
+                                  <p className="text-xs opacity-70 mt-1">
+                                    {format(message.timestamp, 'HH:mm')}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Chat Input */}
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        value={alertChatInputs[alert.id] || ''}
+                        onChange={(e) => setAlertChatInputs(prev => ({
+                          ...prev,
+                          [alert.id]: e.target.value
+                        }))}
+                        onKeyPress={(e) => handleAlertKeyPress(e, alert.id)}
+                        placeholder="Ask about this specific alert..."
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={() => sendAlertMessage(alert.id)}
+                        disabled={!alertChatInputs[alert.id]?.trim()}
+                        size="sm"
+                        className="flex items-center gap-1"
+                      >
+                        <Send className="w-3 h-3" />
+                        Send
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           );
@@ -988,44 +1103,8 @@ export const Dashboard = () => {
     </div>
   );
 
-  // Chat functionality
-  const sendMessage = async () => {
-    if (!chatInput.trim()) return;
-    
-    const userMessage = {
-      role: 'user' as const,
-      content: chatInput,
-      timestamp: new Date()
-    };
-    
-    setChatMessages(prev => [...prev, userMessage]);
-    setChatInput('');
-    
-    // Simulate AI response - replace with actual AI integration
-    setTimeout(() => {
-      const aiMessage = {
-        role: 'assistant' as const,
-        content: `I understand you said: "${userMessage.content}". How can I help you with your security concerns?`,
-        timestamp: new Date()
-      };
-      setChatMessages(prev => [...prev, aiMessage]);
-    }, 1000);
-    
-    toast({
-      title: "Message sent",
-      description: "Your message has been sent to the AI assistant."
-    });
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background">
       {/* Professional Navigation Header */}
       <nav className="bg-card border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1076,66 +1155,14 @@ export const Dashboard = () => {
       </nav>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {currentPage === 'overview' && renderOverview()}
         {currentPage === 'alerts' && renderAlerts()}
         {currentPage === 'devices' && renderDevices()}
         {currentPage === 'settings' && renderSettings()}
       </main>
-
-      {/* Chat Interface */}
-      <div className="border-t border-border bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Chat Messages Area */}
-          {chatMessages.length > 0 && (
-            <div className="max-h-64 overflow-y-auto py-4 space-y-3 border-b border-border">
-              {chatMessages.map((message, idx) => (
-                <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                    message.role === 'user' 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'bg-muted text-foreground'
-                  }`}>
-                    <div className="flex items-start gap-2">
-                      {message.role === 'assistant' && (
-                        <MessageSquare className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      )}
-                      <div>
-                        <p className="text-sm">{message.content}</p>
-                        <p className="text-xs opacity-70 mt-1">
-                          {format(message.timestamp, 'HH:mm')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {/* Chat Input */}
-          <div className="py-4 flex items-center space-x-3">
-            <div className="flex-1 flex items-center space-x-2">
-              <Input
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask about security alerts, device status, or get help..."
-                className="flex-1"
-              />
-              <Button
-                onClick={sendMessage}
-                disabled={!chatInput.trim()}
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <Send className="w-4 h-4" />
-                Send
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
+
+export default Dashboard;
