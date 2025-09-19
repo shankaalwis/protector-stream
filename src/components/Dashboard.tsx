@@ -413,6 +413,16 @@ export const Dashboard = () => {
     }
   };
 
+  const cleanAlertDescription = (description: string) => {
+    // Remove any mention of "Splunk" or similar detection system references
+    return description
+      .replace(/security alert detected by splunk/gi, 'Security alert detected')
+      .replace(/detected by splunk/gi, 'detected')
+      .replace(/splunk security alert/gi, 'Security alert')
+      .replace(/\s+/g, ' ') // Clean up extra spaces
+      .trim();
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'safe': return <CheckCircle className="h-4 w-4 text-success" />;
@@ -534,10 +544,10 @@ export const Dashboard = () => {
                             </span>
                             <span className="font-semibold text-foreground">{alert.alert_type}</span>
                           </div>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            Security incident on {alertDevice?.device_name || 'Unknown Device'}
-                          </p>
-                          <p className="text-sm text-foreground">{alert.description}</p>
+                           <p className="text-sm text-muted-foreground mb-2">
+                             Security incident on {alertDevice?.device_name || 'Unknown Device'}
+                           </p>
+                           <p className="text-sm text-foreground">{cleanAlertDescription(alert.description)}</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-end space-y-2 ml-4">
@@ -616,7 +626,7 @@ export const Dashboard = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-6">
-                <p className="mb-6 text-foreground font-medium text-base">{alert.description}</p>
+                 <p className="mb-6 text-foreground font-medium text-base">{cleanAlertDescription(alert.description)}</p>
                 
                 {/* Device Information */}
                 {alertDevice && (
@@ -782,12 +792,12 @@ export const Dashboard = () => {
                                  </Button>
                                  
                                  {currentExpanded.causes && (
-                                   <div className="p-4 bg-muted/10">
-                                     <ul className="text-sm text-foreground font-medium space-y-2">
+                                   <div className="p-3 bg-muted/10">
+                                     <ul className="text-sm text-foreground font-medium space-y-1">
                                        {analysisData.potential_causes.map((cause: string, idx: number) => (
                                          <li key={idx} className="flex items-start gap-2 p-2 bg-background border border-border/20 rounded-lg">
                                            <span className="text-primary font-bold text-base mt-0.5">•</span>
-                                           <span className="leading-snug">{cause}</span>
+                                           <span className="leading-tight">{cause}</span>
                                          </li>
                                        ))}
                                      </ul>
@@ -813,14 +823,14 @@ export const Dashboard = () => {
                                  </Button>
                                  
                                  {currentExpanded.actions && (
-                                   <div className="p-4 bg-muted/10">
-                                     <ol className="text-sm text-foreground font-medium space-y-2">
+                                   <div className="p-3 bg-muted/10">
+                                     <ol className="text-sm text-foreground font-medium space-y-1">
                                        {analysisData.mitigation_steps.map((step: string, idx: number) => (
-                                         <li key={idx} className="flex items-start gap-3 p-3 bg-background border border-border/20 rounded-lg">
+                                         <li key={idx} className="flex items-start gap-3 p-2 bg-background border border-border/20 rounded-lg">
                                            <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold border-2 border-primary/30">
                                              {idx + 1}
                                            </span>
-                                           <span className="pt-0.5 leading-snug">{step}</span>
+                                           <span className="pt-0.5 leading-tight">{step}</span>
                                          </li>
                                        ))}
                                      </ol>
@@ -904,19 +914,19 @@ export const Dashboard = () => {
   const renderDevices = () => (
     <div className="space-y-8">
       {/* Banner-like header for Devices */}
-      <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-8 shadow-professional-lg">
+      <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 shadow-professional-lg">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent"></div>
         <div className="relative">
           <div className="flex justify-between items-center">
-            <div className="text-center space-y-4 flex-1">
+            <div className="text-center space-y-3 flex-1">
               <div className="flex items-center justify-center space-x-3">
-                <Monitor className="h-8 w-8 text-primary" />
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                <Monitor className="h-6 w-6 text-primary" />
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                   My Devices
                 </h1>
-                <Monitor className="h-8 w-8 text-primary" />
+                <Monitor className="h-6 w-6 text-primary" />
               </div>
-              <p className="text-xl font-medium text-foreground/80">Manage and monitor all connected devices</p>
+              <p className="text-lg font-medium text-foreground/80">Manage and monitor all connected devices</p>
               <div className="flex items-center justify-center space-x-2 pt-2">
                 <div className="h-1 w-20 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full"></div>
               </div>
@@ -1076,19 +1086,19 @@ export const Dashboard = () => {
   const renderSettings = () => (
     <div className="space-y-8">
       {/* Banner-like header for Settings */}
-      <div className="relative overflow-hidden rounded-2xl border-2 border-muted/30 bg-gradient-to-r from-muted/10 via-muted/5 to-transparent p-8 shadow-professional-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-muted/5 to-transparent"></div>
-        <div className="relative text-center space-y-4">
+      <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 shadow-professional-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent"></div>
+        <div className="relative text-center space-y-3">
           <div className="flex items-center justify-center space-x-3">
-            <Settings className="h-8 w-8 text-foreground" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <Settings className="h-6 w-6 text-primary" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               Settings
             </h1>
-            <Settings className="h-8 w-8 text-foreground" />
+            <Settings className="h-6 w-6 text-primary" />
           </div>
-          <p className="text-xl font-medium text-foreground/80">Manage your account and device preferences</p>
+          <p className="text-lg font-medium text-foreground/80">Manage your account and device preferences</p>
           <div className="flex items-center justify-center space-x-2 pt-2">
-            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-foreground/50 to-transparent rounded-full"></div>
+            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full"></div>
           </div>
         </div>
       </div>
