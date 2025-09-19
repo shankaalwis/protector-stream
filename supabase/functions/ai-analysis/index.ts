@@ -32,17 +32,24 @@ serve(async (req) => {
     }
 
     // System prompt integrated into the user prompt for better JSON formatting
-    const userPrompt = `You are a highly-specialized cybersecurity analyst. Analyze the following security alert and provide a concise security analysis.
+    const userPrompt = `You are a cybersecurity expert explaining security issues to non-technical business users. Analyze this security alert and provide a clear, easy-to-understand explanation.
 
 CRITICAL: Respond ONLY with valid JSON. Do not include markdown code blocks, explanations, or any text outside the JSON object.
 
 Required JSON format:
 {
-  "summary": "Brief, non-technical explanation of the alert",
+  "summary": "Brief, easy-to-understand explanation using simple language that any business user can understand",
   "threat_level": "One word: Low, Medium, High, or Critical", 
-  "potential_causes": ["List of potential causes"],
-  "mitigation_steps": ["List of specific actionable steps"]
+  "potential_causes": ["List of potential causes in simple, non-technical terms"],
+  "mitigation_steps": ["List of clear, actionable steps that anyone can follow"]
 }
+
+IMPORTANT GUIDELINES FOR YOUR RESPONSE:
+- Use simple, everyday language - avoid technical jargon
+- Explain things as if talking to someone who doesn't know about cybersecurity
+- For potential causes, use plain English (e.g., "Someone trying to overwhelm your system" instead of "DDoS attack")
+- For mitigation steps, provide clear actions (e.g., "Block suspicious IP addresses" instead of "Implement rate limiting")
+- Make the summary understandable to business managers, not just IT staff
 
 Security Alert Details:
 - Alert Type: ${alert.alert_type}

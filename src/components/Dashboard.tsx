@@ -576,16 +576,81 @@ export const Dashboard = () => {
                     </Button>
                   )}
                 </div>
-                {alert.ai_analysis_chat.length > 0 && (
-                  <div className="mt-4 p-3 bg-muted rounded">
-                    <h4 className="font-semibold mb-2">AI Analysis:</h4>
-                    {alert.ai_analysis_chat.map((chat, idx) => (
-                      <div key={idx} className="text-sm">
-                        <span className="font-medium">{chat.role}:</span> {chat.content}
+                {alert.ai_analysis_chat.length > 0 && (() => {
+                  // Find the AI's response (not the user's prompt)
+                  const aiResponse = alert.ai_analysis_chat.find(chat => chat.role === 'ai')?.content;
+                  if (!aiResponse) return null;
+                  
+                  let analysisData;
+                  try {
+                    analysisData = JSON.parse(aiResponse);
+                  } catch {
+                    return (
+                      <div className="mt-4 p-4 bg-muted rounded-lg">
+                        <h4 className="font-semibold mb-2 text-heading">AI Analysis:</h4>
+                        <p className="text-sm text-muted-foreground">{aiResponse}</p>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    );
+                  }
+                  
+                  const getThreatLevelColor = (level: string) => {
+                    switch (level?.toLowerCase()) {
+                      case 'critical': return 'bg-destructive text-destructive-foreground';
+                      case 'high': return 'bg-warning text-warning-foreground';
+                      case 'medium': return 'bg-warning/70 text-warning-foreground';
+                      case 'low': return 'bg-success text-success-foreground';
+                      default: return 'bg-muted text-muted-foreground';
+                    }
+                  };
+                  
+                  return (
+                    <div className="mt-4 p-6 bg-background border border-border rounded-lg space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-heading text-lg">🤖 AI Security Analysis</h4>
+                        <Badge className={`${getThreatLevelColor(analysisData.threat_level)} font-medium`}>
+                          {analysisData.threat_level || 'Unknown'}
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <h5 className="font-medium text-subheading mb-2">📋 Summary</h5>
+                          <p className="text-sm text-foreground leading-relaxed">{analysisData.summary}</p>
+                        </div>
+                        
+                        {analysisData.potential_causes && analysisData.potential_causes.length > 0 && (
+                          <div>
+                            <h5 className="font-medium text-subheading mb-2">🔍 Potential Causes</h5>
+                            <ul className="text-sm text-foreground space-y-1">
+                              {analysisData.potential_causes.map((cause: string, idx: number) => (
+                                <li key={idx} className="flex items-start gap-2">
+                                  <span className="text-muted-foreground mt-0.5">•</span>
+                                  <span>{cause}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {analysisData.mitigation_steps && analysisData.mitigation_steps.length > 0 && (
+                          <div>
+                            <h5 className="font-medium text-subheading mb-2">⚡ Recommended Actions</h5>
+                            <ol className="text-sm text-foreground space-y-2">
+                              {analysisData.mitigation_steps.map((step: string, idx: number) => (
+                                <li key={idx} className="flex items-start gap-3">
+                                  <span className="flex-shrink-0 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+                                    {idx + 1}
+                                  </span>
+                                  <span className="pt-0.5">{step}</span>
+                                </li>
+                              ))}
+                            </ol>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           );
