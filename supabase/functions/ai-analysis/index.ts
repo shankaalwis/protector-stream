@@ -93,20 +93,30 @@ Timestamp: ${alert.timestamp}`;
     // Extract and parse the AI response from Gemini's response format
     let aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate analysis at this time.';
     
-    // Try to parse as JSON, fallback to raw text if parsing fails
+    // Strip markdown code blocks if present
+    aiResponse = aiResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim();
+    
+    // Try to parse as JSON, fallback to structured response if parsing fails
     let parsedAnalysis;
     try {
       parsedAnalysis = JSON.parse(aiResponse);
+      // Ensure the response has the required structure
+      if (!parsedAnalysis.summary || !parsedAnalysis.threat_level || !parsedAnalysis.mitigation_steps) {
+        throw new Error('Missing required fields in AI response');
+      }
     } catch (parseError) {
       console.warn('Failed to parse AI response as JSON:', parseError);
+      console.warn('Raw AI response:', aiResponse);
       parsedAnalysis = {
-        summary: 'AI analysis completed but format was unexpected',
+        summary: 'AI analysis completed but response format needs improvement',
         threat_level: alert.severity || 'Medium',
-        potential_causes: ['Analysis format error'],
-        mitigation_steps: ['Review alert manually', 'Check system logs']
+        potential_causes: ['Response parsing issue', 'Unexpected AI response format'],
+        mitigation_steps: ['Review alert details manually', 'Check system logs for patterns', 'Consider updating alert thresholds']
       };
-      aiResponse = JSON.stringify(parsedAnalysis);
     }
+    
+    // Use the parsed analysis as the final response
+    aiResponse = JSON.stringify(parsedAnalysis);
 
     // Update alert with AI analysis
     const aiAnalysisChat = [
