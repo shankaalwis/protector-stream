@@ -31,23 +31,26 @@ serve(async (req) => {
       throw new Error(`Failed to fetch alert: ${alertError.message}`);
     }
 
-    // System prompt for structured analysis
-    const systemPrompt = `You are a highly-specialized cybersecurity analyst.
-Your task is to analyze a security alert and provide a concise security analysis.
-You must respond strictly in JSON format. Do not include any extra text, conversation, or greetings.
-Your JSON must have the following four keys:
-1. "summary": A brief, non-technical explanation of the alert.
-2. "threat_level": A single word from the list ("Low", "Medium", "High", "Critical").
-3. "potential_causes": A list of strings, each being a potential cause of this alert.
-4. "mitigation_steps": A list of strings, each string being a specific, actionable step to mitigate the threat.`;
+    // System prompt integrated into the user prompt for better JSON formatting
+    const userPrompt = `You are a highly-specialized cybersecurity analyst. Analyze the following security alert and provide a concise security analysis.
 
-    // User prompt with alert details
-    const userPrompt = `Analyze the following security alert:
+CRITICAL: Respond ONLY with valid JSON. Do not include markdown code blocks, explanations, or any text outside the JSON object.
 
-Alert Type: ${alert.alert_type}
-Description: ${alert.description}
-Severity: ${alert.severity}
-Timestamp: ${alert.timestamp}`;
+Required JSON format:
+{
+  "summary": "Brief, non-technical explanation of the alert",
+  "threat_level": "One word: Low, Medium, High, or Critical", 
+  "potential_causes": ["List of potential causes"],
+  "mitigation_steps": ["List of specific actionable steps"]
+}
+
+Security Alert Details:
+- Alert Type: ${alert.alert_type}
+- Description: ${alert.description}
+- Severity: ${alert.severity}
+- Timestamp: ${alert.timestamp}
+
+Respond with JSON only:`;
 
     // Get Gemini API key from environment
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
@@ -55,28 +58,23 @@ Timestamp: ${alert.timestamp}`;
       throw new Error('GEMINI_API_KEY not found in environment variables');
     }
 
-    // Call Gemini API for AI analysis with system instruction
+    // Call Gemini API for AI analysis - simplified without system instruction
     const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        system_instruction: {
-          parts: [{
-            text: systemPrompt
-          }]
-        },
         contents: [{
           parts: [{
             text: userPrompt
           }]
         }],
         generationConfig: {
-          temperature: 0.3,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024,
+          temperature: 0.1,
+          topK: 1,
+          topP: 0.8,
+          maxOutputTokens: 512,
         }
       })
     });
