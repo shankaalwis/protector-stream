@@ -452,73 +452,73 @@ export const Dashboard = () => {
         </div>
       </div>
       
-      {/* Professional Metrics Cards */}
+      {/* Professional Metrics Cards with Blue Shades */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="card-professional group hover:scale-105 transition-transform duration-200">
+        <Card className="card-professional group hover:scale-105 transition-transform duration-200 border-[hsl(var(--royal-blue))]/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="text-subheading">Total Devices</CardTitle>
-            <div className="p-3 rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-              <Monitor className="h-6 w-6 text-primary" />
+            <div className="p-3 rounded-2xl bg-[hsl(var(--royal-blue))]/15 group-hover:bg-[hsl(var(--royal-blue))]/25 transition-colors">
+              <Monitor className="h-6 w-6 text-[hsl(var(--royal-blue))]" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-foreground">{devices.length}</div>
+            <div className="text-3xl font-bold text-[hsl(var(--royal-blue))]">{devices.length}</div>
             <p className="text-sm text-muted-foreground mt-2">Connected devices</p>
           </CardContent>
         </Card>
         
-        <Card className="card-professional group hover:scale-105 transition-transform duration-200">
+        <Card className="card-professional group hover:scale-105 transition-transform duration-200 border-[hsl(var(--steel-blue))]/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="text-subheading">Active Threats</CardTitle>
-            <div className="p-3 rounded-2xl bg-warning/10 group-hover:bg-warning/20 transition-colors">
-              <AlertTriangle className="h-6 w-6 text-warning" />
+            <div className="p-3 rounded-2xl bg-[hsl(var(--steel-blue))]/15 group-hover:bg-[hsl(var(--steel-blue))]/25 transition-colors">
+              <AlertTriangle className="h-6 w-6 text-[hsl(var(--steel-blue))]" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-foreground">
+            <div className="text-3xl font-bold text-[hsl(var(--steel-blue))]">
               {alerts.filter(a => a.status === 'unresolved').length}
             </div>
             <p className="text-sm text-muted-foreground mt-2">Unresolved alerts</p>
           </CardContent>
         </Card>
         
-        <Card className="card-professional group hover:scale-105 transition-transform duration-200">
+        <Card className="card-professional group hover:scale-105 transition-transform duration-200 border-[hsl(var(--sky-blue))]/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="text-subheading">Data Transfer</CardTitle>
-            <div className="p-3 rounded-2xl bg-success/10 group-hover:bg-success/20 transition-colors">
-              <Activity className="h-6 w-6 text-success" />
+            <div className="p-3 rounded-2xl bg-[hsl(var(--sky-blue))]/15 group-hover:bg-[hsl(var(--sky-blue))]/25 transition-colors">
+              <Activity className="h-6 w-6 text-[hsl(var(--sky-blue))]" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-foreground">{metrics.data_transferred_mb}</div>
+            <div className="text-3xl font-bold text-[hsl(var(--sky-blue))]">{metrics.data_transferred_mb}</div>
             <p className="text-sm text-muted-foreground mt-2">MB transferred</p>
           </CardContent>
         </Card>
         
-        <Card className="card-professional group hover:scale-105 transition-transform duration-200">
+        <Card className="card-professional group hover:scale-105 transition-transform duration-200 border-[hsl(var(--midnight-blue))]/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="text-subheading">Network Status</CardTitle>
-            <div className="p-3 rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-              <Zap className="h-6 w-6 text-primary" />
+            <div className="p-3 rounded-2xl bg-[hsl(var(--midnight-blue))]/15 group-hover:bg-[hsl(var(--midnight-blue))]/25 transition-colors">
+              <Zap className="h-6 w-6 text-[hsl(var(--midnight-blue))]" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-success">Active</div>
+            <div className="text-3xl font-bold text-[hsl(var(--midnight-blue))]">Active</div>
             <p className="text-sm text-muted-foreground mt-2">All systems operational</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Recent Security Alerts */}
-      <Card className="card-professional">
-        <CardHeader className="spacing-generous">
+      <Card className="card-professional border-[hsl(var(--powder-blue))]/40">
+        <CardHeader className="spacing-generous bg-gradient-to-r from-[hsl(var(--powder-blue))]/10 to-transparent">
           <div className="flex items-center justify-between">
             <CardTitle className="text-heading flex items-center">
-              <Bell className="h-6 w-6 text-warning mr-3" />
+              <Bell className="h-6 w-6 text-[hsl(var(--steel-blue))] mr-3" />
               Recent Security Alerts
             </CardTitle>
             <Button 
-              className="btn-primary"
+              className="btn-primary bg-[hsl(var(--royal-blue))] hover:bg-[hsl(var(--royal-blue))]/90 border border-[hsl(var(--royal-blue))]/30"
               onClick={() => setCurrentPage('alerts')}
             >
               View All Alerts
@@ -531,50 +531,50 @@ export const Dashboard = () => {
               alerts.slice(0, 5).map((alert) => {
                 const alertDevice = devices.find(d => d.id === alert.device_id);
                 return (
-                  <div key={alert.id} className="card-professional p-6 hover:shadow-professional-lg transition-shadow duration-200">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4 flex-1">
-                        <div className={`${getSeverityColor(alert.severity)} rounded-full p-1`}>
-                          <AlertTriangle className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <span className={`${getSeverityColor(alert.severity)} text-xs font-semibold`}>
-                              {alert.severity.toUpperCase()}
-                            </span>
-                            <span className="font-semibold text-foreground">{alert.alert_type}</span>
-                          </div>
+                  <div key={alert.id} className="card-professional p-6 hover:shadow-professional-lg transition-shadow duration-200 border-[hsl(var(--sky-blue))]/30 bg-gradient-to-r from-[hsl(var(--powder-blue))]/5 to-transparent">
+                     <div className="flex items-start justify-between">
+                       <div className="flex items-start space-x-4 flex-1">
+                         <div className={`${getSeverityColor(alert.severity)} rounded-full p-1`}>
+                           <AlertTriangle className="h-4 w-4" />
+                         </div>
+                         <div className="flex-1">
+                           <div className="flex items-center space-x-3 mb-2">
+                             <span className={`${getSeverityColor(alert.severity)} text-xs font-semibold`}>
+                               {alert.severity.toUpperCase()}
+                             </span>
+                             <span className="font-semibold text-[hsl(var(--midnight-blue))]">{alert.alert_type}</span>
+                           </div>
                            <p className="text-sm text-muted-foreground mb-2">
                              Security incident on {alertDevice?.device_name || 'Unknown Device'}
                            </p>
                            <p className="text-sm text-foreground">{cleanAlertDescription(alert.description)}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end space-y-2 ml-4">
-                        <span className="text-xs font-medium text-primary">
-                          {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(alert.timestamp), 'MMM dd, yyyy HH:mm')}
-                        </span>
-                        <Button 
-                          className="btn-primary"
-                          size="sm"
-                          onClick={() => setCurrentPage('alerts')}
-                        >
-                          Investigate
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                         </div>
+                       </div>
+                       <div className="flex flex-col items-end space-y-2 ml-4">
+                         <span className="text-xs font-medium text-[hsl(var(--royal-blue))]">
+                           {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
+                         </span>
+                         <span className="text-xs text-muted-foreground">
+                           {format(new Date(alert.timestamp), 'MMM dd, yyyy HH:mm')}
+                         </span>
+                         <Button 
+                           className="btn-primary bg-[hsl(var(--steel-blue))] hover:bg-[hsl(var(--steel-blue))]/90"
+                           size="sm"
+                           onClick={() => setCurrentPage('alerts')}
+                         >
+                           Investigate
+                         </Button>
+                       </div>
+                     </div>
+                   </div>
                 );
               })
             ) : (
-              <div className="text-center py-12">
-                <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
-                <h3 className="text-subheading mb-2">All Clear!</h3>
-                <p className="text-muted-foreground">No security alerts detected. Your network is secure.</p>
-              </div>
+               <div className="text-center py-12">
+                 <CheckCircle className="h-16 w-16 text-[hsl(var(--sky-blue))] mx-auto mb-4" />
+                 <h3 className="text-subheading mb-2 text-[hsl(var(--midnight-blue))]">All Clear!</h3>
+                 <p className="text-muted-foreground">No security alerts detected. Your network is secure.</p>
+               </div>
             )}
           </div>
         </CardContent>
@@ -611,16 +611,16 @@ export const Dashboard = () => {
           const alertDevice = devices.find(d => d.id === alert.device_id);
           console.log('Rendering alert:', alert.id, 'Chat visible:', alertChatVisible[alert.id]);
           return (
-            <Card key={alert.id} className="border-2 border-border/50 shadow-professional hover:shadow-professional-lg transition-all duration-200">
-              <CardHeader className="border-b border-border/30 bg-background/50">
+            <Card key={alert.id} className="border-2 border-[hsl(var(--steel-blue))]/30 shadow-professional hover:shadow-professional-lg transition-all duration-200 bg-gradient-to-r from-[hsl(var(--powder-blue))]/5 to-transparent">
+              <CardHeader className="border-b border-[hsl(var(--sky-blue))]/20 bg-gradient-to-r from-[hsl(var(--powder-blue))]/10 to-transparent">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Badge className={`${getSeverityColor(alert.severity)} border`}>
                       {alert.severity.toUpperCase()}
                     </Badge>
-                    <CardTitle className="text-xl font-semibold text-foreground">{alert.alert_type}</CardTitle>
+                    <CardTitle className="text-xl font-semibold text-[hsl(var(--midnight-blue))]">{alert.alert_type}</CardTitle>
                   </div>
-                  <span className="text-sm font-medium text-muted-foreground border border-border/30 px-3 py-1 rounded-lg bg-muted/30">
+                  <span className="text-sm font-medium text-muted-foreground border border-[hsl(var(--sky-blue))]/30 px-3 py-1 rounded-lg bg-[hsl(var(--powder-blue))]/20">
                     {new Date(alert.timestamp).toLocaleString()}
                   </span>
                 </div>
@@ -628,13 +628,13 @@ export const Dashboard = () => {
               <CardContent className="p-6">
                  <p className="mb-6 text-foreground font-medium text-base">{cleanAlertDescription(alert.description)}</p>
                 
-                {/* Device Information */}
-                {alertDevice && (
-                  <div className="mb-6 p-4 bg-muted/30 border border-border/40 rounded-xl">
-                    <h4 className="font-semibold mb-3 flex items-center text-foreground text-base">
-                      <Monitor className="w-5 h-5 mr-2 text-primary" />
-                      Associated Device
-                    </h4>
+                 {/* Device Information */}
+                 {alertDevice && (
+                   <div className="mb-6 p-4 bg-[hsl(var(--powder-blue))]/20 border border-[hsl(var(--sky-blue))]/40 rounded-xl">
+                     <h4 className="font-semibold mb-3 flex items-center text-[hsl(var(--midnight-blue))] text-base">
+                       <Monitor className="w-5 h-5 mr-2 text-[hsl(var(--royal-blue))]" />
+                       Associated Device
+                     </h4>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div className="flex items-center space-x-2">
                         <span className="font-semibold text-foreground">Name:</span> 
@@ -667,16 +667,16 @@ export const Dashboard = () => {
                   </div>
                 )}
                 
-                <div className="flex space-x-3 mt-6 pb-4 border-b border-border/30">
-                  <Button 
-                    className="btn-primary border border-primary/20"
-                    size="sm" 
-                    onClick={() => getAIAnalysis(alert.id)}
-                    disabled={alert.status === 'closed'}
-                  >
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    {alertChatVisible[alert.id] ? 'Hide Analysis' : 'AI Analysis'}
-                  </Button>
+                 <div className="flex space-x-3 mt-6 pb-4 border-b border-[hsl(var(--sky-blue))]/20">
+                   <Button 
+                     className="btn-primary bg-[hsl(var(--royal-blue))] hover:bg-[hsl(var(--royal-blue))]/90 border border-[hsl(var(--royal-blue))]/30"
+                     size="sm" 
+                     onClick={() => getAIAnalysis(alert.id)}
+                     disabled={alert.status === 'closed'}
+                   >
+                     <BarChart3 className="w-4 h-4 mr-2" />
+                     {alertChatVisible[alert.id] ? 'Hide Analysis' : 'AI Analysis'}
+                   </Button>
                   <Button 
                     className="btn-success border border-success/20"
                     size="sm"
@@ -752,10 +752,10 @@ export const Dashboard = () => {
                   return (
                      <div className="mt-4 space-y-3">
                        {/* AI Analysis Response */}
-                       <div className="p-5 bg-background border-2 border-primary/20 rounded-xl shadow-professional-lg space-y-4">
-                         <div className="flex items-center justify-between border-b border-border/30 pb-3">
-                           <h4 className="font-bold text-foreground text-xl flex items-center gap-3">
-                             <BarChart3 className="w-5 h-5 text-primary" />
+                       <div className="p-5 bg-gradient-to-r from-[hsl(var(--powder-blue))]/10 to-transparent border-2 border-[hsl(var(--royal-blue))]/30 rounded-xl shadow-professional-lg space-y-4">
+                         <div className="flex items-center justify-between border-b border-[hsl(var(--sky-blue))]/20 pb-3">
+                           <h4 className="font-bold text-[hsl(var(--midnight-blue))] text-xl flex items-center gap-3">
+                             <BarChart3 className="w-5 h-5 text-[hsl(var(--royal-blue))]" />
                              AI Security Analysis
                            </h4>
                            <Badge className={`${getThreatLevelColor(analysisData.threat_level)} font-semibold text-sm px-3 py-1 border-2`}>
@@ -765,9 +765,9 @@ export const Dashboard = () => {
                          
                          <div className="space-y-4">
                            {/* Always show summary */}
-                           <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
-                             <h5 className="font-bold text-foreground mb-2 text-base flex items-center gap-2">
-                               <div className="w-2 h-2 bg-primary rounded-full"></div>
+                           <div className="p-3 bg-[hsl(var(--powder-blue))]/15 border border-[hsl(var(--sky-blue))]/30 rounded-lg">
+                             <h5 className="font-bold text-[hsl(var(--midnight-blue))] mb-2 text-base flex items-center gap-2">
+                               <div className="w-2 h-2 bg-[hsl(var(--royal-blue))] rounded-full"></div>
                                Summary
                              </h5>
                              <p className="text-sm text-foreground font-medium leading-snug">{analysisData.summary}</p>
@@ -776,27 +776,27 @@ export const Dashboard = () => {
                            {/* Expandable sections with better styling */}
                            <div className="space-y-3">
                              {analysisData.potential_causes && analysisData.potential_causes.length > 0 && (
-                               <div className="border border-border/30 rounded-lg overflow-hidden">
+                               <div className="border border-[hsl(var(--steel-blue))]/30 rounded-lg overflow-hidden bg-gradient-to-r from-[hsl(var(--powder-blue))]/5 to-transparent">
                                  <Button
                                    variant="ghost"
                                    size="sm"
                                    onClick={() => toggleSection('causes')}
-                                   className="w-full justify-start gap-2 p-3 h-auto border-b border-border/20 hover:bg-muted/30"
+                                   className="w-full justify-start gap-2 p-3 h-auto border-b border-[hsl(var(--sky-blue))]/20 hover:bg-[hsl(var(--powder-blue))]/20"
                                  >
                                    {currentExpanded.causes ? (
-                                     <ChevronDown className="w-4 h-4 text-primary" />
+                                     <ChevronDown className="w-4 h-4 text-[hsl(var(--royal-blue))]" />
                                    ) : (
-                                     <ChevronRight className="w-4 h-4 text-primary" />
+                                     <ChevronRight className="w-4 h-4 text-[hsl(var(--royal-blue))]" />
                                    )}
-                                   <span className="font-semibold text-foreground text-base">Potential Causes</span>
+                                   <span className="font-semibold text-[hsl(var(--midnight-blue))] text-base">Potential Causes</span>
                                  </Button>
                                  
                                  {currentExpanded.causes && (
-                                   <div className="p-3 bg-muted/10">
+                                   <div className="p-3 bg-[hsl(var(--powder-blue))]/10">
                                      <ul className="text-sm text-foreground font-medium space-y-1">
                                        {analysisData.potential_causes.map((cause: string, idx: number) => (
-                                         <li key={idx} className="flex items-start gap-2 p-2 bg-background border border-border/20 rounded-lg">
-                                           <span className="text-primary font-bold text-base mt-0.5">•</span>
+                                         <li key={idx} className="flex items-start gap-2 p-2 bg-background border border-[hsl(var(--sky-blue))]/20 rounded-lg">
+                                           <span className="text-[hsl(var(--royal-blue))] font-bold text-base mt-0.5">•</span>
                                            <span className="leading-tight">{cause}</span>
                                          </li>
                                        ))}
@@ -807,27 +807,27 @@ export const Dashboard = () => {
                              )}
                              
                              {analysisData.mitigation_steps && analysisData.mitigation_steps.length > 0 && (
-                               <div className="border border-border/30 rounded-lg overflow-hidden">
+                               <div className="border border-[hsl(var(--steel-blue))]/30 rounded-lg overflow-hidden bg-gradient-to-r from-[hsl(var(--powder-blue))]/5 to-transparent">
                                  <Button
                                    variant="ghost"
                                    size="sm"
                                    onClick={() => toggleSection('actions')}
-                                   className="w-full justify-start gap-2 p-3 h-auto border-b border-border/20 hover:bg-muted/30"
+                                   className="w-full justify-start gap-2 p-3 h-auto border-b border-[hsl(var(--sky-blue))]/20 hover:bg-[hsl(var(--powder-blue))]/20"
                                  >
                                    {currentExpanded.actions ? (
-                                     <ChevronDown className="w-4 h-4 text-primary" />
+                                     <ChevronDown className="w-4 h-4 text-[hsl(var(--royal-blue))]" />
                                    ) : (
-                                     <ChevronRight className="w-4 h-4 text-primary" />
+                                     <ChevronRight className="w-4 h-4 text-[hsl(var(--royal-blue))]" />
                                    )}
-                                   <span className="font-semibold text-foreground text-base">Recommended Actions</span>
+                                   <span className="font-semibold text-[hsl(var(--midnight-blue))] text-base">Recommended Actions</span>
                                  </Button>
                                  
                                  {currentExpanded.actions && (
-                                   <div className="p-3 bg-muted/10">
+                                   <div className="p-3 bg-[hsl(var(--powder-blue))]/10">
                                      <ol className="text-sm text-foreground font-medium space-y-1">
                                        {analysisData.mitigation_steps.map((step: string, idx: number) => (
-                                         <li key={idx} className="flex items-start gap-3 p-2 bg-background border border-border/20 rounded-lg">
-                                           <span className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold border-2 border-primary/30">
+                                         <li key={idx} className="flex items-start gap-3 p-2 bg-background border border-[hsl(var(--sky-blue))]/20 rounded-lg">
+                                           <span className="flex-shrink-0 w-6 h-6 bg-[hsl(var(--royal-blue))] text-white rounded-full flex items-center justify-center text-xs font-bold border-2 border-[hsl(var(--royal-blue))]/30">
                                              {idx + 1}
                                            </span>
                                            <span className="pt-0.5 leading-tight">{step}</span>
@@ -842,12 +842,12 @@ export const Dashboard = () => {
                         </div>
                       </div>
 
-                      {/* Alert-specific Chat Interface - appears AFTER AI analysis */}
-                      <div className="p-6 bg-muted/20 border-2 border-border/30 rounded-xl shadow-professional space-y-4">
-                        <h5 className="font-bold text-foreground text-lg flex items-center gap-3 border-b border-border/30 pb-3">
-                          <MessageSquare className="w-5 h-5 text-primary" />
-                          Continue Discussion
-                        </h5>
+                       {/* Alert-specific Chat Interface - appears AFTER AI analysis */}
+                       <div className="p-6 bg-gradient-to-r from-[hsl(var(--powder-blue))]/15 to-transparent border-2 border-[hsl(var(--sky-blue))]/30 rounded-xl shadow-professional space-y-4">
+                         <h5 className="font-bold text-[hsl(var(--midnight-blue))] text-lg flex items-center gap-3 border-b border-[hsl(var(--sky-blue))]/20 pb-3">
+                           <MessageSquare className="w-5 h-5 text-[hsl(var(--royal-blue))]" />
+                           Continue Discussion
+                         </h5>
                         
                         {/* Chat Messages */}
                         {alertChatMessages[alert.id] && alertChatMessages[alert.id].length > 0 && (

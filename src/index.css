@@ -24,10 +24,17 @@
     --primary-foreground: 0 0% 100%;
     --primary-hover: 211 100% 45%;
 
-    /* Oxford Blue Banner Colors */
-    --banner-blue: 224 71% 15%;                     /* Oxford Blue for banners */
-    --banner-blue-light: 224 71% 20%;              /* Slightly lighter Oxford Blue */
-    --banner-blue-foreground: 0 0% 100%;           /* White text on Oxford Blue */
+    /* Navy Blue Banner Colors */
+    --banner-blue: 240 100% 20%;                   /* Navy Blue for banners */
+    --banner-blue-light: 240 100% 25%;            /* Lighter Navy Blue */
+    --banner-blue-foreground: 0 0% 100%;          /* White text on Navy Blue */
+    
+    /* Blue Palette for Visual Appeal */
+    --royal-blue: 225 73% 57%;                     /* Royal blue for cards */
+    --steel-blue: 207 44% 49%;                     /* Steel blue for accents */
+    --sky-blue: 197 71% 73%;                       /* Sky blue for highlights */
+    --midnight-blue: 240 64% 27%;                  /* Midnight blue for depth */
+    --powder-blue: 187 48% 80%;                    /* Powder blue for subtle backgrounds */
 
     /* Status Colors */
     --success: 134 61% 41%;                     /* Neon green #28A745 */
@@ -98,10 +105,17 @@
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    /* Oxford Blue Banner Colors for dark mode */
-    --banner-blue: 224 71% 25%;                     /* Lighter Oxford Blue for dark mode */
-    --banner-blue-light: 224 71% 30%;              /* Even lighter Oxford Blue for dark mode */
-    --banner-blue-foreground: 0 0% 100%;           /* White text on Oxford Blue */
+    /* Navy Blue Banner Colors for dark mode */
+    --banner-blue: 240 100% 35%;                   /* Lighter Navy Blue for dark mode */
+    --banner-blue-light: 240 100% 40%;            /* Even lighter Navy Blue */
+    --banner-blue-foreground: 0 0% 100%;          /* White text on Navy Blue */
+    
+    /* Blue Palette for Dark Mode */
+    --royal-blue: 225 73% 67%;                     /* Brighter royal blue for dark mode */
+    --steel-blue: 207 44% 59%;                     /* Brighter steel blue */
+    --sky-blue: 197 71% 83%;                       /* Brighter sky blue */
+    --midnight-blue: 240 64% 37%;                  /* Lighter midnight blue */
+    --powder-blue: 187 48% 90%;                    /* Lighter powder blue */
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
