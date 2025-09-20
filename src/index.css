@@ -45,6 +45,13 @@
     --danger: 354 70% 54%;                      /* Stark red #DC3545 */
     --danger-foreground: 0 0% 100%;
 
+    /* Red Alert Colors for Triggered Alerts */
+    --alert-red: 0 84% 60%;                     /* Bright red #F56565 */
+    --alert-red-dark: 0 84% 50%;               /* Darker red #E53E3E */
+    --alert-red-light: 0 84% 70%;              /* Lighter red #FC8181 */
+    --alert-red-subtle: 0 50% 90%;             /* Subtle red background */
+    --alert-red-foreground: 0 0% 100%;         /* White text */
+
     --secondary: 240 5% 96%;
     --secondary-foreground: 0 0% 20%;
 
@@ -209,6 +216,11 @@
     animation: pulse-red 2s infinite;
   }
 
+  .status-triggered {
+    @apply status-badge bg-[hsl(var(--alert-red))] text-[hsl(var(--alert-red-foreground))];
+    animation: pulse-alert-red 2s infinite;
+  }
+
   /* Professional Input Styles */
   .input-professional {
     @apply flex h-12 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm;
@@ -270,6 +282,15 @@
     }
     70% {
       box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+  }
+
+  @keyframes pulse-alert-red {
+    0%, 100% {
+      box-shadow: 0 0 0 0 hsl(var(--alert-red) / 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px hsl(var(--alert-red) / 0);
     }
   }
 

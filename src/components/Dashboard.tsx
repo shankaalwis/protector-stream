@@ -405,8 +405,8 @@ export const Dashboard = () => {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'status-blocked';
-      case 'high': return 'status-threat';
+      case 'critical': return 'status-triggered';
+      case 'high': return 'status-triggered';
       case 'medium': return 'status-threat';
       case 'low': return 'status-safe';
       default: return 'status-badge';
