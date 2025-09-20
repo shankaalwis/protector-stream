@@ -217,7 +217,7 @@
   }
 
   .status-triggered {
-    @apply status-badge bg-[hsl(var(--alert-red))] text-[hsl(var(--alert-red-foreground))];
+    @apply bg-[hsl(var(--alert-red))] text-[hsl(var(--alert-red-foreground))] px-3 py-1 rounded-full text-xs font-medium border border-[hsl(var(--alert-red-dark))];
     animation: pulse-alert-red 2s infinite;
   }
 
