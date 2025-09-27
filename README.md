@@ -1,73 +1,106 @@
-# Welcome to your Lovable project
+A Web-Based Anomaly Detection and Firewall Management Solution
 
-## Project info
+Using Machine Learning and a Large Language Model (LLM)
 
-**URL**: https://lovable.dev/projects/ec93bc28-e126-48f1-a948-8ca2ebf5a4cd
+📌 Project Overview
 
-## How can I edit this code?
+This project aims to create a smart home network security system that automatically detects anomalies in domestic networks using Machine Learning (ML) and allows users to interact with a firewall via a Large Language Model (LLM).
 
-There are several ways of editing your application.
+The system provides an intuitive web-based dashboard and chat interface that translates technical security alerts into natural language, making cybersecurity accessible for non-technical users
 
-**Use Lovable**
+1. SRI-CSG3101.2 Group - 01 Pro…
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ec93bc28-e126-48f1-a948-8ca2ebf5a4cd) and start prompting.
+.
 
-Changes made via Lovable will be committed automatically to this repo.
+🎯 Goals
 
-**Use your preferred IDE**
+Detect suspicious or anomalous activities in home networks using ML.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Enable firewall management actions (block IPs, quarantine devices) via a conversational interface.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Integrate with a SIEM (Security Information and Event Management) system for data ingestion and analysis.
 
-Follow these steps:
+Provide human-readable explanations of anomalies using an LLM.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Improve usability and transparency of network security for everyday users
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. SRI-CSG3101.2 Group - 01 Pro…
 
-# Step 3: Install the necessary dependencies.
-npm i
+.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+⚙️ Core Features
+✅ In-Scope
 
-**Edit a file directly in GitHub**
+ML-based anomaly detection for network irregularities.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+LLM-powered chat interface for alert explanations and guided actions.
 
-**Use GitHub Codespaces**
+API connectivity with one vendor’s Firewall + SIEM.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+User dashboard for alerts, monitoring, and history.
 
-## What technologies are used for this project?
+User-driven security actions (approve/block devices, mark false positives).
 
-This project is built with:
+Audit trail for accountability and reporting
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. SRI-CSG3101.2 Group - 01 Pro…
 
-## How can I deploy this project?
+.
 
-Simply open [Lovable](https://lovable.dev/projects/ec93bc28-e126-48f1-a948-8ca2ebf5a4cd) and click on Share -> Publish.
+🚫 Out-of-Scope (Future Enhancements)
 
-## Can I connect a custom domain to my Lovable project?
+Multi-firewall integration.
 
-Yes, you can!
+Automated remediation without user consent.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Native iOS/Android apps.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Compliance modules (GDPR, ISO, HIPAA).
+
+Blockchain-based logs & Zero-Knowledge Proof storage
+
+
+👨‍💻 Team
+
+Shanka Alwis (Lead Developer & Network Security Architect)
+
+Thiveekshan Gunasegaran (Lead Developer, ML & LLM Engineer)
+
+Manhith Ransilu Sanjeewa (Backend & QA Engineer)
+
+Rashini Dulya Dias (Data Analyst & Frontend)
+
+Thanoj Nimsara Sahabandu (Project Manager & QA Lead)
+
+🚀 Getting Started
+
+Clone the repository:
+
+git clone https://github.com/<your-org>/<repo-name>.git
+cd <repo-name>
+
+
+Set up the environment:
+
+python -m venv venv
+source venv/bin/activate   # Linux/Mac
+venv\Scripts\activate      # Windows
+pip install -r requirements.txt
+
+
+Start the backend API:
+
+uvicorn main:app --reload
+
+
+Run the frontend:
+
+cd frontend
+npm install
+npm start
+
+
+📄 License
+
+This project is developed as part of CSG3101.2 – Applied Project under the School of Science, Edith Cowan University.
+All rights reserved © 2025.
