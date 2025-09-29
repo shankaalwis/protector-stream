@@ -26,7 +26,8 @@ interface ChartDataPoint {
 
 const ANOMALY_THRESHOLD = 50;
 const CHART_WINDOW_MINUTES = 30; // Show 30 minutes of data
-const TOTAL_DATA_POINTS = CHART_WINDOW_MINUTES * 12; // 360 points (30 min * 12 points/min)
+const DATA_INTERVAL_SECONDS = 5; // 5-second intervals
+const TOTAL_DATA_POINTS = (CHART_WINDOW_MINUTES * 60) / DATA_INTERVAL_SECONDS; // 360 points (30 min * 60 sec / 5 sec)
 const VISIBLE_DATA_POINTS = 72; // Show 6 minutes worth of data at once (72 points)
 
 const AnomalyChart: React.FC = () => {
@@ -47,7 +48,7 @@ const AnomalyChart: React.FC = () => {
     const now = new Date();
     
     for (let i = TOTAL_DATA_POINTS - 1; i >= 0; i--) {
-      const time = new Date(now.getTime() - i * 5000);
+      const time = new Date(now.getTime() - i * DATA_INTERVAL_SECONDS * 1000);
       initialData.push({
         time: time.toLocaleTimeString(),
         packet_count: 0,
@@ -116,6 +117,7 @@ const AnomalyChart: React.FC = () => {
         const { data, error } = await supabase
           .from('anomaly_alerts')
           .select('*')
+          .gte('timestamp', new Date(Date.now() - CHART_WINDOW_MINUTES * 60 * 1000).toISOString())
           .order('timestamp', { ascending: false })
           .limit(TOTAL_DATA_POINTS);
 
@@ -144,7 +146,7 @@ const AnomalyChart: React.FC = () => {
           if (paddingNeeded > 0) {
             const oldestTime = new Date(sortedData[0].timestamp);
             for (let i = paddingNeeded; i > 0; i--) {
-              const time = new Date(oldestTime.getTime() - i * 5000);
+              const time = new Date(oldestTime.getTime() - i * DATA_INTERVAL_SECONDS * 1000);
               paddedData.push({
                 time: time.toLocaleTimeString(),
                 packet_count: 0,
