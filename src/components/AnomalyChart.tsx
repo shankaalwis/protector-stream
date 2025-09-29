@@ -242,13 +242,43 @@ const AnomalyChart: React.FC = () => {
       const payload = props?.payload;
       const isAnomaly = payload?.is_anomaly;
       const clientId = payload?.client_id;
+      const timestamp = payload?.timestamp;
+      const time = payload?.time;
       
-      if (isAnomaly && clientId) {
-        return [`${value} packets (Anomaly - Client: ${clientId})`, 'Packet Count'];
-      }
-      return [`${value} packets`, 'Packet Count'];
+      const timeInfo = time || (timestamp ? new Date(timestamp).toLocaleTimeString() : 'N/A');
+      const clientInfo = clientId || 'Unknown';
+      const statusInfo = isAnomaly ? 'ANOMALY DETECTED' : 'Normal Traffic';
+      
+      return [
+        `${value} packets`,
+        `Time: ${timeInfo}`,
+        `Client: ${clientInfo}`,
+        `Status: ${statusInfo}`
+      ];
     }
     return [value, name];
+  };
+
+  const customTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
+          <p className="font-semibold text-foreground mb-2">
+            {data.is_anomaly ? '🚨 Anomaly Detected' : '📊 Normal Traffic'}
+          </p>
+          <div className="space-y-1 text-sm">
+            <p><span className="font-medium">Time:</span> {data.time}</p>
+            <p><span className="font-medium">Packets:</span> {data.packet_count}</p>
+            <p><span className="font-medium">Client:</span> {data.client_id || 'Unknown'}</p>
+            {data.is_anomaly && (
+              <p className="text-red-500 font-medium">⚠️ Anomaly Alert</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+    return null;
   };
 
   const getThreatLevelColor = (level: string) => {
@@ -356,11 +386,11 @@ const AnomalyChart: React.FC = () => {
                 label={{ value: 'Packet Count', angle: -90, position: 'insideLeft' }}
               />
               <Tooltip 
-                formatter={formatTooltip}
+                content={customTooltip}
                 labelStyle={{ color: '#000' }}
                 contentStyle={{ 
-                  backgroundColor: 'hsl(var(--background))', 
-                  border: '1px solid hsl(var(--border))',
+                  backgroundColor: 'transparent',
+                  border: 'none',
                   borderRadius: '6px'
                 }}
               />
