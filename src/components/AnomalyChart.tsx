@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface AnomalyData {
   id: string;
@@ -23,9 +25,14 @@ interface ChartDataPoint {
 }
 
 const ANOMALY_THRESHOLD = 50;
+const CHART_WINDOW_MINUTES = 30; // Show 30 minutes of data
+const TOTAL_DATA_POINTS = CHART_WINDOW_MINUTES * 12; // 360 points (30 min * 12 points/min)
+const VISIBLE_DATA_POINTS = 72; // Show 6 minutes worth of data at once (72 points)
 
 const AnomalyChart: React.FC = () => {
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [allChartData, setAllChartData] = useState<ChartDataPoint[]>([]);
+  const [viewStartIndex, setViewStartIndex] = useState(0);
+  const [isAtLatest, setIsAtLatest] = useState(true);
   const [anomalyStatus, setAnomalyStatus] = useState({
     totalAlerts: 0,
     latestClient: '',
@@ -35,11 +42,11 @@ const AnomalyChart: React.FC = () => {
 
   // Initialize chart with empty data
   useEffect(() => {
-    // Initialize with 60 empty data points (5 minutes of 5-second intervals)
+    // Initialize with 360 empty data points (30 minutes of 5-second intervals)
     const initialData: ChartDataPoint[] = [];
     const now = new Date();
     
-    for (let i = 59; i >= 0; i--) {
+    for (let i = TOTAL_DATA_POINTS - 1; i >= 0; i--) {
       const time = new Date(now.getTime() - i * 5000);
       initialData.push({
         time: time.toLocaleTimeString(),
@@ -50,7 +57,8 @@ const AnomalyChart: React.FC = () => {
       });
     }
     
-    setChartData(initialData);
+    setAllChartData(initialData);
+    setViewStartIndex(Math.max(0, TOTAL_DATA_POINTS - VISIBLE_DATA_POINTS));
   }, []);
 
   // Set up real-time subscription to anomaly_alerts table
@@ -70,8 +78,8 @@ const AnomalyChart: React.FC = () => {
           console.log('New anomaly alert received:', payload);
           const newAlert = payload.new as AnomalyData;
           
-          // Update chart data - keep last 60 data points
-          setChartData(prevData => {
+          // Update chart data - keep last 360 data points (30 minutes)
+          setAllChartData(prevData => {
             const alertTime = new Date(newAlert.timestamp);
             const newDataPoint: ChartDataPoint = {
               time: alertTime.toLocaleTimeString(),
@@ -82,6 +90,12 @@ const AnomalyChart: React.FC = () => {
             };
             
             const updatedData = [...prevData.slice(1), newDataPoint];
+            
+            // If we're at the latest view, move the window to show the new data
+            if (isAtLatest) {
+              setViewStartIndex(Math.max(0, updatedData.length - VISIBLE_DATA_POINTS));
+            }
+            
             return updatedData;
           });
           
@@ -103,7 +117,7 @@ const AnomalyChart: React.FC = () => {
           .from('anomaly_alerts')
           .select('*')
           .order('timestamp', { ascending: false })
-          .limit(60);
+          .limit(TOTAL_DATA_POINTS);
 
         if (error) {
           console.error('Error loading initial anomaly data:', error);
@@ -123,8 +137,8 @@ const AnomalyChart: React.FC = () => {
             client_id: alert.client_id
           }));
 
-          // If we have less than 60 points, pad with empty data
-          const paddingNeeded = 60 - chartPoints.length;
+          // If we have less than 360 points, pad with empty data
+          const paddingNeeded = TOTAL_DATA_POINTS - chartPoints.length;
           const paddedData: ChartDataPoint[] = [];
           
           if (paddingNeeded > 0) {
@@ -141,7 +155,8 @@ const AnomalyChart: React.FC = () => {
             }
           }
 
-          setChartData([...paddedData, ...chartPoints]);
+          setAllChartData([...paddedData, ...chartPoints]);
+          setViewStartIndex(Math.max(0, TOTAL_DATA_POINTS - VISIBLE_DATA_POINTS));
 
           // Update status with latest data
           const latestAlert = data[0];
@@ -167,6 +182,31 @@ const AnomalyChart: React.FC = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Get visible chart data based on current view
+  const visibleChartData = allChartData.slice(viewStartIndex, viewStartIndex + VISIBLE_DATA_POINTS);
+
+  const handleScrollLeft = () => {
+    const newIndex = Math.max(0, viewStartIndex - 12); // Move back 1 minute
+    setViewStartIndex(newIndex);
+    setIsAtLatest(newIndex >= allChartData.length - VISIBLE_DATA_POINTS);
+  };
+
+  const handleScrollRight = () => {
+    const maxIndex = Math.max(0, allChartData.length - VISIBLE_DATA_POINTS);
+    const newIndex = Math.min(maxIndex, viewStartIndex + 12); // Move forward 1 minute
+    setViewStartIndex(newIndex);
+    setIsAtLatest(newIndex >= maxIndex);
+  };
+
+  const handleGoToLatest = () => {
+    const latestIndex = Math.max(0, allChartData.length - VISIBLE_DATA_POINTS);
+    setViewStartIndex(latestIndex);
+    setIsAtLatest(true);
+  };
+
+  const canScrollLeft = viewStartIndex > 0;
+  const canScrollRight = viewStartIndex < allChartData.length - VISIBLE_DATA_POINTS;
 
   const formatTooltip = (value: any, name: string, props: any) => {
     if (name === 'packet_count') {
@@ -200,7 +240,7 @@ const AnomalyChart: React.FC = () => {
           <div>
             <CardTitle className="text-xl font-semibold">Real-Time Network Anomaly Detection</CardTitle>
             <CardDescription>
-              Live monitoring of packet counts with ML-based anomaly detection (Last 5 minutes)
+              Live monitoring of packet counts with ML-based anomaly detection (Last 30 minutes, showing 6-minute window)
             </CardDescription>
           </div>
           <Badge className={getThreatLevelColor(anomalyStatus.currentThreatLevel)}>
@@ -231,9 +271,47 @@ const AnomalyChart: React.FC = () => {
       </CardHeader>
       
       <CardContent>
+        {/* Scroll Controls */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleScrollLeft}
+              disabled={!canScrollLeft}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Earlier
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleScrollRight}
+              disabled={!canScrollRight}
+            >
+              Later
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            {!isAtLatest && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleGoToLatest}
+              >
+                Go to Latest
+              </Button>
+            )}
+            <span className="text-sm text-muted-foreground">
+              Viewing: {Math.floor(viewStartIndex / 12) + 1}-{Math.min(Math.floor((viewStartIndex + VISIBLE_DATA_POINTS) / 12), CHART_WINDOW_MINUTES)} min
+            </span>
+          </div>
+        </div>
+
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <LineChart data={visibleChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis 
                 dataKey="time" 
