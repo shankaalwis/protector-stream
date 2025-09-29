@@ -19,9 +19,10 @@ interface ChartDataPoint {
   packet_count: number;
   is_anomaly: boolean;
   timestamp: string;
+  client_id?: string;
 }
 
-const ANOMALY_THRESHOLD = 15;
+const ANOMALY_THRESHOLD = 50;
 
 const AnomalyChart: React.FC = () => {
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
@@ -44,7 +45,8 @@ const AnomalyChart: React.FC = () => {
         time: time.toLocaleTimeString(),
         packet_count: 0,
         is_anomaly: false,
-        timestamp: time.toISOString()
+        timestamp: time.toISOString(),
+        client_id: undefined
       });
     }
     
@@ -75,7 +77,8 @@ const AnomalyChart: React.FC = () => {
               time: alertTime.toLocaleTimeString(),
               packet_count: newAlert.packet_count,
               is_anomaly: newAlert.is_anomaly,
-              timestamp: newAlert.timestamp
+              timestamp: newAlert.timestamp,
+              client_id: newAlert.client_id
             };
             
             const updatedData = [...prevData.slice(1), newDataPoint];
@@ -116,7 +119,8 @@ const AnomalyChart: React.FC = () => {
             time: new Date(alert.timestamp).toLocaleTimeString(),
             packet_count: alert.packet_count,
             is_anomaly: alert.is_anomaly,
-            timestamp: alert.timestamp
+            timestamp: alert.timestamp,
+            client_id: alert.client_id
           }));
 
           // If we have less than 60 points, pad with empty data
@@ -131,7 +135,8 @@ const AnomalyChart: React.FC = () => {
                 time: time.toLocaleTimeString(),
                 packet_count: 0,
                 is_anomaly: false,
-                timestamp: time.toISOString()
+                timestamp: time.toISOString(),
+                client_id: undefined
               });
             }
           }
@@ -163,8 +168,15 @@ const AnomalyChart: React.FC = () => {
     };
   }, []);
 
-  const formatTooltip = (value: any, name: string) => {
+  const formatTooltip = (value: any, name: string, props: any) => {
     if (name === 'packet_count') {
+      const payload = props?.payload;
+      const isAnomaly = payload?.is_anomaly;
+      const clientId = payload?.client_id;
+      
+      if (isAnomaly && clientId) {
+        return [`${value} packets (Anomaly - Client: ${clientId})`, 'Packet Count'];
+      }
       return [`${value} packets`, 'Packet Count'];
     }
     return [value, name];
