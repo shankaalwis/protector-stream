@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import AnomalyChart from './AnomalyChart';
 import { 
   Shield, 
   AlertTriangle, 
@@ -507,6 +508,11 @@ export const Dashboard = () => {
             <p className="text-sm text-muted-foreground mt-2">All systems operational</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Real-Time Anomaly Detection Chart */}
+      <div className="animate-fade-in [animation-delay:500ms]">
+        <AnomalyChart />
       </div>
 
       {/* Enhanced Recent Security Alerts Section with Dark Sky Blue */}

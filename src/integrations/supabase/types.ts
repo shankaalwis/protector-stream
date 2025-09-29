@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      anomaly_alerts: {
+        Row: {
+          anomaly_score: number
+          client_id: string
+          created_at: string
+          id: string
+          is_anomaly: boolean
+          packet_count: number
+          timestamp: string
+        }
+        Insert: {
+          anomaly_score: number
+          client_id: string
+          created_at?: string
+          id?: string
+          is_anomaly?: boolean
+          packet_count: number
+          timestamp: string
+        }
+        Update: {
+          anomaly_score?: number
+          client_id?: string
+          created_at?: string
+          id?: string
+          is_anomaly?: boolean
+          packet_count?: number
+          timestamp?: string
+        }
+        Relationships: []
+      }
       devices: {
         Row: {
           alerts: Json | null
