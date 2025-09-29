@@ -22,7 +22,7 @@ interface ChartDataPoint {
   is_anomaly: boolean;
   timestamp: string;
   client_id?: string;
-  minutes_ago: number;
+  timeIndex: number;
 }
 
 const ANOMALY_THRESHOLD = 50;
@@ -48,16 +48,15 @@ const AnomalyChart: React.FC = () => {
     const initialData: ChartDataPoint[] = [];
     const now = new Date();
     
-    for (let i = TOTAL_DATA_POINTS - 1; i >= 0; i--) {
-      const time = new Date(now.getTime() - i * DATA_INTERVAL_SECONDS * 1000);
-      const minutesAgo = Math.floor(i * DATA_INTERVAL_SECONDS / 60);
+    for (let i = 0; i < TOTAL_DATA_POINTS; i++) {
+      const time = new Date(now.getTime() - (TOTAL_DATA_POINTS - 1 - i) * DATA_INTERVAL_SECONDS * 1000);
       initialData.push({
         time: time.toLocaleTimeString(),
         packet_count: 0,
         is_anomaly: false,
         timestamp: time.toISOString(),
         client_id: undefined,
-        minutes_ago: minutesAgo
+        timeIndex: i
       });
     }
     
@@ -85,24 +84,21 @@ const AnomalyChart: React.FC = () => {
           // Update chart data - keep last 360 data points (30 minutes)
           setAllChartData(prevData => {
             const alertTime = new Date(newAlert.timestamp);
-            const now = new Date();
-            const minutesAgo = Math.floor((now.getTime() - alertTime.getTime()) / (1000 * 60));
             const newDataPoint: ChartDataPoint = {
               time: alertTime.toLocaleTimeString(),
               packet_count: newAlert.packet_count,
               is_anomaly: newAlert.is_anomaly,
               timestamp: newAlert.timestamp,
               client_id: newAlert.client_id,
-              minutes_ago: minutesAgo
+              timeIndex: prevData.length > 0 ? prevData[prevData.length - 1].timeIndex + 1 : 0
             };
             
             const updatedData = [...prevData.slice(1), newDataPoint];
             
-            // Recalculate minutes_ago for all points based on current time
-            const currentTime = new Date();
-            const recalculatedData = updatedData.map(point => ({
+            // Update time indices to keep them sequential
+            const recalculatedData = updatedData.map((point, index) => ({
               ...point,
-              minutes_ago: Math.floor((currentTime.getTime() - new Date(point.timestamp).getTime()) / (1000 * 60))
+              timeIndex: index
             }));
             
             // If we're at the latest view, move the window to show the new data
@@ -144,14 +140,13 @@ const AnomalyChart: React.FC = () => {
           
           // Process the data in chronological order (oldest first)
           const sortedData = data.reverse();
-          const now = new Date();
-          const chartPoints: ChartDataPoint[] = sortedData.map(alert => ({
+          const chartPoints: ChartDataPoint[] = sortedData.map((alert, index) => ({
             time: new Date(alert.timestamp).toLocaleTimeString(),
             packet_count: alert.packet_count,
             is_anomaly: alert.is_anomaly,
             timestamp: alert.timestamp,
             client_id: alert.client_id,
-            minutes_ago: Math.floor((now.getTime() - new Date(alert.timestamp).getTime()) / (1000 * 60))
+            timeIndex: index
           }));
 
           // If we have less than 360 points, pad with empty data
@@ -160,7 +155,6 @@ const AnomalyChart: React.FC = () => {
           
           if (paddingNeeded > 0) {
             const oldestTime = new Date(sortedData[0].timestamp);
-            const now = new Date();
             for (let i = paddingNeeded; i > 0; i--) {
               const time = new Date(oldestTime.getTime() - i * DATA_INTERVAL_SECONDS * 1000);
               paddedData.push({
@@ -169,12 +163,17 @@ const AnomalyChart: React.FC = () => {
                 is_anomaly: false,
                 timestamp: time.toISOString(),
                 client_id: undefined,
-                minutes_ago: Math.floor((now.getTime() - time.getTime()) / (1000 * 60))
+                timeIndex: paddingNeeded - i
               });
             }
           }
 
-          setAllChartData([...paddedData, ...chartPoints]);
+          const finalData = [...paddedData, ...chartPoints].map((point, index) => ({
+            ...point,
+            timeIndex: index
+          }));
+          
+          setAllChartData(finalData);
           setViewStartIndex(Math.max(0, TOTAL_DATA_POINTS - VISIBLE_DATA_POINTS));
 
           // Update status with latest data
@@ -195,13 +194,12 @@ const AnomalyChart: React.FC = () => {
 
     loadInitialData();
 
-    // Set up interval to update minutes_ago values every minute
+    // Set up interval to update time labels every minute
     const intervalId = setInterval(() => {
       setAllChartData(prevData => {
-        const currentTime = new Date();
         return prevData.map(point => ({
           ...point,
-          minutes_ago: Math.floor((currentTime.getTime() - new Date(point.timestamp).getTime()) / (1000 * 60))
+          time: new Date(point.timestamp).toLocaleTimeString()
         }));
       });
     }, 60000); // Update every minute
@@ -335,7 +333,7 @@ const AnomalyChart: React.FC = () => {
               </Button>
             )}
             <span className="text-sm text-muted-foreground">
-              Viewing: {Math.floor(viewStartIndex / 12) + 1}-{Math.min(Math.floor((viewStartIndex + VISIBLE_DATA_POINTS) / 12), CHART_WINDOW_MINUTES)} min
+              Viewing: {visibleChartData.length > 0 ? visibleChartData[0].time : 'N/A'} - {visibleChartData.length > 0 ? visibleChartData[visibleChartData.length - 1].time : 'N/A'}
             </span>
           </div>
         </div>
@@ -345,13 +343,13 @@ const AnomalyChart: React.FC = () => {
             <LineChart data={visibleChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis 
-                dataKey="minutes_ago" 
+                dataKey="timeIndex" 
                 tick={{ fontSize: 12 }}
+                tickFormatter={(value, index) => {
+                  const point = visibleChartData[value - (visibleChartData[0]?.timeIndex || 0)];
+                  return point ? point.time : '';
+                }}
                 interval="preserveStartEnd"
-                tickFormatter={(value) => `${value}m ago`}
-                domain={['dataMin', 'dataMax']}
-                type="number"
-                scale="linear"
               />
               <YAxis 
                 tick={{ fontSize: 12 }}
