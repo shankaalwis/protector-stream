@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { alertId } = await req.json();
+    const { alertId, userQuery } = await req.json();
     
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -101,87 +101,163 @@ Analyze this SPECIFIC alert type and provide tailored responses. Respond with JS
       throw new Error('GEMINI_API_KEY not found in environment variables');
     }
 
-    // Call Gemini API for AI analysis - simplified without system instruction
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: userPrompt
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.1,
-          topK: 1,
-          topP: 0.8,
-          maxOutputTokens: 512,
+    // Helper function to call Gemini API with exponential backoff
+    async function callGeminiApi(contents: any[], systemInstruction?: any, maxRetries = 3) {
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          const requestBody: any = {
+            contents,
+            generationConfig: {
+              temperature: userQuery ? 0.7 : 0.1,
+              topK: 1,
+              topP: 0.8,
+              maxOutputTokens: userQuery ? 1024 : 512,
+            }
+          };
+
+          if (systemInstruction) {
+            requestBody.systemInstruction = systemInstruction;
+          }
+
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${geminiApiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(requestBody)
+            }
+          );
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Gemini API error (attempt ${attempt + 1}/${maxRetries}):`, errorText);
+            
+            if (attempt < maxRetries - 1) {
+              const delay = Math.pow(2, attempt) * 1000;
+              console.log(`Retrying in ${delay}ms...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
+              continue;
+            }
+            throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+          }
+
+          return await response.json();
+        } catch (error) {
+          if (attempt === maxRetries - 1) throw error;
+          const delay = Math.pow(2, attempt) * 1000;
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          console.log(`Retry ${attempt + 1} after ${delay}ms due to:`, errorMsg);
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
-      })
-    });
-
-    if (!geminiResponse.ok) {
-      const errorText = await geminiResponse.text();
-      console.error('Gemini API error:', errorText);
-      console.error('Gemini API status:', geminiResponse.status);
-      console.error('Gemini API headers:', Object.fromEntries(geminiResponse.headers.entries()));
-      throw new Error(`Gemini API error: ${geminiResponse.status} - ${errorText}`);
+      }
     }
 
-    const geminiData = await geminiResponse.json();
-    console.log('Gemini API response:', JSON.stringify(geminiData, null, 2));
+    let aiResponse: string;
+    let updatedChat;
 
-    // Extract and parse the AI response from Gemini's response format
-    let aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate analysis at this time.';
-    console.log('Raw AI response before processing:', aiResponse);
-    
-    // Strip markdown code blocks if present
-    aiResponse = aiResponse.replace(/^```json\s*/m, '').replace(/\s*```$/m, '').trim();
-    console.log('AI response after stripping markdown:', aiResponse);
-    
-    // Try to parse as JSON, fallback to structured response if parsing fails
-    let parsedAnalysis;
-    try {
-      parsedAnalysis = JSON.parse(aiResponse);
-      console.log('Successfully parsed JSON:', parsedAnalysis);
-      // Ensure the response has the required structure
-      if (!parsedAnalysis.summary || !parsedAnalysis.threat_level || !parsedAnalysis.mitigation_steps) {
-        throw new Error('Missing required fields in AI response');
-      }
-    } catch (parseError) {
-      console.error('Failed to parse AI response as JSON:', parseError);
-      console.error('Raw AI response that failed to parse:', aiResponse);
-      parsedAnalysis = {
-        summary: 'AI analysis completed but response format needs improvement',
-        threat_level: alert.severity || 'Medium',
-        potential_causes: ['Response parsing issue', 'Unexpected AI response format'],
-        mitigation_steps: ['Review alert details manually', 'Check system logs for patterns', 'Consider updating alert thresholds']
+    // CONVERSATIONAL MODE: Handle follow-up questions
+    if (userQuery) {
+      console.log('Conversational mode: processing user query');
+      
+      const conversationalSystemInstruction = {
+        parts: [{
+          text: `You are the "Security Advisor" AI. Your sole purpose is to provide highly focused, non-technical, and supportive explanations regarding the specific security alert currently under discussion.
+
+**YOUR PERSONA & TONE:**
+1.  **Role:** Act as a friendly, patient, and knowledgeable home security expert.
+2.  **Tone:** Be calm and reassuring. Use simple, everyday language (avoid jargon like 'DDoS' unless immediately followed by a simple explanation like 'a type of attack where...')
+3.  **Focus:** **Crucially, your answers MUST be constrained to the specific alert details and device mentioned in the conversation history.** Do not answer questions unrelated to the security alert, the affected device, or general security concepts. If the user asks something irrelevant, gently redirect them: "That's a good question, but let's stay focused on the alert for now."
+
+**BEHAVIOR GUIDELINES (Conversational Mode):**
+1.  **Response Format:** Always respond with plain, conversational text. **NEVER** use JSON, markdown code blocks, or special formatting like lists or headings in your chat responses.
+2.  **Context:** Maintain the full context of the discussion. Reference the device name and the nature of the alert in your answers to keep them focused and personal.
+3.  **Actionable Advice:** When asked "What should I do?", prioritize repeating and simplifying the most relevant mitigation steps from the initial analysis.`
+        }]
       };
-    }
-    
-    // Use the parsed analysis as the final response
-    aiResponse = JSON.stringify(parsedAnalysis);
 
-    // Update alert with AI analysis
-    const aiAnalysisChat = [
-      ...(alert.ai_analysis_chat || []),
-      {
+      // Build conversation history from ai_analysis_chat
+      const conversationHistory = (alert.ai_analysis_chat || []).map((msg: any) => ({
+        role: msg.role === 'ai' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      }));
+
+      // Add the new user query
+      conversationHistory.push({
         role: 'user',
-        content: userPrompt
-      },
-      {
-        role: 'ai',
-        content: aiResponse
+        parts: [{ text: userQuery }]
+      });
+
+      const geminiData = await callGeminiApi(conversationHistory, conversationalSystemInstruction);
+      console.log('Gemini conversational response:', JSON.stringify(geminiData, null, 2));
+
+      aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate response at this time.';
+
+      // Update chat history with new Q&A
+      updatedChat = [
+        ...(alert.ai_analysis_chat || []),
+        { role: 'user', content: userQuery },
+        { role: 'ai', content: aiResponse }
+      ];
+
+    } else {
+      // INITIAL ANALYSIS MODE: Generate structured analysis
+      console.log('Initial analysis mode: generating structured report');
+      
+      const geminiData = await callGeminiApi([{
+        parts: [{ text: userPrompt }]
+      }]);
+      console.log('Gemini API response:', JSON.stringify(geminiData, null, 2));
+
+      // Extract and parse the AI response from Gemini's response format
+      let rawResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate analysis at this time.';
+      console.log('Raw AI response before processing:', rawResponse);
+      
+      // Strip markdown code blocks if present
+      rawResponse = rawResponse.replace(/^```json\s*/m, '').replace(/\s*```$/m, '').trim();
+      console.log('AI response after stripping markdown:', rawResponse);
+      
+      // Try to parse as JSON, fallback to structured response if parsing fails
+      let parsedAnalysis;
+      try {
+        parsedAnalysis = JSON.parse(rawResponse);
+        console.log('Successfully parsed JSON:', parsedAnalysis);
+        // Ensure the response has the required structure
+        if (!parsedAnalysis.summary || !parsedAnalysis.threat_level || !parsedAnalysis.mitigation_steps) {
+          throw new Error('Missing required fields in AI response');
+        }
+      } catch (parseError) {
+        console.error('Failed to parse AI response as JSON:', parseError);
+        console.error('Raw AI response that failed to parse:', rawResponse);
+        parsedAnalysis = {
+          summary: 'AI analysis completed but response format needs improvement',
+          threat_level: alert.severity || 'Medium',
+          potential_causes: ['Response parsing issue', 'Unexpected AI response format'],
+          mitigation_steps: ['Review alert details manually', 'Check system logs for patterns', 'Consider updating alert thresholds']
+        };
       }
-    ];
+      
+      // Use the parsed analysis as the final response
+      aiResponse = JSON.stringify(parsedAnalysis);
+
+      // Update alert with AI analysis
+      updatedChat = [
+        ...(alert.ai_analysis_chat || []),
+        {
+          role: 'user',
+          content: userPrompt
+        },
+        {
+          role: 'ai',
+          content: aiResponse
+        }
+      ];
+    }
 
     const { error: updateError } = await supabase
       .from('security_alerts')
       .update({ 
-        ai_analysis_chat: aiAnalysisChat,
-        status: 'resolved'
+        ai_analysis_chat: updatedChat,
+        status: userQuery ? alert.status : 'resolved' // Don't change status for follow-up questions
       })
       .eq('id', alertId);
 
@@ -199,8 +275,9 @@ Analyze this SPECIFIC alert type and provide tailored responses. Respond with JS
 
   } catch (error) {
     console.error('Error in ai-analysis function:', error);
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMsg }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
