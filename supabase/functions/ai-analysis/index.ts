@@ -128,7 +128,7 @@ serve(async (req) => {
       }
 
       // Create detailed system message with original analysis context
-      let systemMessage = `You are a friendly cybersecurity advisor helping someone understand their security alert.
+      let systemMessage = `You are a friendly cybersecurity advisor. Answer questions about this specific security alert in simple, conversational language.
 
 ALERT DETAILS:
 - Type: ${alert.alert_type}
@@ -140,22 +140,26 @@ ALERT DETAILS:
       if (originalAnalysis) {
         systemMessage += `
 
-PREVIOUS ANALYSIS:
-- Summary: ${originalAnalysis.summary}
-- Threat Level: ${originalAnalysis.threat_level}
-- Potential Causes: ${originalAnalysis.potential_causes?.join(', ')}
-- Mitigation Steps: ${originalAnalysis.mitigation_steps?.join(', ')}`;
+ANALYSIS SUMMARY: ${originalAnalysis.summary}
+
+MAIN CAUSES: ${originalAnalysis.potential_causes?.slice(0, 2).join(' OR ')}
+
+KEY ACTIONS: ${originalAnalysis.mitigation_steps?.slice(0, 2).join(' THEN ')}`;
       }
 
       systemMessage += `
 
-CONVERSATION GUIDELINES:
-1. Answer questions about THIS specific alert using the analysis above
-2. When asked about "potential causes" - explain the specific causes listed above in simple terms
-3. When asked "what is going on" - explain the summary in everyday language
-4. Reference the device "${deviceContext?.name || 'your device'}" when relevant  
-5. Use simple, non-technical language
-6. Be helpful and specific to this alert`;
+RESPONSE EXAMPLES:
+- "what is going on" → "Your ${deviceContext?.name || 'smart light'} is sending too many security alerts, which could mean it's been compromised or misconfigured."
+- "potential causes" → "Most likely your device was hacked or there's a setting problem causing false alarms."
+- "what should I do" → "First, disconnect your ${deviceContext?.name || 'device'} from the network, then check its settings."
+
+CONVERSATION RULES:
+1. ALWAYS respond in plain text, NEVER JSON
+2. Keep answers under 40 words
+3. Use simple everyday language
+4. Give different specific answers for different questions  
+5. Be reassuring but honest about risks`;
 
       // Build conversation history (excluding the original analysis to avoid duplication)
       const conversationHistory = (alert.ai_analysis_chat || [])
@@ -181,6 +185,11 @@ CONVERSATION GUIDELINES:
       console.log('Lovable AI conversational response:', JSON.stringify(aiData, null, 2));
 
       aiResponse = aiData.choices?.[0]?.message?.content || 'Unable to generate response at this time.';
+      
+      // Ensure we don't return JSON in conversational mode
+      if (aiResponse.includes('{') && aiResponse.includes('summary')) {
+        aiResponse = "I'm having trouble with my response format. Could you please rephrase your question?";
+      }
 
       // Update chat history with new Q&A
       updatedChat = [
