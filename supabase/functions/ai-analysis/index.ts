@@ -55,7 +55,7 @@ serve(async (req) => {
     }
 
     // Helper function to call Lovable AI Gateway with exponential backoff
-    async function callLovableAI(messages: any[], maxRetries = 3) {
+    async function callLovableAI(messages: any[], isConversational = false, maxRetries = 3) {
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
           const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -67,7 +67,7 @@ serve(async (req) => {
             body: JSON.stringify({
               model: 'google/gemini-2.5-flash',
               messages,
-              temperature: 0.1,
+              temperature: isConversational ? 0.7 : 0.1, // Higher temperature for conversational responses
               max_tokens: 1000
             })
           });
@@ -122,19 +122,32 @@ serve(async (req) => {
         content: userQuery
       });
 
-      // Add system message for conversational guidance
+      // Create detailed system message for conversational guidance
+      const systemMessage = `You are a friendly cybersecurity advisor helping someone understand their security alert. 
+
+ALERT CONTEXT:
+- Alert Type: ${alert.alert_type}
+- Description: ${alert.description}
+- Severity: ${alert.severity}
+- Device: ${deviceContext?.name || 'Unknown device'} ${deviceContext?.clientId ? `(ID: ${deviceContext.clientId})` : ''}
+- Status: ${deviceContext?.status || 'Unknown'}
+
+CONVERSATION RULES:
+1. Answer questions about THIS SPECIFIC alert in simple, non-technical language
+2. Reference the actual device name "${deviceContext?.name || 'your device'}" when relevant
+3. If asked "what is going on" or similar, explain what this specific alert means for their device
+4. Keep responses helpful but focused on this security alert
+5. Use everyday language - avoid technical jargon
+6. Be reassuring but honest about any risks
+
+Answer the user's question about this security alert.`;
+
       const messages = [
-        {
-          role: 'system',
-          content: `You are a friendly cybersecurity advisor. Answer questions about this security alert in simple terms. 
-          Focus only on the alert: ${alert.alert_type} - ${alert.description}. 
-          Device: ${deviceContext?.name || 'Unknown'}. 
-          Keep responses conversational and helpful.`
-        },
+        { role: 'system', content: systemMessage },
         ...conversationHistory
       ];
 
-      const aiData = await callLovableAI(messages);
+      const aiData = await callLovableAI(messages, true); // true for conversational mode
       console.log('Lovable AI conversational response:', JSON.stringify(aiData, null, 2));
 
       aiResponse = aiData.choices?.[0]?.message?.content || 'Unable to generate response at this time.';
@@ -172,7 +185,7 @@ Respond with valid JSON only.`;
         { role: 'user', content: 'Analyze this security alert.' }
       ];
 
-      const aiData = await callLovableAI(messages);
+      const aiData = await callLovableAI(messages, false); // false for structured analysis
       console.log('Lovable AI response:', JSON.stringify(aiData, null, 2));
 
       // Extract and parse the AI response
