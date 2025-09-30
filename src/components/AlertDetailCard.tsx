@@ -115,10 +115,11 @@ const AlertDetailCard = ({
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* Alert Header and Summary Card */}
+    <div className="w-full mx-auto">
+      {/* Single Combined Card for Alert, AI Analysis, and Chat */}
       <Card className="shadow-lg rounded-xl border-2 border-border/50">
-        <CardHeader className="pb-4">
+        {/* Alert Header and Summary Section */}
+        <CardHeader className="pb-4 border-b border-border/30">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className={cn(
@@ -143,7 +144,7 @@ const AlertDetailCard = ({
           </div>
         </CardHeader>
         
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6 p-6">
           {/* Device Info */}
           {device && (
             <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
@@ -200,7 +201,7 @@ const AlertDetailCard = ({
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-2 pt-2 border-t">
+          <div className="flex flex-wrap gap-2 pt-2 border-b border-border/30 pb-4">
             <Button
               onClick={onToggleAnalysis}
               variant="default"
@@ -248,120 +249,118 @@ const AlertDetailCard = ({
               </Button>
             )}
           </div>
+
+          {/* AI Analysis Content - Tabbed Structure */}
+          {isAnalysisVisible && analysisData && (
+            <div className="border-t border-border/30 pt-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  AI Security Analysis
+                </h3>
+              </div>
+              <Tabs defaultValue="causes" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="causes" className="text-sm">Potential Causes</TabsTrigger>
+                  <TabsTrigger value="actions" className="text-sm">Action Plan</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="causes" className="mt-4">
+                  {analysisData.potential_causes && (
+                    <div className="space-y-2">
+                      {analysisData.potential_causes.map((cause: string, idx: number) => (
+                        <div key={idx} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                          <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
+                          <p className="text-sm text-foreground">{cause}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="actions" className="mt-4">
+                  {analysisData.mitigation_steps && (
+                    <div className="space-y-2">
+                      {analysisData.mitigation_steps.map((step: string, idx: number) => (
+                        <div key={idx} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                          <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+                            {idx + 1}
+                          </div>
+                          <p className="text-sm text-foreground">{step}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+
+          {/* Continue Discussion Chat Interface */}
+          {isAnalysisVisible && (
+            <div className="border-t border-border/30 pt-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-primary" />
+                  Continue Discussion
+                </h3>
+              </div>
+              <div className="space-y-4">
+                {/* Chat Messages */}
+                {chatMessages.length > 0 && (
+                  <ScrollArea className="h-64 w-full border rounded-lg p-3">
+                    <div className="space-y-3">
+                      {chatMessages.map((message, idx) => (
+                        <div
+                          key={idx}
+                          className={cn(
+                            "flex",
+                            message.role === 'user' ? 'justify-end' : 'justify-start'
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "max-w-[80%] px-3 py-2 rounded-lg text-sm",
+                              message.role === 'user'
+                                ? 'bg-primary text-primary-foreground ml-4'
+                                : 'bg-muted text-foreground mr-4'
+                            )}
+                          >
+                            <p>{message.content}</p>
+                            <p className="text-xs opacity-70 mt-1">
+                              {format(message.timestamp, 'HH:mm')}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                )}
+                
+                {/* Chat Input */}
+                <div className="flex gap-2">
+                  <Input
+                    value={chatInput}
+                    onChange={(e) => onChatInputChange(e.target.value)}
+                    onKeyPress={onKeyPress}
+                    placeholder="Ask about this alert..."
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={onSendMessage}
+                    disabled={!chatInput.trim()}
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Send className="h-4 w-4" />
+                    Send
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
-
-      {/* AI Analysis Content - Tabbed Structure */}
-      {isAnalysisVisible && analysisData && (
-        <Card className="shadow-lg rounded-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-primary" />
-              AI Security Analysis
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="causes" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="causes" className="text-sm">Potential Causes</TabsTrigger>
-                <TabsTrigger value="actions" className="text-sm">Action Plan</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="causes" className="mt-4">
-                {analysisData.potential_causes && (
-                  <div className="space-y-2">
-                    {analysisData.potential_causes.map((cause: string, idx: number) => (
-                      <div key={idx} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                        <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
-                        <p className="text-sm text-foreground">{cause}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="actions" className="mt-4">
-                {analysisData.mitigation_steps && (
-                  <div className="space-y-2">
-                    {analysisData.mitigation_steps.map((step: string, idx: number) => (
-                      <div key={idx} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                        <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
-                          {idx + 1}
-                        </div>
-                        <p className="text-sm text-foreground">{step}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Continue Discussion Chat Interface */}
-      {isAnalysisVisible && (
-        <Card className="shadow-lg rounded-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-primary" />
-              Continue Discussion
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Chat Messages */}
-            {chatMessages.length > 0 && (
-              <ScrollArea className="h-64 w-full border rounded-lg p-3">
-                <div className="space-y-3">
-                  {chatMessages.map((message, idx) => (
-                    <div
-                      key={idx}
-                      className={cn(
-                        "flex",
-                        message.role === 'user' ? 'justify-end' : 'justify-start'
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "max-w-[80%] px-3 py-2 rounded-lg text-sm",
-                          message.role === 'user'
-                            ? 'bg-primary text-primary-foreground ml-4'
-                            : 'bg-muted text-foreground mr-4'
-                        )}
-                      >
-                        <p>{message.content}</p>
-                        <p className="text-xs opacity-70 mt-1">
-                          {format(message.timestamp, 'HH:mm')}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
-            
-            {/* Chat Input */}
-            <div className="flex gap-2">
-              <Input
-                value={chatInput}
-                onChange={(e) => onChatInputChange(e.target.value)}
-                onKeyPress={onKeyPress}
-                placeholder="Ask about this alert..."
-                className="flex-1"
-              />
-              <Button
-                onClick={onSendMessage}
-                disabled={!chatInput.trim()}
-                size="sm"
-                className="gap-2"
-              >
-                <Send className="h-4 w-4" />
-                Send
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
