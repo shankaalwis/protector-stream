@@ -53,11 +53,11 @@ serve(async (req) => {
 
     const get = (obj: any, path: string) => path.split('.').reduce((o, k) => (o && typeof o === 'object') ? o[k] : undefined, obj);
 
-    const client_id = primary?.client_id ?? primary?.clientId ?? get(primary, 'device.client_id') ?? payload?.client_id ?? incoming?.client_id;
+    const client_id = primary?.Target_Username ?? primary?.client_id ?? primary?.clientId ?? get(primary, 'device.client_id') ?? payload?.client_id ?? incoming?.client_id;
     const ip_address = primary?.ip_address ?? primary?.ip ?? get(primary, 'device.ip_address') ?? payload?.ip_address ?? incoming?.ip_address;
     const alert_type = payload?.alert_type ?? primary?.alert_type ?? incoming?.alert_type ?? payload?.search_name ?? 'Unknown Threat';
-    const description = payload?.description ?? primary?.description ?? incoming?.description ?? 'Security alert detected by Splunk';
-    const severity = (payload?.severity ?? primary?.severity ?? incoming?.severity ?? 'medium') as string;
+    const description = payload?.description ?? primary?.description ?? incoming?.description ?? `Security alert detected - ${primary?.failed_attempts || ''} failed attempts from ${primary?.Attacker_Client || 'unknown source'}`.trim();
+    const severity = (payload?.severity ?? primary?.severity ?? incoming?.severity ?? 'high') as string;
 
     console.log('Received Splunk alert (normalized):', { contentType, incoming, normalized: { client_id, ip_address, alert_type, description, severity } });
 
