@@ -110,37 +110,65 @@ serve(async (req) => {
     if (userQuery) {
       console.log('Conversational mode: processing user query');
       
-      // Build conversation history from ai_analysis_chat
-      const conversationHistory = (alert.ai_analysis_chat || []).map((msg: any) => ({
-        role: msg.role === 'ai' ? 'assistant' : msg.role,
-        content: msg.content
-      }));
+      // Get the original AI analysis from the chat history
+      let originalAnalysis = null;
+      const analysisMessages = alert.ai_analysis_chat || [];
+      
+      // Find the AI analysis response (usually the last AI message)
+      for (let i = analysisMessages.length - 1; i >= 0; i--) {
+        if (analysisMessages[i].role === 'ai' && analysisMessages[i].content.includes('summary')) {
+          try {
+            originalAnalysis = JSON.parse(analysisMessages[i].content);
+            break;
+          } catch (e) {
+            // Continue looking if this isn't valid JSON
+          }
+        }
+      }
+
+      // Create detailed system message with original analysis context
+      let systemMessage = `You are a friendly cybersecurity advisor helping someone understand their security alert.
+
+ALERT DETAILS:
+- Type: ${alert.alert_type}
+- Description: ${alert.description}  
+- Severity: ${alert.severity}
+- Device: ${deviceContext?.name || 'Unknown device'} ${deviceContext?.clientId ? `(ID: ${deviceContext.clientId})` : ''}
+- Timestamp: ${alert.timestamp}`;
+
+      if (originalAnalysis) {
+        systemMessage += `
+
+PREVIOUS ANALYSIS:
+- Summary: ${originalAnalysis.summary}
+- Threat Level: ${originalAnalysis.threat_level}
+- Potential Causes: ${originalAnalysis.potential_causes?.join(', ')}
+- Mitigation Steps: ${originalAnalysis.mitigation_steps?.join(', ')}`;
+      }
+
+      systemMessage += `
+
+CONVERSATION GUIDELINES:
+1. Answer questions about THIS specific alert using the analysis above
+2. When asked about "potential causes" - explain the specific causes listed above in simple terms
+3. When asked "what is going on" - explain the summary in everyday language
+4. Reference the device "${deviceContext?.name || 'your device'}" when relevant  
+5. Use simple, non-technical language
+6. Be helpful and specific to this alert`;
+
+      // Build conversation history (excluding the original analysis to avoid duplication)
+      const conversationHistory = (alert.ai_analysis_chat || [])
+        .filter((msg: any) => !msg.content.includes('summary') || msg.role === 'user')
+        .map((msg: any) => ({
+          role: msg.role === 'ai' ? 'assistant' : msg.role,
+          content: msg.content
+        }));
 
       // Add the new user query
       conversationHistory.push({
         role: 'user',
         content: userQuery
       });
-
-      // Create detailed system message for conversational guidance
-      const systemMessage = `You are a friendly cybersecurity advisor helping someone understand their security alert. 
-
-ALERT CONTEXT:
-- Alert Type: ${alert.alert_type}
-- Description: ${alert.description}
-- Severity: ${alert.severity}
-- Device: ${deviceContext?.name || 'Unknown device'} ${deviceContext?.clientId ? `(ID: ${deviceContext.clientId})` : ''}
-- Status: ${deviceContext?.status || 'Unknown'}
-
-CONVERSATION RULES:
-1. Answer questions about THIS SPECIFIC alert in simple, non-technical language
-2. Reference the actual device name "${deviceContext?.name || 'your device'}" when relevant
-3. If asked "what is going on" or similar, explain what this specific alert means for their device
-4. Keep responses helpful but focused on this security alert
-5. Use everyday language - avoid technical jargon
-6. Be reassuring but honest about any risks
-
-Answer the user's question about this security alert.`;
 
       const messages = [
         { role: 'system', content: systemMessage },
