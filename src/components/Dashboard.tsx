@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import AnomalyChart from './AnomalyChart';
+import AlertDetailCard from './AlertDetailCard';
 import { 
   Shield, 
   AlertTriangle, 
@@ -646,304 +647,29 @@ export const Dashboard = () => {
         </div>
       </div>
       
-      <div className="grid gap-6">
+      <div className="space-y-6">
         {alerts.filter(alert => alert.status !== 'closed').map((alert) => {
           const alertDevice = devices.find(d => d.id === alert.device_id);
           console.log('Rendering alert:', alert.id, 'Chat visible:', alertChatVisible[alert.id]);
           return (
-            <Card key={alert.id} className="border-2 border-[hsl(var(--dark-sky-blue))]/40 shadow-2xl hover:shadow-[0_25px_50px_-12px_hsl(var(--dark-sky-blue))]/25 transition-all duration-500 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/15 via-background to-[hsl(var(--dark-sky-blue-light))]/5 hover:from-[hsl(var(--dark-sky-blue-subtle))]/25 animate-fade-in hover:scale-[1.01] hover:border-[hsl(var(--dark-sky-blue-light))]/60">
-              <CardHeader className="border-b border-[hsl(var(--dark-sky-blue))]/30 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/20 via-[hsl(var(--dark-sky-blue-light))]/5 to-transparent">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Badge className={`${getSeverityColor(alert.severity)} border animate-pulse`}>
-                      {alert.severity.toUpperCase()}
-                    </Badge>
-                    <CardTitle className="text-xl font-semibold text-[hsl(var(--dark-sky-blue))] group-hover:text-[hsl(var(--dark-sky-blue-light))] transition-colors">{alert.alert_type}</CardTitle>
-                  </div>
-                  <span className="text-sm font-medium text-muted-foreground border border-[hsl(var(--dark-sky-blue))]/40 px-3 py-1 rounded-lg bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/30 to-[hsl(var(--dark-sky-blue-light))]/20">
-                    {new Date(alert.timestamp).toLocaleString()}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                 <p className="mb-6 text-foreground font-medium text-base">{cleanAlertDescription(alert.description)}</p>
-                
-                 {/* Enhanced Device Information with Dark Sky Blue */}
-                 {alertDevice && (
-                   <div className="mb-6 p-4 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/25 to-[hsl(var(--dark-sky-blue-light))]/10 border border-[hsl(var(--dark-sky-blue))]/50 rounded-xl shadow-lg animate-fade-in">
-                     <h4 className="font-semibold mb-3 flex items-center text-[hsl(var(--dark-sky-blue))] text-base">
-                       <Monitor className="w-5 h-5 mr-2 text-[hsl(var(--dark-sky-blue))] animate-pulse" />
-                       <span className="bg-gradient-to-r from-[hsl(var(--dark-sky-blue))] to-[hsl(var(--dark-sky-blue-light))] bg-clip-text text-transparent">Associated Device</span>
-                     </h4>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-semibold text-foreground">Name:</span> 
-                        <span className="text-foreground/80">{alertDevice.device_name}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-semibold text-foreground">IP:</span>
-                        <span className="text-foreground/80 font-mono">{alertDevice.ip_address}</span>
-                      </div>
-                      {alertDevice.client_id && (
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold text-foreground">Client ID:</span>
-                          <span className="text-foreground/80 font-mono">{alertDevice.client_id}</span>
-                        </div>
-                      )}
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold text-foreground">Status:</span>
-                          <div className="flex items-center space-x-2">
-                            {getStatusIcon(alertDevice.status)}
-                            <span className={
-                              alertDevice.status === 'safe' ? 'status-safe' :
-                              alertDevice.status === 'threat' ? 'status-threat' :
-                              'status-blocked'
-                            }>
-                              {alertDevice.status.toUpperCase()}
-                            </span>
-                          </div>
-                        </div>
-                    </div>
-                  </div>
-                )}
-                
-                 <div className="flex space-x-3 mt-6 pb-4 border-b border-[hsl(var(--dark-sky-blue))]/30">
-                   <Button 
-                     className="btn-primary bg-gradient-to-r from-[hsl(var(--dark-sky-blue))] to-[hsl(var(--dark-sky-blue-light))] hover:from-[hsl(var(--dark-sky-blue-dark))] hover:to-[hsl(var(--dark-sky-blue))] border border-[hsl(var(--dark-sky-blue))]/40 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                     size="sm" 
-                     onClick={() => getAIAnalysis(alert.id)}
-                     disabled={alert.status === 'closed'}
-                   >
-                     <BarChart3 className="w-4 h-4 mr-2" />
-                     {alertChatVisible[alert.id] ? 'Hide Analysis' : 'AI Analysis'}
-                   </Button>
-                  <Button 
-                    className="btn-success border border-success/20"
-                    size="sm"
-                    onClick={() => closeAlert(alert.id)}
-                    disabled={alert.status === 'closed'}
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Resolve Alert
-                  </Button>
-                  {alertDevice && alertDevice.status !== 'blocked' && (
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      className="border border-destructive/20"
-                      onClick={() => updateDeviceStatus(alertDevice.id, 'blocked')}
-                      disabled={alert.status === 'closed'}
-                    >
-                      <Shield className="w-4 h-4 mr-1" />
-                      Block Device
-                    </Button>
-                  )}
-                  {alertDevice && alertDevice.status === 'blocked' && (
-                    <Button 
-                      size="sm" 
-                      variant="secondary"
-                      className="border border-border/40"
-                      onClick={() => updateDeviceStatus(alertDevice.id, 'safe')}
-                    >
-                      <ShieldCheck className="w-4 h-4 mr-1" />
-                      Unblock Device
-                    </Button>
-                  )}
-                </div>
-                {alert.ai_analysis_chat.length > 0 && alertChatVisible[alert.id] && (() => {
-                  // Find the AI's response (not the user's prompt)
-                  const aiResponse = alert.ai_analysis_chat.find(chat => chat.role === 'ai')?.content;
-                  if (!aiResponse) return null;
-                  
-                  let analysisData;
-                  try {
-                    analysisData = JSON.parse(aiResponse);
-                  } catch {
-                    return (
-                      <div className="mt-6 p-6 bg-background border-2 border-primary/20 rounded-xl shadow-professional">
-                        <h4 className="font-bold mb-3 text-xl text-foreground">AI Security Analysis</h4>
-                        <p className="text-base text-foreground font-medium">{aiResponse}</p>
-                      </div>
-                    );
-                  }
-                  
-                  const getThreatLevelColor = (level: string) => {
-                    switch (level?.toLowerCase()) {
-                      case 'critical': return 'bg-destructive text-destructive-foreground border-destructive/30';
-                      case 'high': return 'bg-warning text-warning-foreground border-warning/30';
-                      case 'medium': return 'bg-warning/70 text-warning-foreground border-warning/30';
-                      case 'low': return 'bg-success text-success-foreground border-success/30';
-                      default: return 'bg-muted text-foreground border-border/30';
-                    }
-                  };
-
-                  const currentExpanded = expandedSections[alert.id] || { causes: false, actions: false };
-                  
-                  const toggleSection = (section: 'causes' | 'actions') => {
-                    setExpandedSections(prev => ({
-                      ...prev,
-                      [alert.id]: {
-                        ...currentExpanded,
-                        [section]: !currentExpanded[section]
-                      }
-                    }));
-                  };
-                  
-                  return (
-                     <div className="mt-4 space-y-3">
-                       {/* AI Analysis Response */}
-                       <div className="p-5 bg-gradient-to-r from-[hsl(var(--powder-blue))]/10 to-transparent border-2 border-[hsl(var(--royal-blue))]/30 rounded-xl shadow-professional-lg space-y-4">
-                         <div className="flex items-center justify-between border-b border-[hsl(var(--sky-blue))]/20 pb-3">
-                           <h4 className="font-bold text-[hsl(var(--midnight-blue))] text-xl flex items-center gap-3">
-                             <BarChart3 className="w-5 h-5 text-[hsl(var(--royal-blue))]" />
-                             AI Security Analysis
-                           </h4>
-                           <Badge className={`${getThreatLevelColor(analysisData.threat_level)} font-semibold text-sm px-3 py-1 border-2`}>
-                             {analysisData.threat_level || 'Unknown'}
-                           </Badge>
-                         </div>
-                         
-                         <div className="space-y-4">
-                           {/* Always show summary */}
-                           <div className="p-3 bg-[hsl(var(--powder-blue))]/15 border border-[hsl(var(--sky-blue))]/30 rounded-lg">
-                             <h5 className="font-bold text-[hsl(var(--midnight-blue))] mb-2 text-base flex items-center gap-2">
-                               <div className="w-2 h-2 bg-[hsl(var(--royal-blue))] rounded-full"></div>
-                               Summary
-                             </h5>
-                             <p className="text-sm text-foreground font-medium leading-snug">{analysisData.summary}</p>
-                           </div>
-
-                           {/* Expandable sections with better styling */}
-                           <div className="space-y-3">
-                             {analysisData.potential_causes && analysisData.potential_causes.length > 0 && (
-                               <div className="border border-[hsl(var(--steel-blue))]/30 rounded-lg overflow-hidden bg-gradient-to-r from-[hsl(var(--powder-blue))]/5 to-transparent">
-                                 <Button
-                                   variant="ghost"
-                                   size="sm"
-                                   onClick={() => toggleSection('causes')}
-                                   className="w-full justify-start gap-2 p-3 h-auto border-b border-[hsl(var(--sky-blue))]/20 hover:bg-[hsl(var(--powder-blue))]/20"
-                                 >
-                                   {currentExpanded.causes ? (
-                                     <ChevronDown className="w-4 h-4 text-[hsl(var(--royal-blue))]" />
-                                   ) : (
-                                     <ChevronRight className="w-4 h-4 text-[hsl(var(--royal-blue))]" />
-                                   )}
-                                   <span className="font-semibold text-[hsl(var(--midnight-blue))] text-base">Potential Causes</span>
-                                 </Button>
-                                 
-                                 {currentExpanded.causes && (
-                                   <div className="p-3 bg-[hsl(var(--powder-blue))]/10">
-                                     <ul className="text-sm text-foreground font-medium space-y-1">
-                                       {analysisData.potential_causes.map((cause: string, idx: number) => (
-                                         <li key={idx} className="flex items-start gap-2 p-2 bg-background border border-[hsl(var(--sky-blue))]/20 rounded-lg">
-                                           <span className="text-[hsl(var(--royal-blue))] font-bold text-base mt-0.5">•</span>
-                                           <span className="leading-tight">{cause}</span>
-                                         </li>
-                                       ))}
-                                     </ul>
-                                   </div>
-                                 )}
-                               </div>
-                             )}
-                             
-                             {analysisData.mitigation_steps && analysisData.mitigation_steps.length > 0 && (
-                               <div className="border border-[hsl(var(--steel-blue))]/30 rounded-lg overflow-hidden bg-gradient-to-r from-[hsl(var(--powder-blue))]/5 to-transparent">
-                                 <Button
-                                   variant="ghost"
-                                   size="sm"
-                                   onClick={() => toggleSection('actions')}
-                                   className="w-full justify-start gap-2 p-3 h-auto border-b border-[hsl(var(--sky-blue))]/20 hover:bg-[hsl(var(--powder-blue))]/20"
-                                 >
-                                   {currentExpanded.actions ? (
-                                     <ChevronDown className="w-4 h-4 text-[hsl(var(--royal-blue))]" />
-                                   ) : (
-                                     <ChevronRight className="w-4 h-4 text-[hsl(var(--royal-blue))]" />
-                                   )}
-                                   <span className="font-semibold text-[hsl(var(--midnight-blue))] text-base">Recommended Actions</span>
-                                 </Button>
-                                 
-                                 {currentExpanded.actions && (
-                                   <div className="p-3 bg-[hsl(var(--powder-blue))]/10">
-                                     <ol className="text-sm text-foreground font-medium space-y-1">
-                                       {analysisData.mitigation_steps.map((step: string, idx: number) => (
-                                         <li key={idx} className="flex items-start gap-3 p-2 bg-background border border-[hsl(var(--sky-blue))]/20 rounded-lg">
-                                           <span className="flex-shrink-0 w-6 h-6 bg-[hsl(var(--royal-blue))] text-white rounded-full flex items-center justify-center text-xs font-bold border-2 border-[hsl(var(--royal-blue))]/30">
-                                             {idx + 1}
-                                           </span>
-                                           <span className="pt-0.5 leading-tight">{step}</span>
-                                         </li>
-                                       ))}
-                                     </ol>
-                                   </div>
-                                 )}
-                               </div>
-                             )}
-                           </div>
-                        </div>
-                      </div>
-
-                       {/* Alert-specific Chat Interface - appears AFTER AI analysis */}
-                       <div className="p-6 bg-gradient-to-r from-[hsl(var(--powder-blue))]/15 to-transparent border-2 border-[hsl(var(--sky-blue))]/30 rounded-xl shadow-professional space-y-4">
-                         <h5 className="font-bold text-[hsl(var(--midnight-blue))] text-lg flex items-center gap-3 border-b border-[hsl(var(--sky-blue))]/20 pb-3">
-                           <MessageSquare className="w-5 h-5 text-[hsl(var(--royal-blue))]" />
-                           Continue Discussion
-                         </h5>
-                        
-                        {/* Chat Messages */}
-                        {alertChatMessages[alert.id] && alertChatMessages[alert.id].length > 0 && (
-                          <div className="max-h-48 overflow-y-auto space-y-3 p-4 bg-background border border-border/30 rounded-lg">
-                            {alertChatMessages[alert.id].map((message, idx) => (
-                              <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-xs px-4 py-3 rounded-xl text-sm border-2 ${
-                                  message.role === 'user' 
-                                    ? 'bg-primary text-primary-foreground border-primary/30' 
-                                    : 'bg-muted text-foreground border-border/40'
-                                }`}>
-                                  <div className="flex items-start gap-2">
-                                    {message.role === 'assistant' && (
-                                      <MessageSquare className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary" />
-                                    )}
-                                    <div>
-                                      <p className="font-medium">{message.content}</p>
-                                      <p className="text-xs opacity-70 mt-1 font-medium">
-                                        {format(message.timestamp, 'HH:mm')}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        
-                        {/* Chat Input */}
-                        <div className="flex items-center space-x-3 p-3 bg-background border border-border/30 rounded-lg">
-                          <Input
-                            value={alertChatInputs[alert.id] || ''}
-                            onChange={(e) => setAlertChatInputs(prev => ({
-                              ...prev,
-                              [alert.id]: e.target.value
-                            }))}
-                            onKeyPress={(e) => handleAlertKeyPress(e, alert.id)}
-                            placeholder="Ask about this specific alert..."
-                            className="flex-1 border-border/30 focus:border-primary"
-                          />
-                          <Button
-                            onClick={() => sendAlertMessage(alert.id)}
-                            disabled={!alertChatInputs[alert.id]?.trim()}
-                            size="sm"
-                            className="flex items-center gap-2 border border-primary/20"
-                          >
-                            <Send className="w-4 h-4" />
-                            Send
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </CardContent>
-            </Card>
+            <AlertDetailCard
+              key={alert.id}
+              alert={alert}
+              device={alertDevice}
+              chatMessages={alertChatMessages[alert.id] || []}
+              chatInput={alertChatInputs[alert.id] || ''}
+              onChatInputChange={(value) => setAlertChatInputs(prev => ({
+                ...prev,
+                [alert.id]: value
+              }))}
+              onSendMessage={() => sendAlertMessage(alert.id)}
+              onKeyPress={(e) => handleAlertKeyPress(e, alert.id)}
+              onCloseAlert={() => closeAlert(alert.id)}
+              onBlockDevice={() => alertDevice && updateDeviceStatus(alertDevice.id, 'blocked')}
+              onUnblockDevice={() => alertDevice && updateDeviceStatus(alertDevice.id, 'safe')}
+              isAnalysisVisible={alertChatVisible[alert.id] || false}
+              onToggleAnalysis={() => getAIAnalysis(alert.id)}
+            />
           );
         })}
       </div>
