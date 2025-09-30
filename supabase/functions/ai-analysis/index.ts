@@ -257,7 +257,7 @@ Analyze this SPECIFIC alert type and provide tailored responses. Respond with JS
       .from('security_alerts')
       .update({ 
         ai_analysis_chat: updatedChat,
-        status: userQuery ? alert.status : 'resolved' // Don't change status for follow-up questions
+        status: userQuery ? alert.status : (alert.status === 'unresolved' ? 'resolved' : alert.status) // Only change unresolved to resolved
       })
       .eq('id', alertId);
 
