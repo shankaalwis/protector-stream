@@ -150,16 +150,17 @@ KEY ACTIONS: ${originalAnalysis.mitigation_steps?.slice(0, 2).join(' THEN ')}`;
       systemMessage += `
 
 RESPONSE EXAMPLES:
-- "what is going on" → "Your ${deviceContext?.name || 'smart light'} is sending too many security alerts, which could mean it's been compromised or misconfigured."
-- "potential causes" → "Most likely your device was hacked or there's a setting problem causing false alarms."
-- "what should I do" → "First, disconnect your ${deviceContext?.name || 'device'} from the network, then check its settings."
+- "what is going on" → "Your ${deviceContext?.name || 'device'} is acting strangely and sending too many security alerts. This could mean it's been hacked or has a configuration problem."
+- "potential causes" → "Most likely your device was compromised by hackers or has incorrect settings causing false alarms."
+- "what should I do" → "Disconnect your ${deviceContext?.name || 'device'} from the internet, restart it, and check if the alerts stop."
 
 CONVERSATION RULES:
 1. ALWAYS respond in plain text, NEVER JSON
 2. Keep answers under 40 words
-3. Use simple everyday language
-4. Give different specific answers for different questions  
-5. Be reassuring but honest about risks`;
+3. Use simple everyday language that anyone can understand
+4. Avoid technical terms like "Splunk", "logs", "monitoring tools"
+5. Give actionable steps regular users can actually do
+6. Be reassuring but honest about risks`;
 
       // Build conversation history (excluding the original analysis to avoid duplication)
       const conversationHistory = (alert.ai_analysis_chat || [])
@@ -208,7 +209,7 @@ CONVERSATION RULES:
   "summary": "Brief explanation in simple terms of what happened",
   "threat_level": "Low/Medium/High/Critical", 
   "potential_causes": ["List of 2-3 possible causes"],
-  "mitigation_steps": ["List of 2-3 actionable steps"]
+  "mitigation_steps": ["List of 2-3 actionable steps that a regular user can take"]
 }
 
 Alert Details:
@@ -216,6 +217,8 @@ Alert Details:
 - Description: ${alert.description}
 - Severity: ${alert.severity}${deviceContext ? `
 - Device: ${deviceContext.name} (${deviceContext.clientId})` : ''}
+
+IMPORTANT: Avoid technical jargon and tool names like "Splunk" or "logs". Focus on simple actions users can actually do like disconnecting devices, checking settings, contacting support, or restarting devices. Make everything understandable for non-technical users.
 
 Respond with valid JSON only.`;
 
