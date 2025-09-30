@@ -48,89 +48,40 @@ serve(async (req) => {
       status: device.status
     } : null;
 
-    // Context-aware prompt that analyzes specific alert types
-    const userPrompt = `You are a cybersecurity expert explaining security issues to non-technical business users. Analyze this SPECIFIC security alert and provide a tailored, context-aware explanation based on the exact alert type and details provided.
-
-CRITICAL: Respond ONLY with valid JSON. Do not include markdown code blocks, explanations, or any text outside the JSON object.
-
-Required JSON format:
-{
-  "summary": "Specific explanation of what happened based on the alert type and details - not generic",
-  "threat_level": "One word: Low, Medium, High, or Critical", 
-  "potential_causes": ["List of specific causes related to this exact alert type"],
-  "mitigation_steps": ["List of specific actionable steps for this exact alert type and situation"]
-}
-
-CONTEXT-AWARE ANALYSIS REQUIREMENTS:
-- Your analysis must be SPECIFIC to the alert type provided
-- For "HIGH VOLUME ALERT": Explain that someone is sending unusually large amounts of traffic/requests to the specific topic/system mentioned
-- For device-specific alerts: Reference the specific device or system mentioned
-- For topic-specific alerts (e.g., smart_home/living_room/light_control): Explain that traffic is targeting that specific control system
-- Make the summary directly address what this specific alert means for the exact device and topic involved
-- Potential causes should be specific to the alert type and topic (e.g., for high volume on light control: "Someone trying to repeatedly turn lights on/off", "Malicious attempts to control your smart lights", "Automated attacks targeting your light switches")
-- Mitigation steps should be specific to the alert type and affected system (e.g., for light control: "Check your smart light bulbs for unusual behavior", "Temporarily disconnect the affected light from the network", "Review who has access to control your lights")
-
-LANGUAGE GUIDELINES:
-- Use simple, everyday language - avoid technical jargon
-- Explain things as if talking to someone who doesn't know about cybersecurity
-- Use plain English descriptions (e.g., "Someone flooding your light control system with commands" instead of "DDoS attack on IoT endpoint")
-- Provide clear, actionable steps that anyone can understand
-- When mentioning topics like "smart_home/living_room/light_control", explain it as "your living room light control system"
-
-Security Alert Details to Analyze:
-- Alert Type: ${alert.alert_type}
-- Description: ${alert.description}
-- Severity: ${alert.severity}
-- Timestamp: ${alert.timestamp}${deviceContext ? `
-- Device Name: ${deviceContext.name}
-- Client ID: ${deviceContext.clientId}
-- Device IP Address: ${deviceContext.ipAddress}
-- Device Status: ${deviceContext.status}
-
-DEVICE-SPECIFIC REQUIREMENTS:
-- Reference the specific device "${deviceContext.name}" (Client ID: ${deviceContext.clientId}) in your analysis
-- Make your summary explain what's happening to this specific device
-- Tailor mitigation steps to actions that can be taken for this particular device
-- Use the device name and type in your explanations to make it personal and actionable` : ''}
-
-Analyze this SPECIFIC alert type and provide tailored responses. Respond with JSON only:`;
-
-    // Get Gemini API key from environment
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY not found in environment variables');
+    // Get Lovable API key from environment
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    if (!lovableApiKey) {
+      throw new Error('LOVABLE_API_KEY not found in environment variables');
     }
 
-    // Helper function to call Gemini API with exponential backoff
-    async function callGeminiApi(contents: any[], systemInstruction?: any, maxRetries = 3) {
+    // Helper function to call Lovable AI Gateway with exponential backoff
+    async function callLovableAI(messages: any[], maxRetries = 3) {
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
-          const requestBody: any = {
-            contents,
-            generationConfig: {
-              temperature: userQuery ? 0.7 : 0.1,
-              topK: 1,
-              topP: 0.8,
-              maxOutputTokens: userQuery ? 1024 : 1024, // Increased for structured responses
-            }
-          };
-
-          if (systemInstruction) {
-            requestBody.systemInstruction = systemInstruction;
-          }
-
-          const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${geminiApiKey}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(requestBody)
-            }
-          );
+          const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${lovableApiKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model: 'google/gemini-2.5-flash',
+              messages,
+              temperature: 0.1,
+              max_tokens: 1000
+            })
+          });
 
           if (!response.ok) {
             const errorText = await response.text();
-            console.error(`Gemini API error (attempt ${attempt + 1}/${maxRetries}):`, errorText);
+            console.error(`Lovable AI error (attempt ${attempt + 1}/${maxRetries}):`, errorText);
+            
+            if (response.status === 429) {
+              throw new Error('Rate limits exceeded, please try again later.');
+            }
+            if (response.status === 402) {
+              throw new Error('Payment required, please add funds to your Lovable AI workspace.');
+            }
             
             if (attempt < maxRetries - 1) {
               const delay = Math.pow(2, attempt) * 1000;
@@ -138,7 +89,7 @@ Analyze this SPECIFIC alert type and provide tailored responses. Respond with JS
               await new Promise(resolve => setTimeout(resolve, delay));
               continue;
             }
-            throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+            throw new Error(`Lovable AI error: ${response.status} - ${errorText}`);
           }
 
           return await response.json();
@@ -159,38 +110,34 @@ Analyze this SPECIFIC alert type and provide tailored responses. Respond with JS
     if (userQuery) {
       console.log('Conversational mode: processing user query');
       
-      const conversationalSystemInstruction = {
-        parts: [{
-          text: `You are the "Security Advisor" AI. Your sole purpose is to provide highly focused, non-technical, and supportive explanations regarding the specific security alert currently under discussion.
-
-**YOUR PERSONA & TONE:**
-1.  **Role:** Act as a friendly, patient, and knowledgeable home security expert.
-2.  **Tone:** Be calm and reassuring. Use simple, everyday language (avoid jargon like 'DDoS' unless immediately followed by a simple explanation like 'a type of attack where...')
-3.  **Focus:** **Crucially, your answers MUST be constrained to the specific alert details and device mentioned in the conversation history.** Do not answer questions unrelated to the security alert, the affected device, or general security concepts. If the user asks something irrelevant, gently redirect them: "That's a good question, but let's stay focused on the alert for now."
-
-**BEHAVIOR GUIDELINES (Conversational Mode):**
-1.  **Response Format:** Always respond with plain, conversational text. **NEVER** use JSON, markdown code blocks, or special formatting like lists or headings in your chat responses.
-2.  **Context:** Maintain the full context of the discussion. Reference the device name and the nature of the alert in your answers to keep them focused and personal.
-3.  **Actionable Advice:** When asked "What should I do?", prioritize repeating and simplifying the most relevant mitigation steps from the initial analysis.`
-        }]
-      };
-
       // Build conversation history from ai_analysis_chat
       const conversationHistory = (alert.ai_analysis_chat || []).map((msg: any) => ({
-        role: msg.role === 'ai' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
+        role: msg.role === 'ai' ? 'assistant' : msg.role,
+        content: msg.content
       }));
 
       // Add the new user query
       conversationHistory.push({
         role: 'user',
-        parts: [{ text: userQuery }]
+        content: userQuery
       });
 
-      const geminiData = await callGeminiApi(conversationHistory, conversationalSystemInstruction);
-      console.log('Gemini conversational response:', JSON.stringify(geminiData, null, 2));
+      // Add system message for conversational guidance
+      const messages = [
+        {
+          role: 'system',
+          content: `You are a friendly cybersecurity advisor. Answer questions about this security alert in simple terms. 
+          Focus only on the alert: ${alert.alert_type} - ${alert.description}. 
+          Device: ${deviceContext?.name || 'Unknown'}. 
+          Keep responses conversational and helpful.`
+        },
+        ...conversationHistory
+      ];
 
-      aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate response at this time.';
+      const aiData = await callLovableAI(messages);
+      console.log('Lovable AI conversational response:', JSON.stringify(aiData, null, 2));
+
+      aiResponse = aiData.choices?.[0]?.message?.content || 'Unable to generate response at this time.';
 
       // Update chat history with new Q&A
       updatedChat = [
@@ -203,36 +150,43 @@ Analyze this SPECIFIC alert type and provide tailored responses. Respond with JS
       // INITIAL ANALYSIS MODE: Generate structured analysis
       console.log('Initial analysis mode: generating structured report');
       
-      const geminiData = await callGeminiApi([{
-        parts: [{ text: userPrompt }]
-      }]);
-      console.log('Gemini API response:', JSON.stringify(geminiData, null, 2));
+      // Create a concise, focused prompt for structured analysis
+      const systemPrompt = `Analyze this security alert and provide a JSON response with exactly these fields:
+{
+  "summary": "Brief explanation in simple terms of what happened",
+  "threat_level": "Low/Medium/High/Critical", 
+  "potential_causes": ["List of 2-3 possible causes"],
+  "mitigation_steps": ["List of 2-3 actionable steps"]
+}
 
-      // Extract and parse the AI response from Gemini's response format
-      let rawResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+Alert Details:
+- Type: ${alert.alert_type}
+- Description: ${alert.description}
+- Severity: ${alert.severity}${deviceContext ? `
+- Device: ${deviceContext.name} (${deviceContext.clientId})` : ''}
+
+Respond with valid JSON only.`;
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: 'Analyze this security alert.' }
+      ];
+
+      const aiData = await callLovableAI(messages);
+      console.log('Lovable AI response:', JSON.stringify(aiData, null, 2));
+
+      // Extract and parse the AI response
+      let rawResponse = aiData.choices?.[0]?.message?.content;
       console.log('Raw AI response before processing:', rawResponse);
       
-      // Check if we got a valid response
       if (!rawResponse) {
-        const finishReason = geminiData.candidates?.[0]?.finishReason;
-        console.error('No content in Gemini response. Finish reason:', finishReason);
-        
-        if (finishReason === 'MAX_TOKENS') {
-          // Retry with shorter prompt or use fallback
-          rawResponse = JSON.stringify({
-            summary: `Security alert detected: ${alert.alert_type}. This alert requires attention but the AI analysis was truncated due to response length limits.`,
-            threat_level: alert.severity || 'Medium',
-            potential_causes: ['System detected unusual activity', 'Requires manual review due to analysis limits'],
-            mitigation_steps: ['Review alert details in dashboard', 'Check affected device logs', 'Contact support if needed']
-          });
-        } else {
-          rawResponse = JSON.stringify({
-            summary: 'AI analysis temporarily unavailable. Please review alert details manually.',
-            threat_level: alert.severity || 'Medium',
-            potential_causes: ['AI service temporary issue'],
-            mitigation_steps: ['Review alert details manually', 'Check system logs', 'Retry analysis later']
-          });
-        }
+        console.error('No content in AI response');
+        rawResponse = JSON.stringify({
+          summary: `Security alert: ${alert.alert_type}. ${alert.description}`,
+          threat_level: alert.severity || 'Medium',
+          potential_causes: ['System detected suspicious activity', 'Requires investigation'],
+          mitigation_steps: ['Review alert details', 'Check affected device', 'Monitor for patterns']
+        });
       } else {
         // Strip markdown code blocks if present
         rawResponse = rawResponse.replace(/^```json\s*/m, '').replace(/\s*```$/m, '').trim();
@@ -267,7 +221,7 @@ Analyze this SPECIFIC alert type and provide tailored responses. Respond with JS
         ...(alert.ai_analysis_chat || []),
         {
           role: 'user',
-          content: userPrompt
+          content: systemPrompt
         },
         {
           role: 'ai',
