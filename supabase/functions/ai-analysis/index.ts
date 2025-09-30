@@ -111,7 +111,7 @@ Analyze this SPECIFIC alert type and provide tailored responses. Respond with JS
               temperature: userQuery ? 0.7 : 0.1,
               topK: 1,
               topP: 0.8,
-              maxOutputTokens: userQuery ? 1024 : 512,
+              maxOutputTokens: userQuery ? 1024 : 1024, // Increased for structured responses
             }
           };
 
@@ -209,12 +209,35 @@ Analyze this SPECIFIC alert type and provide tailored responses. Respond with JS
       console.log('Gemini API response:', JSON.stringify(geminiData, null, 2));
 
       // Extract and parse the AI response from Gemini's response format
-      let rawResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate analysis at this time.';
+      let rawResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
       console.log('Raw AI response before processing:', rawResponse);
       
-      // Strip markdown code blocks if present
-      rawResponse = rawResponse.replace(/^```json\s*/m, '').replace(/\s*```$/m, '').trim();
-      console.log('AI response after stripping markdown:', rawResponse);
+      // Check if we got a valid response
+      if (!rawResponse) {
+        const finishReason = geminiData.candidates?.[0]?.finishReason;
+        console.error('No content in Gemini response. Finish reason:', finishReason);
+        
+        if (finishReason === 'MAX_TOKENS') {
+          // Retry with shorter prompt or use fallback
+          rawResponse = JSON.stringify({
+            summary: `Security alert detected: ${alert.alert_type}. This alert requires attention but the AI analysis was truncated due to response length limits.`,
+            threat_level: alert.severity || 'Medium',
+            potential_causes: ['System detected unusual activity', 'Requires manual review due to analysis limits'],
+            mitigation_steps: ['Review alert details in dashboard', 'Check affected device logs', 'Contact support if needed']
+          });
+        } else {
+          rawResponse = JSON.stringify({
+            summary: 'AI analysis temporarily unavailable. Please review alert details manually.',
+            threat_level: alert.severity || 'Medium',
+            potential_causes: ['AI service temporary issue'],
+            mitigation_steps: ['Review alert details manually', 'Check system logs', 'Retry analysis later']
+          });
+        }
+      } else {
+        // Strip markdown code blocks if present
+        rawResponse = rawResponse.replace(/^```json\s*/m, '').replace(/\s*```$/m, '').trim();
+        console.log('AI response after stripping markdown:', rawResponse);
+      }
       
       // Try to parse as JSON, fallback to structured response if parsing fails
       let parsedAnalysis;
@@ -229,10 +252,10 @@ Analyze this SPECIFIC alert type and provide tailored responses. Respond with JS
         console.error('Failed to parse AI response as JSON:', parseError);
         console.error('Raw AI response that failed to parse:', rawResponse);
         parsedAnalysis = {
-          summary: 'AI analysis completed but response format needs improvement',
+          summary: `Security alert: ${alert.alert_type}. ${alert.description}`,
           threat_level: alert.severity || 'Medium',
-          potential_causes: ['Response parsing issue', 'Unexpected AI response format'],
-          mitigation_steps: ['Review alert details manually', 'Check system logs for patterns', 'Consider updating alert thresholds']
+          potential_causes: ['System detected suspicious activity', 'Automatic analysis unavailable'],
+          mitigation_steps: ['Review alert details', 'Check affected device', 'Monitor for patterns']
         };
       }
       
