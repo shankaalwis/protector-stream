@@ -330,11 +330,24 @@ export const Dashboard = () => {
       [alertId]: ''
     }));
     
-    // Simulate AI response - replace with actual AI integration
-    setTimeout(() => {
+    try {
+      // Call AI analysis function with user query for conversational mode
+      console.log('Calling AI analysis function with user query:', currentInput);
+      const response = await supabase.functions.invoke('ai-analysis', {
+        body: { 
+          alertId,
+          userQuery: currentInput 
+        }
+      });
+      
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      // Add AI response
       const aiMessage = {
         role: 'assistant' as const,
-        content: `I understand your concern about this alert: "${currentInput}". Based on the alert details, I can help you investigate further or suggest next steps.`,
+        content: response.data?.analysis || 'Unable to generate response at this time.',
         timestamp: new Date()
       };
       
@@ -342,12 +355,33 @@ export const Dashboard = () => {
         ...prev,
         [alertId]: [...(prev[alertId] || []), aiMessage]
       }));
-    }, 1000);
-    
-    toast({
-      title: "Message sent",
-      description: "Your message has been sent to the AI assistant."
-    });
+
+      // Refresh alerts data to get the updated conversation history
+      await fetchAlerts();
+      
+      toast({
+        title: "Message sent",
+        description: "Your message has been sent to the AI assistant."
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage = {
+        role: 'assistant' as const,
+        content: 'Sorry, I encountered an error processing your message. Please try again.',
+        timestamp: new Date()
+      };
+      
+      setAlertChatMessages(prev => ({
+        ...prev,
+        [alertId]: [...(prev[alertId] || []), errorMessage]
+      }));
+      
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleAlertKeyPress = (e: React.KeyboardEvent, alertId: string) => {

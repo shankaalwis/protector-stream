@@ -14,6 +14,7 @@ serve(async (req) => {
 
   try {
     const { alertId, userQuery } = await req.json();
+    console.log('Request received:', { alertId, userQuery, hasUserQuery: !!userQuery });
     
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -108,7 +109,7 @@ serve(async (req) => {
 
     // CONVERSATIONAL MODE: Handle follow-up questions
     if (userQuery) {
-      console.log('Conversational mode: processing user query');
+      console.log('Conversational mode: processing user query:', userQuery);
       
       // Get the original AI analysis from the chat history
       let originalAnalysis = null;
@@ -175,6 +176,7 @@ CONVERSATION GUIDELINES:
         ...conversationHistory
       ];
 
+      console.log('Sending messages to AI:', { systemMessageLength: systemMessage.length, historyLength: conversationHistory.length });
       const aiData = await callLovableAI(messages, true); // true for conversational mode
       console.log('Lovable AI conversational response:', JSON.stringify(aiData, null, 2));
 
