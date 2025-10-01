@@ -23,6 +23,7 @@ interface TimeSeriesData {
 export default function SiemDashboard() {
   const [throughputData, setThroughputData] = useState<TimeSeriesData[]>([]);
   const [failedAuthCount, setFailedAuthCount] = useState<number>(0);
+  const [successfulConnections, setSuccessfulConnections] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -64,6 +65,21 @@ export default function SiemDashboard() {
         const count = authValue.total_failed_attempts || 0;
         setFailedAuthCount(count);
       }
+
+      // Fetch successful connections data
+      const { data: connectionsData, error: connectionsError } = await supabase
+        .from('dashboard_metrics')
+        .select('*')
+        .eq('metric_key', 'successful_connections_24h')
+        .maybeSingle();
+
+      if (connectionsError) {
+        console.error('Error fetching connections metrics:', connectionsError);
+      } else if (connectionsData && connectionsData.metric_value) {
+        const connectionsValue = connectionsData.metric_value as { value: number };
+        const count = connectionsValue.value || 0;
+        setSuccessfulConnections(count);
+      }
     } catch (error) {
       console.error('Error in fetchMetrics:', error);
       toast({
@@ -102,17 +118,31 @@ export default function SiemDashboard() {
   }, []);
 
   // Determine gauge color based on thresholds
-  const getGaugeColor = (value: number) => {
+  const getAuthGaugeColor = (value: number) => {
     if (value <= 500) return 'hsl(var(--chart-2))'; // Green
     if (value <= 2500) return 'hsl(var(--chart-3))'; // Yellow
     return 'hsl(var(--destructive))'; // Red
   };
 
-  const gaugeData = [
+  const getConnectionsGaugeColor = (value: number) => {
+    if (value >= 25) return 'hsl(var(--chart-2))'; // Green - meeting target
+    if (value >= 15) return 'hsl(var(--chart-3))'; // Yellow - warning
+    return 'hsl(var(--destructive))'; // Red - critical
+  };
+
+  const authGaugeData = [
     {
       name: 'Failed Attempts',
       value: failedAuthCount,
-      fill: getGaugeColor(failedAuthCount),
+      fill: getAuthGaugeColor(failedAuthCount),
+    },
+  ];
+
+  const connectionsGaugeData = [
+    {
+      name: 'Successful Connections',
+      value: successfulConnections,
+      fill: getConnectionsGaugeColor(successfulConnections),
     },
   ];
 
@@ -220,7 +250,7 @@ export default function SiemDashboard() {
                       cy="50%" 
                       innerRadius="60%" 
                       outerRadius="90%" 
-                      data={gaugeData}
+                      data={authGaugeData}
                       startAngle={180}
                       endAngle={0}
                     >
@@ -269,19 +299,74 @@ export default function SiemDashboard() {
             </CardContent>
           </Card>
 
-          {/* Placeholder: Anomaly Trend Chart */}
+          {/* Successful Connections Gauge */}
           <Card className="bg-card/50 backdrop-blur border-primary/20">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                <CardTitle>Anomaly Trend Chart</CardTitle>
+                <Users className="h-5 w-5 text-primary" />
+                <CardTitle>Successful Connections (Last 24 Hours)</CardTitle>
               </div>
-              <CardDescription>Security anomaly patterns</CardDescription>
+              <CardDescription>Critical connections target: 25</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[200px] flex items-center justify-center">
-                <p className="text-muted-foreground">Coming soon...</p>
-              </div>
+              {loading ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <p className="text-muted-foreground">Loading...</p>
+                </div>
+              ) : (
+                <div className="h-[250px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadialBarChart 
+                      cx="50%" 
+                      cy="50%" 
+                      innerRadius="60%" 
+                      outerRadius="90%" 
+                      data={connectionsGaugeData}
+                      startAngle={180}
+                      endAngle={0}
+                    >
+                      <RadialBar
+                        background
+                        dataKey="value"
+                        cornerRadius={10}
+                        max={50}
+                      />
+                      <text
+                        x="50%"
+                        y="50%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-foreground text-3xl font-bold"
+                      >
+                        {successfulConnections.toLocaleString()}
+                      </text>
+                      <text
+                        x="50%"
+                        y="60%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-muted-foreground text-sm"
+                      >
+                        / 50 connections
+                      </text>
+                    </RadialBarChart>
+                  </ResponsiveContainer>
+                  <div className="flex justify-center gap-6 mt-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-destructive" />
+                      <span className="text-xs text-muted-foreground">Critical (&lt;15)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-3))' }} />
+                      <span className="text-xs text-muted-foreground">Warning (15-24)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-2))' }} />
+                      <span className="text-xs text-muted-foreground">Good (25+)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

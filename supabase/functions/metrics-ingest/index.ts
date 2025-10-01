@@ -69,6 +69,47 @@ serve(async (req) => {
       );
     }
 
+    // Successful Connections - single value, no history
+    if (result.successful_connections !== undefined) {
+      const time_epoch = parseInt(result.time) * 1000;
+      const successful_connections = parseInt(result.successful_connections);
+
+      console.log('Processing successful connections metric:', { time_epoch, successful_connections });
+
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
+
+      const { data, error } = await supabase
+        .from('dashboard_metrics')
+        .upsert({
+          metric_key,
+          metric_value: { time_epoch, value: successful_connections },
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'metric_key'
+        })
+        .select();
+
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`Failed to store metric: ${error.message}`);
+      }
+
+      console.log('Successfully stored successful connections metric');
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Successful connections metric stored successfully',
+          metric_key,
+          data
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Message Throughput - rolling history
     if (!result.value) {
       throw new Error('Invalid payload: missing result.value');
