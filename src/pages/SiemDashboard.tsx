@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, Legend } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, Legend, BarChart, Bar } from "recharts";
 import { Activity, Shield, TrendingUp, ArrowLeft, Users, AlertTriangle } from "lucide-react";
-import { format } from "date-fns";
+import { format, subDays, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface DashboardMetric {
   id: string;
@@ -20,10 +21,24 @@ interface TimeSeriesData {
   throughput: number;
 }
 
+interface AnomalyData {
+  day: string;
+  count: number;
+}
+
+interface RecentAnomaly {
+  id: string;
+  timestamp: string;
+  client_id: string;
+  anomaly_score: number;
+}
+
 export default function SiemDashboard() {
   const [throughputData, setThroughputData] = useState<TimeSeriesData[]>([]);
   const [failedAuthCount, setFailedAuthCount] = useState<number>(0);
   const [successfulConnections, setSuccessfulConnections] = useState<number>(0);
+  const [anomalyTrendData, setAnomalyTrendData] = useState<AnomalyData[]>([]);
+  const [recentAnomalies, setRecentAnomalies] = useState<RecentAnomaly[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -79,6 +94,53 @@ export default function SiemDashboard() {
         const connectionsValue = connectionsData.metric_value as { value: number };
         const count = connectionsValue.value || 0;
         setSuccessfulConnections(count);
+      }
+
+      // Fetch anomaly alerts for the last 7 days
+      const sevenDaysAgo = subDays(new Date(), 7);
+      const { data: anomalyData, error: anomalyError } = await supabase
+        .from('anomaly_alerts')
+        .select('*')
+        .eq('is_anomaly', true)
+        .gte('timestamp', sevenDaysAgo.toISOString())
+        .order('timestamp', { ascending: false });
+
+      if (anomalyError) {
+        console.error('Error fetching anomaly alerts:', anomalyError);
+      } else if (anomalyData) {
+        // Aggregate by day for the bar chart
+        const dailyAnomalies: { [key: string]: number } = {};
+        
+        // Initialize all 7 days with 0
+        for (let i = 6; i >= 0; i--) {
+          const day = format(subDays(new Date(), i), 'EEE');
+          dailyAnomalies[day] = 0;
+        }
+
+        // Count anomalies per day
+        anomalyData.forEach((anomaly: any) => {
+          const day = format(new Date(anomaly.timestamp), 'EEE');
+          if (dailyAnomalies[day] !== undefined) {
+            dailyAnomalies[day]++;
+          }
+        });
+
+        const trendData = Object.entries(dailyAnomalies).map(([day, count]) => ({
+          day,
+          count
+        }));
+
+        setAnomalyTrendData(trendData);
+
+        // Get the 5 most recent anomalies for the table
+        const recent = anomalyData.slice(0, 5).map((anomaly: any) => ({
+          id: anomaly.id,
+          timestamp: format(new Date(anomaly.timestamp), 'MMM dd, yyyy HH:mm'),
+          client_id: anomaly.client_id,
+          anomaly_score: anomaly.anomaly_score
+        }));
+
+        setRecentAnomalies(recent);
       }
     } catch (error) {
       console.error('Error in fetchMetrics:', error);
@@ -365,6 +427,112 @@ export default function SiemDashboard() {
                       <span className="text-xs text-muted-foreground">Good (5-25)</span>
                     </div>
                   </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Anomaly Trend Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Anomaly Trend Bar Chart */}
+          <Card className="bg-card/50 backdrop-blur border-primary/20">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                <CardTitle>Anomaly Trend: Last 7 Days</CardTitle>
+              </div>
+              <CardDescription>Daily count of confirmed security anomalies</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="h-[300px] flex items-center justify-center">
+                  <p className="text-muted-foreground">Loading...</p>
+                </div>
+              ) : anomalyTrendData.length === 0 ? (
+                <div className="h-[300px] flex items-center justify-center">
+                  <p className="text-muted-foreground">No anomalies detected in the last 7 days</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={anomalyTrendData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                    <XAxis 
+                      dataKey="day" 
+                      stroke="hsl(var(--muted-foreground))"
+                      style={{ fontSize: '12px' }}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))"
+                      style={{ fontSize: '12px' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                        color: 'hsl(var(--foreground))'
+                      }}
+                    />
+                    <Bar 
+                      dataKey="count" 
+                      fill="hsl(var(--primary))" 
+                      radius={[8, 8, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Recent Incidents Table */}
+          <Card className="bg-card/50 backdrop-blur border-destructive/20">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <CardTitle>Recent Incidents</CardTitle>
+              </div>
+              <CardDescription>5 most recent confirmed anomalies</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="h-[300px] flex items-center justify-center">
+                  <p className="text-muted-foreground">Loading...</p>
+                </div>
+              ) : recentAnomalies.length === 0 ? (
+                <div className="h-[300px] flex items-center justify-center">
+                  <p className="text-muted-foreground">No recent anomalies</p>
+                </div>
+              ) : (
+                <div className="overflow-auto max-h-[300px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Timestamp</TableHead>
+                        <TableHead>Client ID</TableHead>
+                        <TableHead className="text-right">Score</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {recentAnomalies.map((anomaly) => {
+                        // Color based on anomaly score (higher = more red)
+                        const getScoreColor = (score: number) => {
+                          if (score >= 0.8) return 'text-destructive font-semibold';
+                          if (score >= 0.6) return 'text-orange-500 font-medium';
+                          if (score >= 0.4) return 'text-yellow-500';
+                          return 'text-foreground';
+                        };
+
+                        return (
+                          <TableRow key={anomaly.id} className={getScoreColor(anomaly.anomaly_score)}>
+                            <TableCell className="font-mono text-xs">{anomaly.timestamp}</TableCell>
+                            <TableCell className="font-mono">{anomaly.client_id}</TableCell>
+                            <TableCell className="text-right font-bold">{anomaly.anomaly_score.toFixed(2)}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
                 </div>
               )}
             </CardContent>
