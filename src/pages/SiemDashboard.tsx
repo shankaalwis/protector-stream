@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Activity, Shield, TrendingUp } from "lucide-react";
+import { Activity, Shield, TrendingUp, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface DashboardMetric {
@@ -21,6 +23,7 @@ export default function SiemDashboard() {
   const [throughputData, setThroughputData] = useState<TimeSeriesData[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const fetchMetrics = async () => {
     try {
@@ -86,13 +89,23 @@ export default function SiemDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Shield className="h-10 w-10 text-primary" />
-          <div>
-            <h1 className="text-4xl font-bold text-foreground">🛡️ SIEM Dashboard: Threat Monitor</h1>
-            <p className="text-muted-foreground mt-2">Real-time security intelligence and event monitoring</p>
+        {/* Header with Back Button */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Shield className="h-10 w-10 text-primary" />
+            <div>
+              <h1 className="text-4xl font-bold text-foreground">🛡️ SIEM Dashboard: Threat Monitor</h1>
+              <p className="text-muted-foreground mt-2">Real-time security intelligence and event monitoring</p>
+            </div>
           </div>
+          <Button
+            onClick={() => navigate('/')}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
         </div>
 
         {/* Main Metrics Grid */}
