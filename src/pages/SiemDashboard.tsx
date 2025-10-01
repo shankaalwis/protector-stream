@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Activity, Shield, TrendingUp, ArrowLeft, Users } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, Legend } from "recharts";
+import { Activity, Shield, TrendingUp, ArrowLeft, Users, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,6 +22,7 @@ interface TimeSeriesData {
 
 export default function SiemDashboard() {
   const [throughputData, setThroughputData] = useState<TimeSeriesData[]>([]);
+  const [failedAuthCount, setFailedAuthCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -30,35 +31,38 @@ export default function SiemDashboard() {
     try {
       console.log('Fetching dashboard metrics...');
       
-      const { data, error } = await supabase
+      // Fetch throughput data
+      const { data: throughputData, error: throughputError } = await supabase
         .from('dashboard_metrics')
         .select('*')
         .eq('metric_key', 'Dashboard Data: Message Throughput (New)')
         .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching metrics:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load dashboard metrics",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (data && data.metric_value) {
-        console.log('Raw metric data:', data.metric_value);
-        
-        // Transform the data for the chart
-        const chartData = Array.isArray(data.metric_value) 
-          ? data.metric_value.map((item: any) => ({
+      if (throughputError) {
+        console.error('Error fetching throughput metrics:', throughputError);
+      } else if (throughputData && throughputData.metric_value) {
+        const chartData = Array.isArray(throughputData.metric_value) 
+          ? throughputData.metric_value.map((item: any) => ({
               time: format(new Date(item.time_epoch), 'HH:mm'),
               throughput: item.throughput
             }))
           : [];
-
-        console.log('Transformed chart data:', chartData);
         setThroughputData(chartData);
+      }
+
+      // Fetch failed auth data
+      const { data: authData, error: authError } = await supabase
+        .from('dashboard_metrics')
+        .select('*')
+        .eq('metric_key', 'Failed Auth Attempts (24h) Webhook')
+        .maybeSingle();
+
+      if (authError) {
+        console.error('Error fetching auth metrics:', authError);
+      } else if (authData && authData.metric_value) {
+        const authValue = authData.metric_value as { total_failed_attempts: number };
+        const count = authValue.total_failed_attempts || 0;
+        setFailedAuthCount(count);
       }
     } catch (error) {
       console.error('Error in fetchMetrics:', error);
@@ -75,7 +79,7 @@ export default function SiemDashboard() {
   useEffect(() => {
     fetchMetrics();
 
-    // Set up real-time subscription
+    // Set up real-time subscription for both metrics
     const channel = supabase
       .channel('dashboard-metrics-changes')
       .on(
@@ -83,8 +87,7 @@ export default function SiemDashboard() {
         {
           event: '*',
           schema: 'public',
-          table: 'dashboard_metrics',
-          filter: 'metric_key=eq.Dashboard Data: Message Throughput (New)'
+          table: 'dashboard_metrics'
         },
         (payload) => {
           console.log('Real-time metric update:', payload);
@@ -97,6 +100,21 @@ export default function SiemDashboard() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Determine gauge color based on thresholds
+  const getGaugeColor = (value: number) => {
+    if (value <= 500) return 'hsl(var(--chart-2))'; // Green
+    if (value <= 2500) return 'hsl(var(--chart-3))'; // Yellow
+    return 'hsl(var(--destructive))'; // Red
+  };
+
+  const gaugeData = [
+    {
+      name: 'Failed Attempts',
+      value: failedAuthCount,
+      fill: getGaugeColor(failedAuthCount),
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 p-8">
@@ -180,19 +198,74 @@ export default function SiemDashboard() {
             </CardContent>
           </Card>
 
-          {/* Placeholder: Top Attacking IPs */}
+          {/* Authentication Failures Gauge */}
           <Card className="bg-card/50 backdrop-blur border-destructive/20">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-destructive" />
-                <CardTitle>Top Attacking IPs</CardTitle>
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <CardTitle>Authentication Failures: Last 24 hrs</CardTitle>
               </div>
-              <CardDescription>Most frequent threat sources</CardDescription>
+              <CardDescription>Failed authentication attempts in 24 hours</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[200px] flex items-center justify-center">
-                <p className="text-muted-foreground">Coming soon...</p>
-              </div>
+              {loading ? (
+                <div className="h-[250px] flex items-center justify-center">
+                  <p className="text-muted-foreground">Loading...</p>
+                </div>
+              ) : (
+                <div className="h-[250px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadialBarChart 
+                      cx="50%" 
+                      cy="50%" 
+                      innerRadius="60%" 
+                      outerRadius="90%" 
+                      data={gaugeData}
+                      startAngle={180}
+                      endAngle={0}
+                    >
+                      <RadialBar
+                        background
+                        dataKey="value"
+                        cornerRadius={10}
+                        max={5000}
+                      />
+                      <text
+                        x="50%"
+                        y="50%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-foreground text-3xl font-bold"
+                      >
+                        {failedAuthCount.toLocaleString()}
+                      </text>
+                      <text
+                        x="50%"
+                        y="60%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-muted-foreground text-sm"
+                      >
+                        / 5,000 attempts
+                      </text>
+                    </RadialBarChart>
+                  </ResponsiveContainer>
+                  <div className="flex justify-center gap-6 mt-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-2))' }} />
+                      <span className="text-xs text-muted-foreground">Safe (0-500)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-3))' }} />
+                      <span className="text-xs text-muted-foreground">Warning (501-2500)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-destructive" />
+                      <span className="text-xs text-muted-foreground">Critical (2501+)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

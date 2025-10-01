@@ -23,11 +23,57 @@ serve(async (req) => {
     
     // Extract time and value from Splunk's result object
     const result = payload.result;
-    if (!result || !result.time || !result.value) {
-      throw new Error('Invalid payload: missing result.time or result.value');
+    if (!result || !result.time) {
+      throw new Error('Invalid payload: missing result.time');
     }
 
-    // Convert epoch seconds to milliseconds and parse value
+    // Handle different metric types
+    if (result.total_failed_attempts !== undefined) {
+      // Failed Auth Attempts - single value, no history
+      const time_epoch = parseInt(result.time) * 1000;
+      const total_failed_attempts = parseInt(result.total_failed_attempts);
+
+      console.log('Processing failed auth metric:', { time_epoch, total_failed_attempts });
+
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
+
+      const { data, error } = await supabase
+        .from('dashboard_metrics')
+        .upsert({
+          metric_key,
+          metric_value: { time_epoch, total_failed_attempts },
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'metric_key'
+        })
+        .select();
+
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`Failed to store metric: ${error.message}`);
+      }
+
+      console.log('Successfully stored failed auth metric');
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Failed auth metric stored successfully',
+          metric_key,
+          data
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Message Throughput - rolling history
+    if (!result.value) {
+      throw new Error('Invalid payload: missing result.value');
+    }
+
     const time_epoch = parseInt(result.time) * 1000;
     const throughput = parseInt(result.value);
 
