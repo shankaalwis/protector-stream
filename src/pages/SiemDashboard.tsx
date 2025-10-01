@@ -125,9 +125,9 @@ export default function SiemDashboard() {
   };
 
   const getConnectionsGaugeColor = (value: number) => {
-    if (value >= 25) return 'hsl(var(--chart-2))'; // Green - meeting target
-    if (value >= 15) return 'hsl(var(--chart-3))'; // Yellow - warning
-    return 'hsl(var(--destructive))'; // Red - critical
+    if (value > 25) return 'hsl(var(--destructive))'; // Red - critical (too many)
+    if (value < 5) return 'hsl(var(--chart-3))'; // Yellow - warning (too few)
+    return 'hsl(var(--chart-2))'; // Green - good (5-25)
   };
 
   const authGaugeData = [
@@ -306,7 +306,7 @@ export default function SiemDashboard() {
                 <Users className="h-5 w-5 text-primary" />
                 <CardTitle>Successful Connections (Last 24 Hours)</CardTitle>
               </div>
-              <CardDescription>Critical connections target: 25</CardDescription>
+              <CardDescription>Normal range: 5-25 connections</CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -354,15 +354,15 @@ export default function SiemDashboard() {
                   <div className="flex justify-center gap-6 mt-4">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-destructive" />
-                      <span className="text-xs text-muted-foreground">Critical (&lt;15)</span>
+                      <span className="text-xs text-muted-foreground">Critical (&gt;25)</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-3))' }} />
-                      <span className="text-xs text-muted-foreground">Warning (15-24)</span>
+                      <span className="text-xs text-muted-foreground">Warning (&lt;5)</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-2))' }} />
-                      <span className="text-xs text-muted-foreground">Good (25+)</span>
+                      <span className="text-xs text-muted-foreground">Good (5-25)</span>
                     </div>
                   </div>
                 </div>
