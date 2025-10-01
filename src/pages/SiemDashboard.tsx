@@ -119,15 +119,15 @@ export default function SiemDashboard() {
 
   // Determine gauge color based on thresholds
   const getAuthGaugeColor = (value: number) => {
-    if (value <= 500) return 'hsl(var(--chart-2))'; // Green
-    if (value <= 2500) return 'hsl(var(--chart-3))'; // Yellow
+    if (value <= 500) return 'hsl(var(--success))'; // Green
+    if (value <= 2500) return 'hsl(var(--warning))'; // Yellow
     return 'hsl(var(--destructive))'; // Red
   };
 
   const getConnectionsGaugeColor = (value: number) => {
     if (value > 25) return 'hsl(var(--destructive))'; // Red - critical (too many)
-    if (value < 5) return 'hsl(var(--chart-3))'; // Yellow - warning (too few)
-    return 'hsl(var(--chart-2))'; // Green - good (5-25)
+    if (value < 5) return 'hsl(var(--warning))'; // Yellow - warning (too few)
+    return 'hsl(var(--success))'; // Green - good (5-25)
   };
 
   const authGaugeData = [
@@ -282,11 +282,11 @@ export default function SiemDashboard() {
                   </ResponsiveContainer>
                   <div className="flex justify-center gap-6 mt-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-2))' }} />
+                      <div className="w-3 h-3 rounded-full bg-success" />
                       <span className="text-xs text-muted-foreground">Safe (0-500)</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-3))' }} />
+                      <div className="w-3 h-3 rounded-full bg-warning" />
                       <span className="text-xs text-muted-foreground">Warning (501-2500)</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -357,11 +357,11 @@ export default function SiemDashboard() {
                       <span className="text-xs text-muted-foreground">Critical (&gt;25)</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-3))' }} />
+                      <div className="w-3 h-3 rounded-full bg-warning" />
                       <span className="text-xs text-muted-foreground">Warning (&lt;5)</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-2))' }} />
+                      <div className="w-3 h-3 rounded-full bg-success" />
                       <span className="text-xs text-muted-foreground">Good (5-25)</span>
                     </div>
                   </div>
