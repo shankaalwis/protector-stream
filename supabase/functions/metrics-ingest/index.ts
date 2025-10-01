@@ -19,7 +19,7 @@ serve(async (req) => {
     console.log('Received payload:', JSON.stringify(payload));
 
     // Extract metric_key from Splunk's search_name
-    const metric_key = 'message_throughput_60m'; // Fixed key for message throughput
+    const metric_key = payload.search_name || 'message_throughput_60m';
     
     // Extract time and value from Splunk's result object
     const result = payload.result;

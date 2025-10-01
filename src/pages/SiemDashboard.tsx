@@ -33,7 +33,7 @@ export default function SiemDashboard() {
       const { data, error } = await supabase
         .from('dashboard_metrics')
         .select('*')
-        .eq('metric_key', 'message_throughput_60m')
+        .eq('metric_key', 'Dashboard Data: Message Throughput (New)')
         .maybeSingle();
 
       if (error) {
@@ -84,7 +84,7 @@ export default function SiemDashboard() {
           event: '*',
           schema: 'public',
           table: 'dashboard_metrics',
-          filter: 'metric_key=eq.message_throughput_60m'
+          filter: 'metric_key=eq.Dashboard Data: Message Throughput (New)'
         },
         (payload) => {
           console.log('Real-time metric update:', payload);
