@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { formatDistanceToNow, format } from 'date-fns';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -1106,6 +1107,13 @@ export const Dashboard = () => {
                     <span>{label}</span>
                   </button>
                 ))}
+                <Link
+                  to="/siem-dashboard"
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-muted-foreground hover:text-foreground hover:bg-accent"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span>SIEM Dashboard</span>
+                </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">

@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.firewall-control]
 verify_jwt = false
+
+[functions.metrics-ingest]
+verify_jwt = false

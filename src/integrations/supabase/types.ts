@@ -44,6 +44,30 @@ export type Database = {
         }
         Relationships: []
       }
+      dashboard_metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          metric_key: string
+          metric_value: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metric_key: string
+          metric_value: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metric_key?: string
+          metric_value?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       devices: {
         Row: {
           alerts: Json | null
