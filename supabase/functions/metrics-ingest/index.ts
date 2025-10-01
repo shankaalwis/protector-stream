@@ -18,24 +18,62 @@ serve(async (req) => {
     const payload = await req.json();
     console.log('Received payload:', JSON.stringify(payload));
 
-    // Extract metric_key and data from the payload
-    // Splunk reports typically send results as an array
-    const metric_key = payload.metric_key || payload.search_name || 'unknown_metric';
-    const metric_value = payload.results || payload.result || payload.data || payload;
+    // Extract metric_key from Splunk's search_name
+    const metric_key = 'message_throughput_60m'; // Fixed key for message throughput
+    
+    // Extract time and value from Splunk's result object
+    const result = payload.result;
+    if (!result || !result.time || !result.value) {
+      throw new Error('Invalid payload: missing result.time or result.value');
+    }
 
-    console.log('Processing metric:', { metric_key, dataLength: Array.isArray(metric_value) ? metric_value.length : 'not-array' });
+    // Convert epoch seconds to milliseconds and parse value
+    const time_epoch = parseInt(result.time) * 1000;
+    const throughput = parseInt(result.value);
+
+    console.log('Processing metric:', { time_epoch, throughput });
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Upsert to dashboard_metrics table
+    // Fetch existing data for rolling history
+    const { data: existingData, error: fetchError } = await supabase
+      .from('dashboard_metrics')
+      .select('metric_value')
+      .eq('metric_key', metric_key)
+      .maybeSingle();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error('Error fetching existing data:', fetchError);
+      throw new Error(`Failed to fetch existing data: ${fetchError.message}`);
+    }
+
+    // Get existing array or start with empty array
+    let dataPoints = [];
+    if (existingData && existingData.metric_value) {
+      dataPoints = Array.isArray(existingData.metric_value) 
+        ? existingData.metric_value 
+        : [];
+    }
+
+    // Append new data point
+    dataPoints.push({ time_epoch, throughput });
+
+    // Keep only the last 60 points
+    if (dataPoints.length > 60) {
+      dataPoints = dataPoints.slice(-60);
+    }
+
+    console.log(`Rolling history: ${dataPoints.length} points`);
+
+    // Upsert the updated array
     const { data, error } = await supabase
       .from('dashboard_metrics')
       .upsert({
         metric_key,
-        metric_value,
+        metric_value: dataPoints,
         updated_at: new Date().toISOString()
       }, {
         onConflict: 'metric_key'
@@ -47,13 +85,14 @@ serve(async (req) => {
       throw new Error(`Failed to store metric: ${error.message}`);
     }
 
-    console.log('Successfully stored metric:', metric_key);
+    console.log('Successfully stored metric with rolling history');
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Metric stored successfully',
         metric_key,
+        points_stored: dataPoints.length,
         data
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

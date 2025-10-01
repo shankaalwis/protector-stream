@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Activity, Shield, TrendingUp, ArrowLeft } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Activity, Shield, TrendingUp, ArrowLeft, Users } from "lucide-react";
+import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
 interface DashboardMetric {
@@ -16,7 +17,7 @@ interface DashboardMetric {
 
 interface TimeSeriesData {
   time: string;
-  value: number;
+  throughput: number;
 }
 
 export default function SiemDashboard() {
@@ -27,33 +28,44 @@ export default function SiemDashboard() {
 
   const fetchMetrics = async () => {
     try {
+      console.log('Fetching dashboard metrics...');
+      
       const { data, error } = await supabase
         .from('dashboard_metrics')
         .select('*')
         .eq('metric_key', 'message_throughput_60m')
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      if (error) {
+        console.error('Error fetching metrics:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard metrics",
+          variant: "destructive",
+        });
+        return;
       }
 
-      if (data) {
-        // Transform the metric_value into chart data
+      if (data && data.metric_value) {
+        console.log('Raw metric data:', data.metric_value);
+        
+        // Transform the data for the chart
         const chartData = Array.isArray(data.metric_value) 
           ? data.metric_value.map((item: any) => ({
-              time: item._time || item.time || new Date().toISOString(),
-              value: parseInt(item.count || item.value || 0)
+              time: format(new Date(item.time_epoch), 'HH:mm'),
+              throughput: item.throughput
             }))
           : [];
-        
+
+        console.log('Transformed chart data:', chartData);
         setThroughputData(chartData);
       }
     } catch (error) {
-      console.error('Error fetching metrics:', error);
+      console.error('Error in fetchMetrics:', error);
       toast({
         title: "Error",
-        description: "Failed to load dashboard metrics",
-        variant: "destructive"
+        description: "Failed to process metrics data",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -109,108 +121,98 @@ export default function SiemDashboard() {
         </div>
 
         {/* Main Metrics Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Message Throughput Chart */}
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 bg-card/50 backdrop-blur border-primary/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-primary" />
-                Message Throughput (Last 60 Minutes)
-              </CardTitle>
+                <CardTitle>Message Throughput (Last 60 Minutes)</CardTitle>
+              </div>
               <CardDescription>Real-time message flow analysis</CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
                 <div className="h-[300px] flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <p className="text-muted-foreground">Loading metrics...</p>
                 </div>
-              ) : throughputData.length > 0 ? (
+              ) : throughputData.length === 0 ? (
+                <div className="h-[300px] flex items-center justify-center">
+                  <p className="text-muted-foreground">No data available yet. Waiting for Splunk metrics...</p>
+                </div>
+              ) : (
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={throughputData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <AreaChart data={throughputData}>
+                    <defs>
+                      <linearGradient id="throughputGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                     <XAxis 
                       dataKey="time" 
-                      tickFormatter={(value) => new Date(value).toLocaleTimeString()}
-                      className="text-xs"
+                      stroke="hsl(var(--muted-foreground))"
+                      style={{ fontSize: '12px' }}
                     />
-                    <YAxis className="text-xs" />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))"
+                      style={{ fontSize: '12px' }}
+                    />
                     <Tooltip 
-                      labelFormatter={(value) => new Date(value).toLocaleString()}
-                      contentStyle={{ 
+                      contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
+                        borderRadius: '8px',
+                        color: 'hsl(var(--foreground))'
                       }}
                     />
-                    <Line 
+                    <Area 
                       type="monotone" 
-                      dataKey="value" 
+                      dataKey="throughput" 
                       stroke="hsl(var(--primary))" 
                       strokeWidth={2}
-                      dot={{ fill: 'hsl(var(--primary))' }}
+                      fill="url(#throughputGradient)"
                     />
-                  </LineChart>
+                  </AreaChart>
                 </ResponsiveContainer>
-              ) : (
-                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                  No data available yet. Waiting for Splunk reports...
-                </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Placeholder: Summary Stats */}
-          <Card className="bg-gradient-to-br from-card to-secondary/10">
+          {/* Placeholder: Top Attacking IPs */}
+          <Card className="bg-card/50 backdrop-blur border-destructive/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-destructive" />
+                <CardTitle>Top Attacking IPs</CardTitle>
+              </div>
+              <CardDescription>Most frequent threat sources</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[200px] flex items-center justify-center">
+                <p className="text-muted-foreground">Coming soon...</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Placeholder: Anomaly Trend Chart */}
+          <Card className="bg-card/50 backdrop-blur border-primary/20">
+            <CardHeader>
+              <div className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
-                Summary Stats
-              </CardTitle>
-              <CardDescription>Key metrics overview</CardDescription>
+                <CardTitle>Anomaly Trend Chart</CardTitle>
+              </div>
+              <CardDescription>Security anomaly patterns</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 bg-background/50 rounded-lg">
-                <p className="text-sm text-muted-foreground">Total Messages</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {throughputData.reduce((sum, item) => sum + item.value, 0)}
-                </p>
-              </div>
-              <div className="p-4 bg-background/50 rounded-lg">
-                <p className="text-sm text-muted-foreground">Peak Throughput</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {Math.max(...throughputData.map(d => d.value), 0)}
-                </p>
-              </div>
-              <div className="p-4 bg-background/50 rounded-lg">
-                <p className="text-sm text-muted-foreground">Active Monitoring</p>
-                <p className="text-2xl font-bold text-green-500">Live</p>
+            <CardContent>
+              <div className="h-[200px] flex items-center justify-center">
+                <p className="text-muted-foreground">Coming soon...</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Future Expansion Placeholders */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-dashed border-2 border-muted-foreground/30">
-            <CardHeader>
-              <CardTitle className="text-muted-foreground">🎯 Top Attacking IPs</CardTitle>
-              <CardDescription>Coming soon - Real-time threat source analysis</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[200px] flex items-center justify-center text-muted-foreground">
-              Widget placeholder - Ready for integration
-            </CardContent>
-          </Card>
-
-          <Card className="border-dashed border-2 border-muted-foreground/30">
-            <CardHeader>
-              <CardTitle className="text-muted-foreground">📊 Anomaly Trend Chart</CardTitle>
-              <CardDescription>Coming soon - ML-powered anomaly detection</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[200px] flex items-center justify-center text-muted-foreground">
-              Widget placeholder - Ready for integration
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );
