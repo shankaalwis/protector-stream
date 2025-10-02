@@ -609,6 +609,7 @@ export default function SiemDashboard() {
                     dataKey="failure_count" 
                     fill="hsl(var(--destructive))" 
                     radius={[0, 8, 8, 0]}
+                    barSize={25}
                   />
                 </BarChart>
               </ResponsiveContainer>
