@@ -13,6 +13,7 @@ serve(async (req) => {
   }
 
   try {
+    // Force redeployment - v2
     console.log('Metrics ingest endpoint called');
     
     const payload = await req.json();
