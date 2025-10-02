@@ -33,12 +33,18 @@ interface RecentAnomaly {
   anomaly_score: number;
 }
 
+interface TopTargetedClient {
+  targeted_client: string;
+  failure_count: number;
+}
+
 export default function SiemDashboard() {
   const [throughputData, setThroughputData] = useState<TimeSeriesData[]>([]);
   const [failedAuthCount, setFailedAuthCount] = useState<number>(0);
   const [successfulConnections, setSuccessfulConnections] = useState<number>(0);
   const [anomalyTrendData, setAnomalyTrendData] = useState<AnomalyData[]>([]);
   const [recentAnomalies, setRecentAnomalies] = useState<RecentAnomaly[]>([]);
+  const [topTargetedClients, setTopTargetedClients] = useState<TopTargetedClient[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -141,6 +147,21 @@ export default function SiemDashboard() {
         }));
 
         setRecentAnomalies(recent);
+      }
+
+      // Fetch top targeted clients
+      const { data: topClientsData, error: topClientsError } = await supabase
+        .from('dashboard_metrics')
+        .select('*')
+        .eq('metric_key', 'top_targeted_clients')
+        .maybeSingle();
+
+      if (topClientsError) {
+        console.error('Error fetching top targeted clients:', topClientsError);
+      } else if (topClientsData && topClientsData.metric_value) {
+        const clientsValue = topClientsData.metric_value as unknown as { data: TopTargetedClient[] };
+        const clients = clientsValue.data || [];
+        setTopTargetedClients(clients);
       }
     } catch (error) {
       console.error('Error in fetchMetrics:', error);
@@ -538,6 +559,62 @@ export default function SiemDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Top Targeted Clients Widget */}
+        <Card className="bg-card/50 backdrop-blur border-destructive/20">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-destructive" />
+              <CardTitle>Top 5 Targeted Clients (Last 24 Hours)</CardTitle>
+            </div>
+            <CardDescription>Clients with the most failed authentication attempts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="h-[300px] flex items-center justify-center">
+                <p className="text-muted-foreground">Loading...</p>
+              </div>
+            ) : topTargetedClients.length === 0 ? (
+              <div className="h-[300px] flex items-center justify-center">
+                <p className="text-muted-foreground">No targeted clients data available yet</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart 
+                  data={topTargetedClients} 
+                  layout="vertical"
+                  margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                  <XAxis 
+                    type="number"
+                    stroke="hsl(var(--muted-foreground))"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <YAxis 
+                    type="category"
+                    dataKey="targeted_client"
+                    stroke="hsl(var(--muted-foreground))"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="failure_count" 
+                    fill="hsl(var(--destructive))" 
+                    radius={[0, 8, 8, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
 
       </div>
     </div>

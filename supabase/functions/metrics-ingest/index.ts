@@ -28,6 +28,47 @@ serve(async (req) => {
     }
 
     // Handle different metric types
+    // Top Targeted Clients - array of top 5 clients with failure counts
+    if (result.data && Array.isArray(result.data) && metric_key === 'top_targeted_clients') {
+      const time_epoch = parseInt(result.time) * 1000;
+      const topClients = result.data.slice(0, 5); // Ensure max 5 records
+
+      console.log('Processing top targeted clients metric:', { time_epoch, count: topClients.length });
+
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
+
+      const { data, error } = await supabase
+        .from('dashboard_metrics')
+        .upsert({
+          metric_key,
+          metric_value: { time_epoch, data: topClients },
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'metric_key'
+        })
+        .select();
+
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`Failed to store metric: ${error.message}`);
+      }
+
+      console.log('Successfully stored top targeted clients metric');
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Top targeted clients metric stored successfully',
+          metric_key,
+          data
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     if (result.total_failed_attempts !== undefined) {
       // Failed Auth Attempts - single value, no history
       const time_epoch = parseInt(result.time) * 1000;
