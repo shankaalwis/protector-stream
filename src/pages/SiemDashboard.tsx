@@ -161,7 +161,17 @@ export default function SiemDashboard() {
       } else if (topClientsData && topClientsData.metric_value) {
         const clientsValue = topClientsData.metric_value as unknown as { data: TopTargetedClient[] };
         const clients = clientsValue.data || [];
-        setTopTargetedClients(clients);
+        
+        // Pad array to always show 5 entries
+        const paddedClients = [...clients];
+        while (paddedClients.length < 5) {
+          paddedClients.push({
+            targeted_client: `Client ${paddedClients.length + 1}`,
+            failure_count: 0
+          });
+        }
+        
+        setTopTargetedClients(paddedClients.slice(0, 5));
       }
     } catch (error) {
       console.error('Error in fetchMetrics:', error);
