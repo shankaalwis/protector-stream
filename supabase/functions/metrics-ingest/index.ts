@@ -18,20 +18,14 @@ serve(async (req) => {
     const payload = await req.json();
     console.log('Received payload:', JSON.stringify(payload));
 
-    // Extract metric_key from Splunk's search_name
-    const metric_key = payload.search_name || 'message_throughput_60m';
+    // Extract metric_key from Splunk's search_name or use the provided metric_key
+    const metric_key = payload.metric_key || payload.search_name || 'message_throughput_60m';
     
-    // Extract time and value from Splunk's result object
-    const result = payload.result;
-    if (!result || !result.time) {
-      throw new Error('Invalid payload: missing result.time');
-    }
-
     // Handle different metric types
     // Top Targeted Clients - array of top 5 clients with failure counts
-    if (result.data && Array.isArray(result.data) && metric_key === 'top_targeted_clients') {
-      const time_epoch = parseInt(result.time) * 1000;
-      const topClients = result.data.slice(0, 5); // Ensure max 5 records
+    if (metric_key === 'top_targeted_clients' && payload.data && Array.isArray(payload.data)) {
+      const time_epoch = payload.timestamp || Date.now();
+      const topClients = payload.data.slice(0, 5); // Ensure max 5 records
 
       console.log('Processing top targeted clients metric:', { time_epoch, count: topClients.length });
 
@@ -67,6 +61,12 @@ serve(async (req) => {
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Extract time and value from Splunk's result object
+    const result = payload.result;
+    if (!result || !result.time) {
+      throw new Error('Invalid payload: missing result.time');
     }
     
     if (result.total_failed_attempts !== undefined) {
