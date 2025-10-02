@@ -659,7 +659,7 @@ export default function SiemDashboard() {
         </Card>
 
         {/* Top Busiest Topics Widget */}
-        <Card className="bg-card/50 backdrop-blur border-primary/20">
+        <Card className="bg-card/50 backdrop-blur border-primary/30">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-primary" />
@@ -677,12 +677,12 @@ export default function SiemDashboard() {
                 <p className="text-muted-foreground">No topic data available yet</p>
               </div>
             ) : (
-              <div className="overflow-auto">
+              <div className="overflow-auto rounded-md border-2 border-primary/40">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-b border-primary/20">
-                      <TableHead className="text-left font-semibold">Topic</TableHead>
-                      <TableHead className="text-right font-semibold">Message Count</TableHead>
+                    <TableRow className="border-b-2 border-primary/50 bg-primary/5">
+                      <TableHead className="text-left font-bold text-base py-4">Topic</TableHead>
+                      <TableHead className="text-right font-bold text-base py-4">Message Count</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -693,15 +693,15 @@ export default function SiemDashboard() {
                         <TableRow 
                           key={index}
                           className={`
-                            border-b border-border/30
-                            ${isEmptyRow ? 'opacity-30' : 'hover:bg-primary/5'}
-                            transition-colors
+                            border-b-2 border-primary/30
+                            ${isEmptyRow ? 'opacity-30' : 'hover:bg-primary/10'}
+                            transition-all duration-200
                           `}
                         >
-                          <TableCell className={`font-mono text-sm ${isEmptyRow ? 'text-muted-foreground' : 'text-foreground'}`}>
+                          <TableCell className={`font-mono text-sm py-4 ${isEmptyRow ? 'text-muted-foreground' : 'text-foreground font-medium'}`}>
                             {topic.topic_name}
                           </TableCell>
-                          <TableCell className={`text-right font-bold text-lg ${isEmptyRow ? 'text-muted-foreground' : 'text-primary'}`}>
+                          <TableCell className={`text-right font-bold text-xl py-4 ${isEmptyRow ? 'text-muted-foreground' : 'text-primary'}`}>
                             {typeof topic.message_count === 'string' ? parseInt(topic.message_count).toLocaleString() : topic.message_count.toLocaleString()}
                           </TableCell>
                         </TableRow>
