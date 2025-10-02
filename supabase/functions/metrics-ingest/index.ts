@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    // Force redeployment - v2
+    // Metrics ingest v2.1 - handles top_busiest_topics
     console.log('Metrics ingest endpoint called');
     
     const payload = await req.json();
@@ -21,6 +21,7 @@ serve(async (req) => {
 
     // Extract metric_key from Splunk's search_name or use the provided metric_key
     const metric_key = payload.metric_key || payload.search_name || 'message_throughput_60m';
+    console.log('Processing metric_key:', metric_key);
     
     // Handle different metric types
     // Top Targeted Clients - array of top 5 clients with failure counts
