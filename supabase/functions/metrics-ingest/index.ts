@@ -63,6 +63,47 @@ serve(async (req) => {
       );
     }
 
+    // Top Busiest Topics - array of top 5 busiest topics with message counts
+    if (metric_key === 'top_busiest_topics' && payload.data && Array.isArray(payload.data)) {
+      const time_epoch = payload.timestamp || Date.now();
+      const topTopics = payload.data.slice(0, 5); // Ensure max 5 records
+
+      console.log('Processing top busiest topics metric:', { time_epoch, count: topTopics.length });
+
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
+
+      const { data, error } = await supabase
+        .from('dashboard_metrics')
+        .upsert({
+          metric_key,
+          metric_value: { time_epoch, data: topTopics },
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'metric_key'
+        })
+        .select();
+
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`Failed to store metric: ${error.message}`);
+      }
+
+      console.log('Successfully stored top busiest topics metric');
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Top busiest topics metric stored successfully',
+          metric_key,
+          data
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Extract time and value from Splunk's result object
     const result = payload.result;
     if (!result || !result.time) {

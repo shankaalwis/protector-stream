@@ -38,6 +38,11 @@ interface TopTargetedClient {
   failure_count: number;
 }
 
+interface BusiestTopic {
+  topic_name: string;
+  message_count: number;
+}
+
 export default function SiemDashboard() {
   const [throughputData, setThroughputData] = useState<TimeSeriesData[]>([]);
   const [failedAuthCount, setFailedAuthCount] = useState<number>(0);
@@ -45,6 +50,7 @@ export default function SiemDashboard() {
   const [anomalyTrendData, setAnomalyTrendData] = useState<AnomalyData[]>([]);
   const [recentAnomalies, setRecentAnomalies] = useState<RecentAnomaly[]>([]);
   const [topTargetedClients, setTopTargetedClients] = useState<TopTargetedClient[]>([]);
+  const [busiestTopics, setBusiestTopics] = useState<BusiestTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -172,6 +178,31 @@ export default function SiemDashboard() {
         }
         
         setTopTargetedClients(paddedClients.slice(0, 5));
+      }
+
+      // Fetch top busiest topics
+      const { data: topTopicsData, error: topTopicsError } = await supabase
+        .from('dashboard_metrics')
+        .select('*')
+        .eq('metric_key', 'top_busiest_topics')
+        .maybeSingle();
+
+      if (topTopicsError) {
+        console.error('Error fetching top busiest topics:', topTopicsError);
+      } else if (topTopicsData && topTopicsData.metric_value) {
+        const topicsValue = topTopicsData.metric_value as unknown as { data: BusiestTopic[] };
+        const topics = topicsValue.data || [];
+        
+        // Pad array to always show 5 entries
+        const paddedTopics = [...topics];
+        while (paddedTopics.length < 5) {
+          paddedTopics.push({
+            topic_name: `Topic ${paddedTopics.length + 1}`,
+            message_count: 0
+          });
+        }
+        
+        setBusiestTopics(paddedTopics.slice(0, 5));
       }
     } catch (error) {
       console.error('Error in fetchMetrics:', error);
@@ -623,6 +654,62 @@ export default function SiemDashboard() {
                   />
                 </BarChart>
               </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Top Busiest Topics Widget */}
+        <Card className="bg-card/50 backdrop-blur border-primary/20">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" />
+              <CardTitle>Top 5 Busiest Topics (Last 60 Minutes)</CardTitle>
+            </div>
+            <CardDescription>Most active MQTT topics by message count</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="h-[300px] flex items-center justify-center">
+                <p className="text-muted-foreground">Loading...</p>
+              </div>
+            ) : busiestTopics.length === 0 ? (
+              <div className="h-[300px] flex items-center justify-center">
+                <p className="text-muted-foreground">No topic data available yet</p>
+              </div>
+            ) : (
+              <div className="overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-primary/20">
+                      <TableHead className="text-left font-semibold">Topic</TableHead>
+                      <TableHead className="text-right font-semibold">Message Count</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {busiestTopics.map((topic, index) => {
+                      const isEmptyRow = topic.message_count === 0;
+                      
+                      return (
+                        <TableRow 
+                          key={index}
+                          className={`
+                            border-b border-border/30
+                            ${isEmptyRow ? 'opacity-30' : 'hover:bg-primary/5'}
+                            transition-colors
+                          `}
+                        >
+                          <TableCell className={`font-mono text-sm ${isEmptyRow ? 'text-muted-foreground' : 'text-foreground'}`}>
+                            {topic.topic_name}
+                          </TableCell>
+                          <TableCell className={`text-right font-bold text-lg ${isEmptyRow ? 'text-muted-foreground' : 'text-primary'}`}>
+                            {typeof topic.message_count === 'string' ? parseInt(topic.message_count).toLocaleString() : topic.message_count.toLocaleString()}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
