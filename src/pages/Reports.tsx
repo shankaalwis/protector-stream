@@ -12,7 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { CalendarIcon, Download, FileText, FileSpreadsheet, Eye, Loader2, Shield } from 'lucide-react';
+import { CalendarIcon, Download, FileText, FileSpreadsheet, Eye, Loader2, Shield, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -27,6 +28,7 @@ interface ReportData {
 export default function Reports() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
@@ -115,11 +117,12 @@ export default function Reports() {
         }
       }
 
-      // Fetch anomalies if selected
+      // Fetch anomalies if selected (only where is_anomaly is true)
       if (includeAnomalies) {
         const { data: anomaliesData, error } = await supabase
           .from('anomaly_alerts')
           .select('*')
+          .eq('is_anomaly', true)
           .gte('timestamp', startDate.toISOString())
           .lte('timestamp', endDate.toISOString())
           .order('timestamp', { ascending: false });
@@ -285,13 +288,15 @@ export default function Reports() {
       doc.text('Detected Anomalies', 14, yPosition);
       yPosition += 5;
 
-      const anomaliesTableData = reportData.anomalies.map(anomaly => [
-        anomaly.client_id,
-        anomaly.packet_count.toString(),
-        anomaly.anomaly_score.toFixed(2),
-        anomaly.is_anomaly ? 'Yes' : 'No',
-        format(new Date(anomaly.timestamp), 'PPp')
-      ]);
+      const anomaliesTableData = reportData.anomalies
+        .filter(anomaly => anomaly.is_anomaly)
+        .map(anomaly => [
+          anomaly.client_id,
+          anomaly.packet_count.toString(),
+          anomaly.anomaly_score.toFixed(2),
+          'Yes',
+          format(new Date(anomaly.timestamp), 'PPp')
+        ]);
 
       autoTable(doc, {
         startY: yPosition,
@@ -337,22 +342,26 @@ export default function Reports() {
       csvContent += '\n';
     }
 
-    // Anomalies
-    if (reportData.anomalies.length > 0) {
+    // Anomalies (only true anomalies)
+    const trueAnomalies = reportData.anomalies.filter(a => a.is_anomaly);
+    if (trueAnomalies.length > 0) {
       csvContent += 'DETECTED ANOMALIES\n';
-      csvContent += 'Client ID,Packet Count,Anomaly Score,Is Anomaly,Timestamp\n';
-      reportData.anomalies.forEach(anomaly => {
-        csvContent += `"${anomaly.client_id}","${anomaly.packet_count}","${anomaly.anomaly_score}","${anomaly.is_anomaly}","${format(new Date(anomaly.timestamp), 'PPp')}"\n`;
+      csvContent += 'Client ID,Packet Count,Anomaly Score,Timestamp\n';
+      trueAnomalies.forEach(anomaly => {
+        csvContent += `"${anomaly.client_id}","${anomaly.packet_count}","${anomaly.anomaly_score}","${format(new Date(anomaly.timestamp), 'PPp')}"\n`;
       });
       csvContent += '\n';
     }
 
-    // Metrics
+    // Metrics (formatted properly)
     if (reportData.metrics.length > 0) {
       csvContent += 'DASHBOARD METRICS\n';
-      csvContent += 'Metric Key,Metric Value,Created At\n';
+      csvContent += 'Metric Key,Value,Created At\n';
       reportData.metrics.forEach(metric => {
-        csvContent += `"${metric.metric_key}","${JSON.stringify(metric.metric_value).replace(/"/g, '""')}","${format(new Date(metric.created_at), 'PPp')}"\n`;
+        const value = typeof metric.metric_value === 'object' 
+          ? Object.entries(metric.metric_value).map(([k, v]) => `${k}: ${v}`).join('; ')
+          : metric.metric_value;
+        csvContent += `"${metric.metric_key}","${value}","${format(new Date(metric.created_at), 'PPp')}"\n`;
       });
     }
 
@@ -383,6 +392,14 @@ export default function Reports() {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="relative overflow-hidden rounded-2xl border-2 border-[hsl(var(--banner-blue))] bg-gradient-to-r from-[hsl(var(--banner-blue))]/15 via-[hsl(var(--banner-blue))]/8 to-transparent p-6 shadow-lg">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/siem-dashboard')}
+            className="absolute left-4 top-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
           <div className="relative text-center space-y-3">
             <div className="flex items-center justify-center space-x-3">
               <Shield className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
@@ -586,7 +603,7 @@ export default function Reports() {
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">Anomalies Detected</p>
-                    <p className="text-3xl font-bold text-warning">{reportData.anomalies.length}</p>
+                    <p className="text-3xl font-bold text-warning">{reportData.anomalies.filter(a => a.is_anomaly).length}</p>
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">Metric Records</p>
@@ -676,11 +693,11 @@ export default function Reports() {
               </Card>
             )}
 
-            {/* Anomalies Table */}
-            {reportData.anomalies.length > 0 && (
+            {/* Anomalies Table - Only showing true anomalies */}
+            {reportData.anomalies.filter(a => a.is_anomaly).length > 0 && (
               <Card className="card-professional">
                 <CardHeader>
-                  <CardTitle className="text-heading">Detected Anomalies ({reportData.anomalies.length})</CardTitle>
+                  <CardTitle className="text-heading">Detected Anomalies ({reportData.anomalies.filter(a => a.is_anomaly).length})</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[400px]">
@@ -690,24 +707,38 @@ export default function Reports() {
                           <TableHead>Client ID</TableHead>
                           <TableHead>Packet Count</TableHead>
                           <TableHead>Anomaly Score</TableHead>
-                          <TableHead>Is Anomaly</TableHead>
+                          <TableHead>Risk Level</TableHead>
                           <TableHead>Timestamp</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {reportData.anomalies.map((anomaly) => (
-                          <TableRow key={anomaly.id}>
-                            <TableCell className="font-mono text-xs">{anomaly.client_id}</TableCell>
-                            <TableCell>{anomaly.packet_count}</TableCell>
-                            <TableCell className="font-medium">{anomaly.anomaly_score.toFixed(2)}</TableCell>
-                            <TableCell>
-                              <Badge className={anomaly.is_anomaly ? 'status-threat' : 'status-safe'}>
-                                {anomaly.is_anomaly ? 'Yes' : 'No'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{format(new Date(anomaly.timestamp), 'PPp')}</TableCell>
-                          </TableRow>
-                        ))}
+                        {reportData.anomalies
+                          .filter(anomaly => anomaly.is_anomaly)
+                          .map((anomaly) => (
+                            <TableRow key={anomaly.id}>
+                              <TableCell className="font-mono text-xs">{anomaly.client_id}</TableCell>
+                              <TableCell className="font-medium">{anomaly.packet_count.toLocaleString()}</TableCell>
+                              <TableCell>
+                                <Badge className={
+                                  anomaly.anomaly_score > 0.8 ? 'status-threat' : 
+                                  anomaly.anomaly_score > 0.6 ? 'bg-warning text-warning-foreground' : 
+                                  'bg-[hsl(var(--dark-sky-blue))] text-white'
+                                }>
+                                  {anomaly.anomaly_score.toFixed(3)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={
+                                  anomaly.anomaly_score > 0.8 ? 'status-threat' : 
+                                  anomaly.anomaly_score > 0.6 ? 'bg-warning text-warning-foreground' : 
+                                  'bg-[hsl(var(--dark-sky-blue))] text-white'
+                                }>
+                                  {anomaly.anomaly_score > 0.8 ? 'Critical' : anomaly.anomaly_score > 0.6 ? 'High' : 'Medium'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{format(new Date(anomaly.timestamp), 'PPp')}</TableCell>
+                            </TableRow>
+                          ))}
                       </TableBody>
                     </Table>
                   </ScrollArea>
@@ -715,35 +746,54 @@ export default function Reports() {
               </Card>
             )}
 
-            {/* Metrics Table */}
+            {/* Metrics Display - Visually Appealing */}
             {reportData.metrics.length > 0 && (
               <Card className="card-professional">
                 <CardHeader>
-                  <CardTitle className="text-heading">Dashboard Metrics ({reportData.metrics.length})</CardTitle>
+                  <CardTitle className="text-heading">Dashboard Metrics Summary</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[400px]">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Metric Key</TableHead>
-                          <TableHead>Metric Value</TableHead>
-                          <TableHead>Created At</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {reportData.metrics.map((metric) => (
-                          <TableRow key={metric.id}>
-                            <TableCell className="font-medium">{metric.metric_key}</TableCell>
-                            <TableCell className="font-mono text-xs max-w-md truncate">
-                              {JSON.stringify(metric.metric_value)}
-                            </TableCell>
-                            <TableCell>{format(new Date(metric.created_at), 'PPp')}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </ScrollArea>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {reportData.metrics.map((metric) => {
+                      const metricValue = metric.metric_value;
+                      const isObject = typeof metricValue === 'object' && metricValue !== null;
+                      
+                      return (
+                        <Card key={metric.id} className="bg-gradient-to-br from-background to-muted/20 border-2">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                              {metric.metric_key.split('_').map(word => 
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                              ).join(' ')}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-2">
+                            {isObject ? (
+                              <div className="space-y-2">
+                                {Object.entries(metricValue).map(([key, value]) => (
+                                  <div key={key} className="flex justify-between items-center">
+                                    <span className="text-xs text-muted-foreground">
+                                      {key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                                    </span>
+                                    <span className="text-lg font-bold text-[hsl(var(--dark-sky-blue))]">
+                                      {typeof value === 'number' ? value.toLocaleString() : String(value)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-3xl font-bold text-[hsl(var(--dark-sky-blue))]">
+                                {typeof metricValue === 'number' ? metricValue.toLocaleString() : String(metricValue)}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground pt-2 border-t">
+                              {format(new Date(metric.created_at), 'PPp')}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
                 </CardContent>
               </Card>
             )}
