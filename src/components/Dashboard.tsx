@@ -1157,79 +1157,117 @@ export const Dashboard = () => {
     </div>
   );
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Professional Navigation Header */}
-      <nav className="bg-card border-b border-border sticky top-0 z-40 backdrop-blur">
+      {/* Enhanced Professional Navigation Header with Glassmorphism */}
+      <nav className="bg-gradient-to-r from-card/95 via-card/98 to-card/95 border-b border-border/50 sticky top-0 z-50 backdrop-blur-xl shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
+          <div className="flex justify-between h-20">
+            {/* Logo and Brand */}
             <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
-                <Shield className="h-8 w-8 text-primary mr-3" />
-                <span className="text-xl font-bold text-foreground">AuraShield</span>
+              <div className="flex-shrink-0 flex items-center group cursor-pointer">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] rounded-full blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                  <Shield className="h-10 w-10 text-primary relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                </div>
+                <div className="ml-3">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-primary via-[hsl(var(--dark-sky-blue))] to-primary bg-clip-text text-transparent">
+                    AuraShield
+                  </span>
+                  <p className="text-xs text-muted-foreground font-medium">Security Platform</p>
+                </div>
               </div>
-              <div className="hidden md:ml-8 md:flex md:space-x-1">
+
+              {/* Desktop Navigation */}
+              <div className="hidden lg:ml-12 lg:flex lg:space-x-2">
                 <button
                   onClick={() => setCurrentPage('overview')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                  className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center space-x-2 relative group ${
                     currentPage === 'overview'
-                      ? 'bg-primary text-primary-foreground shadow-lg'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      ? 'bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] text-primary-foreground shadow-xl shadow-primary/30 scale-105'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/80 hover:scale-105'
                   }`}
                 >
                   <Home className="w-4 h-4" />
                   <span>Overview</span>
+                  {currentPage === 'overview' && (
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-primary rounded-full"></div>
+                  )}
                 </button>
+                
                 <button
                   onClick={() => setCurrentPage('alerts')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                  className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center space-x-2 relative group ${
                     currentPage === 'alerts'
-                      ? 'bg-primary text-primary-foreground shadow-lg'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      ? 'bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] text-primary-foreground shadow-xl shadow-primary/30 scale-105'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/80 hover:scale-105'
                   }`}
                 >
                   <Bell className="w-4 h-4" />
                   <span>Alerts</span>
+                  {alerts.filter(a => a.status === 'unresolved').length > 0 && (
+                    <Badge className="ml-1 h-5 min-w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs font-bold px-1.5 animate-pulse">
+                      {alerts.filter(a => a.status === 'unresolved').length}
+                    </Badge>
+                  )}
+                  {currentPage === 'alerts' && (
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-primary rounded-full"></div>
+                  )}
                 </button>
+                
                 <Link
                   to="/siem-dashboard"
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-muted-foreground hover:text-foreground hover:bg-accent"
+                  className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center space-x-2 text-muted-foreground hover:text-foreground hover:bg-accent/80 hover:scale-105"
                 >
                   <BarChart3 className="w-4 h-4" />
-                  <span>SIEM Dashboard</span>
+                  <span>SIEM</span>
                 </Link>
+                
                 <Link
                   to="/reports"
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-muted-foreground hover:text-foreground hover:bg-accent"
+                  className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center space-x-2 text-muted-foreground hover:text-foreground hover:bg-accent/80 hover:scale-105"
                 >
                   <FileText className="w-4 h-4" />
                   <span>Reports</span>
                 </Link>
+                
                 <button
                   onClick={() => setCurrentPage('devices')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                  className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center space-x-2 relative group ${
                     currentPage === 'devices'
-                      ? 'bg-primary text-primary-foreground shadow-lg'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      ? 'bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] text-primary-foreground shadow-xl shadow-primary/30 scale-105'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/80 hover:scale-105'
                   }`}
                 >
                   <Monitor className="w-4 h-4" />
                   <span>Devices</span>
+                  {currentPage === 'devices' && (
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-primary rounded-full"></div>
+                  )}
                 </button>
+                
                 <button
                   onClick={() => setCurrentPage('settings')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                  className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center space-x-2 relative group ${
                     currentPage === 'settings'
-                      ? 'bg-primary text-primary-foreground shadow-lg'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      ? 'bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] text-primary-foreground shadow-xl shadow-primary/30 scale-105'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/80 hover:scale-105'
                   }`}
                 >
                   <Settings className="w-4 h-4" />
                   <span>Settings</span>
+                  {currentPage === 'settings' && (
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-primary rounded-full"></div>
+                  )}
                 </button>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+
+            {/* Right Side Actions */}
+            <div className="flex items-center space-x-3">
+              {/* Aura Assistant Button */}
               <Button
                 variant="ghost"
                 size="sm"
@@ -1240,25 +1278,140 @@ export const Dashboard = () => {
                     setButtonClicked(false);
                   }, 300);
                 }}
-                className={`flex items-center space-x-2 relative transition-all hover:scale-105 ${
+                className={`flex items-center space-x-2 relative transition-all hover:scale-105 bg-gradient-to-r from-primary/10 to-[hsl(var(--dark-sky-blue))]/10 border border-primary/20 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/20 ${
                   buttonClicked ? 'button-morph' : ''
                 }`}
               >
                 <Sparkles className="w-4 h-4 text-primary" />
-                <span className="hidden sm:inline">Aura Assistant</span>
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                <span className="hidden sm:inline font-semibold">Aura Assistant</span>
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50"></span>
               </Button>
+
+              {/* User Profile Section */}
+              <div className="hidden md:flex items-center space-x-3 px-4 py-2 rounded-xl bg-accent/50 border border-border/50">
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-foreground">
+                    {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : 'User'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Administrator</p>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-[hsl(var(--dark-sky-blue))] flex items-center justify-center text-primary-foreground font-bold shadow-lg">
+                  {userProfile?.first_name?.charAt(0) || 'U'}
+                </div>
+              </div>
+
+              {/* Sign Out Button */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={signOut}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 hover:bg-destructive/10 hover:text-destructive border border-transparent hover:border-destructive/20 transition-all"
               >
                 <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
+                <span className="hidden sm:inline">Sign Out</span>
+              </Button>
+
+              {/* Mobile Menu Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden"
+              >
+                <Menu className="w-5 h-5" />
               </Button>
             </div>
           </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="lg:hidden py-4 space-y-2 border-t border-border/50 mt-2 animate-fade-in">
+              <button
+                onClick={() => {
+                  setCurrentPage('overview');
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all flex items-center space-x-3 ${
+                  currentPage === 'overview'
+                    ? 'bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent'
+                }`}
+              >
+                <Home className="w-5 h-5" />
+                <span>Overview</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  setCurrentPage('alerts');
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all flex items-center justify-between ${
+                  currentPage === 'alerts'
+                    ? 'bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Bell className="w-5 h-5" />
+                  <span>Alerts</span>
+                </div>
+                {alerts.filter(a => a.status === 'unresolved').length > 0 && (
+                  <Badge className="bg-destructive text-destructive-foreground">
+                    {alerts.filter(a => a.status === 'unresolved').length}
+                  </Badge>
+                )}
+              </button>
+              
+              <Link
+                to="/siem-dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all flex items-center space-x-3 text-muted-foreground hover:bg-accent"
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span>SIEM Dashboard</span>
+              </Link>
+              
+              <Link
+                to="/reports"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all flex items-center space-x-3 text-muted-foreground hover:bg-accent"
+              >
+                <FileText className="w-5 h-5" />
+                <span>Reports</span>
+              </Link>
+              
+              <button
+                onClick={() => {
+                  setCurrentPage('devices');
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all flex items-center space-x-3 ${
+                  currentPage === 'devices'
+                    ? 'bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent'
+                }`}
+              >
+                <Monitor className="w-5 h-5" />
+                <span>Devices</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  setCurrentPage('settings');
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all flex items-center space-x-3 ${
+                  currentPage === 'settings'
+                    ? 'bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent'
+                }`}
+              >
+                <Settings className="w-5 h-5" />
+                <span>Settings</span>
+              </button>
+            </div>
+          )}
         </div>
       </nav>
 
