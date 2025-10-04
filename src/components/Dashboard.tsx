@@ -1275,18 +1275,6 @@ export const Dashboard = () => {
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50"></span>
               </Button>
 
-              {/* User Profile Section */}
-              <div className="hidden md:flex items-center space-x-3 px-4 py-2 rounded-xl bg-accent/50 border border-border/50">
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-foreground">
-                    {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : 'User'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Administrator</p>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-[hsl(var(--dark-sky-blue))] flex items-center justify-center text-primary-foreground font-bold shadow-lg">
-                  {userProfile?.first_name?.charAt(0) || 'U'}
-                </div>
-              </div>
 
               {/* Sign Out Button */}
               <Button
