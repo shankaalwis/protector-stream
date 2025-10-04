@@ -147,18 +147,11 @@ serve(async (req) => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <h1 style="color: #dc2626; font-size: 24px; margin-bottom: 20px;">Security Alert Detected</h1>
               <p style="color: #666; font-size: 16px; margin-bottom: 20px;">
-                AuraShield has detected a security alert on your network.
+                AuraShield has detected a security alert on your network. Please check your dashboard immediately.
               </p>
-              <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin-bottom: 20px;">
-                <p style="margin: 0; color: #991b1b; font-weight: bold;">Alert Type: ${alert_type}</p>
-                <p style="margin: 5px 0 0 0; color: #7f1d1d;">${description}</p>
-              </div>
-              <p style="color: #666; font-size: 16px; margin-bottom: 20px;">
-                Please log in to your AuraShield dashboard to review and take action on this alert.
-              </p>
-              <a href="${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '') || ''}" 
+              <a href="https://protector.shankaalwis.dev/" 
                  style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                View Dashboard
+                Go to AuraShield
               </a>
               <p style="color: #999; font-size: 14px; margin-top: 30px;">
                 This is an automated security notification from AuraShield.
