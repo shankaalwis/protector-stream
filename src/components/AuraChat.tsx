@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Send, Bot, User, X, AlertCircle } from 'lucide-react';
+import guarddogImage from '@/assets/guarddog.png';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -189,8 +190,9 @@ const AuraChat = ({ isOpen, onClose }: AuraChatProps) => {
         {/* Header */}
         <div className="p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-              <Bot className="w-6 h-6 text-primary" />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center relative">
+              <div className="absolute inset-0 bg-primary/20 rounded-full blur-md"></div>
+              <img src={guarddogImage} alt="Aura" className="w-12 h-12 object-contain relative z-10 drop-shadow-lg" />
             </div>
             <div>
               <h2 className="text-xl font-semibold">Aura</h2>
@@ -218,8 +220,9 @@ const AuraChat = ({ isOpen, onClose }: AuraChatProps) => {
                 }`}
               >
                 {message.role === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-5 h-5 text-primary" />
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative">
+                    <div className="absolute inset-0 bg-primary/10 rounded-full blur-sm"></div>
+                    <img src={guarddogImage} alt="Aura" className="w-8 h-8 object-contain relative z-10 drop-shadow-md" />
                   </div>
                 )}
                 <div
@@ -244,8 +247,9 @@ const AuraChat = ({ isOpen, onClose }: AuraChatProps) => {
             {/* Typing Indicator */}
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
               <div className="flex gap-3 justify-start message-blossom">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-5 h-5 text-primary" />
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative">
+                  <div className="absolute inset-0 bg-primary/10 rounded-full blur-sm"></div>
+                  <img src={guarddogImage} alt="Aura" className="w-8 h-8 object-contain relative z-10 drop-shadow-md" />
                 </div>
                 <div className="rounded-lg px-4 py-3 bg-muted relative">
                   <div className="w-16 h-4 relative typing-light"></div>
@@ -300,8 +304,9 @@ const AuraChat = ({ isOpen, onClose }: AuraChatProps) => {
           <div className="p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5 flex-shrink-0">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Bot className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center relative">
+                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-md"></div>
+                  <img src={guarddogImage} alt="Aura" className="w-12 h-12 object-contain relative z-10 drop-shadow-lg" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold">Aura</h2>
@@ -338,8 +343,9 @@ const AuraChat = ({ isOpen, onClose }: AuraChatProps) => {
                   }`}
                 >
                   {message.role === 'assistant' && (
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-5 h-5 text-primary" />
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative">
+                      <div className="absolute inset-0 bg-primary/10 rounded-full blur-sm"></div>
+                      <img src={guarddogImage} alt="Aura" className="w-8 h-8 object-contain relative z-10 drop-shadow-md" />
                     </div>
                   )}
                   <div
@@ -364,8 +370,9 @@ const AuraChat = ({ isOpen, onClose }: AuraChatProps) => {
               {/* Typing Indicator */}
               {isLoading && messages[messages.length - 1]?.role === 'user' && (
                 <div className="flex gap-3 justify-start message-blossom">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-5 h-5 text-primary" />
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative">
+                    <div className="absolute inset-0 bg-primary/10 rounded-full blur-sm"></div>
+                    <img src={guarddogImage} alt="Aura" className="w-8 h-8 object-contain relative z-10 drop-shadow-md" />
                   </div>
                   <div className="rounded-lg px-4 py-3 bg-muted relative">
                     <div className="w-16 h-4 relative typing-light"></div>
