@@ -766,6 +766,11 @@ export default function Reports() {
                     <Activity className="h-6 w-6 text-[hsl(var(--dark-sky-blue))]" />
                     Dashboard Metrics Summary
                   </CardTitle>
+                  {reportData.metrics.length > 0 && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Latest metrics as of {format(new Date(Math.max(...reportData.metrics.map(m => new Date(m.created_at).getTime()))), 'PPP \'at\' HH:mm')}
+                    </p>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-8">
                   {/* Key Metrics Grid */}
