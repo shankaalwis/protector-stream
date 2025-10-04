@@ -76,8 +76,8 @@ const AlertDetailCard = ({
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'bg-red-500 text-white border-red-600';
-      case 'high': return 'bg-orange-500 text-white border-orange-600';
+      case 'critical': return 'bg-red-700 text-white border-red-700';
+      case 'high': return 'bg-red-500 text-white border-red-500';
       case 'medium': return 'bg-yellow-500 text-yellow-900 border-yellow-600';
       case 'low': return 'bg-green-500 text-white border-green-600';
       default: return 'bg-gray-500 text-white border-gray-600';

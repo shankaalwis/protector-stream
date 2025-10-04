@@ -453,3 +453,4 @@ const AnomalyChart: React.FC = () => {
 };
 
 export default AnomalyChart;
+

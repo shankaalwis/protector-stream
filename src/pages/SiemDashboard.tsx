@@ -8,6 +8,7 @@ import { Activity, Shield, TrendingUp, ArrowLeft, Users, AlertTriangle } from "l
 import { format, subDays, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ModeToggle } from "@/components/ModeToggle";
 
 interface DashboardMetric {
   id: string;
@@ -219,8 +220,7 @@ export default function SiemDashboard() {
   useEffect(() => {
     fetchMetrics();
 
-    // Set up real-time subscription for both metrics
-    const channel = supabase
+    const metricsChannel = supabase
       .channel('dashboard-metrics-changes')
       .on(
         'postgres_changes',
@@ -229,73 +229,81 @@ export default function SiemDashboard() {
           schema: 'public',
           table: 'dashboard_metrics'
         },
-        (payload) => {
-          console.log('Real-time metric update:', payload);
+        () => {
+          fetchMetrics();
+        }
+      )
+      .subscribe();
+
+    const anomaliesChannel = supabase
+      .channel('anomaly-alerts-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'anomaly_alerts'
+        },
+        () => {
           fetchMetrics();
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(metricsChannel);
+      supabase.removeChannel(anomaliesChannel);
     };
   }, []);
 
-  // Determine gauge color based on thresholds
-  const getAuthGaugeColor = (value: number) => {
-    if (value <= 500) return 'hsl(var(--success))'; // Green
-    if (value <= 2500) return 'hsl(var(--warning))'; // Yellow
-    return 'hsl(var(--destructive))'; // Red
-  };
-
-  const getConnectionsGaugeColor = (value: number) => {
-    if (value > 25) return 'hsl(var(--destructive))'; // Red - critical (too many)
-    if (value < 5) return 'hsl(var(--warning))'; // Yellow - warning (too few)
-    return 'hsl(var(--success))'; // Green - good (5-25)
-  };
-
-  const authGaugeData = [
-    {
-      name: 'Failed Attempts',
-      value: failedAuthCount,
-      fill: getAuthGaugeColor(failedAuthCount),
-    },
-  ];
-
-  const connectionsGaugeData = [
-    {
-      name: 'Successful Connections',
-      value: successfulConnections,
-      fill: getConnectionsGaugeColor(successfulConnections),
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header with Back Button */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Shield className="h-10 w-10 text-primary" />
-            <div>
-              <h1 className="text-4xl font-bold text-foreground">🛡️ SIEM Dashboard: Threat Monitor</h1>
-              <p className="text-muted-foreground mt-2">Real-time security intelligence and event monitoring</p>
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-7xl space-y-8 px-4 py-12 sm:px-6 lg:px-8">
+        <Card className="border border-border/60 bg-card/90 shadow-sm">
+          <CardContent className="flex flex-col gap-6 p-6">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-start gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <img src="/projectlogov3.png" alt="ARES logo" className="h-10 w-10" />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">ARES</span>
+                  <h1 className="text-3xl font-semibold text-foreground">SIEM telemetry</h1>
+                  <p className="text-sm text-muted-foreground">Real-time security intelligence and event monitoring pipeline.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <ModeToggle />
+                <Button onClick={() => navigate('/')} variant="outline" className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to dashboard
+                </Button>
+              </div>
             </div>
-          </div>
-          <Button
-            onClick={() => navigate('/')}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
-        </div>
+            <div className="grid gap-3 text-sm sm:grid-cols-3">
+              <div className="rounded-xl border border-border/60 bg-background/60 p-4">
+                <span className="text-xs uppercase tracking-wide text-muted-foreground">Throughput avg</span>
+                <p className="text-2xl font-semibold text-foreground">{averageThroughput} msg/s</p>
+                <p className="text-xs text-muted-foreground">Across last 60 minutes</p>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-background/60 p-4">
+                <span className="text-xs uppercase tracking-wide text-muted-foreground">Failed auth</span>
+                <p className="text-2xl font-semibold text-foreground">{failedAuthCount}</p>
+                <p className="text-xs text-muted-foreground">Detected in rolling window</p>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-background/60 p-4">
+                <span className="text-xs uppercase tracking-wide text-muted-foreground">Anomaly bursts</span>
+                <p className="text-2xl font-semibold text-foreground">{totalAnomalies}</p>
+                <p className="text-xs text-muted-foreground">Across past 7 days</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Main Metrics Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Message Throughput Chart */}
-          <Card className="lg:col-span-2 bg-card/50 backdrop-blur border-primary/20">
+          <Card className="lg:col-span-2 border border-border/60 bg-card/90 shadow-sm">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-primary" />
@@ -353,7 +361,7 @@ export default function SiemDashboard() {
           </Card>
 
           {/* Authentication Failures Gauge */}
-          <Card className="bg-card/50 backdrop-blur border-destructive/20">
+          <Card className="border border-border/60 bg-card/90 shadow-sm">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -424,7 +432,7 @@ export default function SiemDashboard() {
           </Card>
 
           {/* Successful Connections Gauge */}
-          <Card className="bg-card/50 backdrop-blur border-primary/20">
+          <Card className="border border-border/60 bg-card/90 shadow-sm">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-primary" />
@@ -498,7 +506,7 @@ export default function SiemDashboard() {
         {/* Anomaly Trend Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Anomaly Trend Bar Chart */}
-          <Card className="bg-card/50 backdrop-blur border-primary/20">
+          <Card className="border border-border/60 bg-card/90 shadow-sm">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
@@ -548,7 +556,7 @@ export default function SiemDashboard() {
           </Card>
 
           {/* Recent Incidents Table */}
-          <Card className="bg-card/50 backdrop-blur border-destructive/20">
+          <Card className="border border-border/60 bg-card/90 shadow-sm">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -602,7 +610,7 @@ export default function SiemDashboard() {
         </div>
 
         {/* Top Targeted Clients Widget */}
-        <Card className="bg-card/50 backdrop-blur border-destructive/20">
+        <Card className="border border-border/60 bg-card/90 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-destructive" />
@@ -659,7 +667,7 @@ export default function SiemDashboard() {
         </Card>
 
         {/* Top Busiest Topics Widget */}
-        <Card className="bg-card/50 backdrop-blur border-primary/30">
+        <Card className="border border-border/60 bg-card/90 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-primary" />
@@ -718,3 +726,6 @@ export default function SiemDashboard() {
     </div>
   );
 }
+
+
+

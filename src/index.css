@@ -1,314 +1,477 @@
+@import url("https://fonts.cdnfonts.com/css/aptos");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Professional Design System - Clean, modern interface */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @layer base {
   :root {
-    /* Professional Color Palette */
-    --background: 0 0% 100%;                    /* Pure white */
-    --background-subtle: 240 20% 99%;           /* Very subtle light gray */
-    --foreground: 0 0% 20%;                     /* Dark gray #333333 */
+    --font-sans: "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-display: "Aptos Display", "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Aptos Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+
+    --background: 0 0% 100%;
+    --background-subtle: 216 56% 97%;
+    --foreground: 222 40% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 20%;
+    --card-foreground: 222 40% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+    --popover-foreground: 222 40% 16%;
 
-    /* Dark Sky Blue Primary Theme */
-    --primary: 200 100% 30%;                       /* Dark Sky Blue primary */
-    --primary-foreground: 0 0% 100%;               /* White text */
-    --primary-hover: 200 100% 25%;                 /* Darker on hover */
+    --primary: 220 72% 38%;
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 220 72% 32%;
 
-    /* Dark Sky Blue Banner Colors */
-    --banner-blue: 200 100% 30%;                   /* Dark Sky Blue for banners */
-    --banner-blue-light: 200 100% 35%;            /* Lighter Dark Sky Blue */
-    --banner-blue-foreground: 0 0% 100%;          /* White text on Dark Sky Blue */
-    
-    /* Unified Dark Sky Blue Palette */
-    --dark-sky-blue: 200 100% 30%;                 /* Main dark sky blue */
-    --dark-sky-blue-light: 200 100% 35%;          /* Light variant */
-    --dark-sky-blue-dark: 200 100% 25%;           /* Dark variant */
-    --dark-sky-blue-lighter: 200 100% 40%;        /* Lighter variant */
-    --dark-sky-blue-subtle: 200 50% 85%;          /* Subtle backgrounds */
-    --dark-sky-blue-muted: 200 30% 70%;           /* Muted variant */
+    --secondary: 215 51% 92%;
+    --secondary-foreground: 222 35% 28%;
 
-    /* Status Colors */
-    --success: 134 61% 41%;                     /* Neon green #28A745 */
-    --success-foreground: 0 0% 100%;
-    --warning: 45 100% 51%;                     /* Warm orange #FFC107 */
-    --warning-foreground: 0 0% 20%;
-    --danger: 354 70% 54%;                      /* Stark red #DC3545 */
-    --danger-foreground: 0 0% 100%;
+    --accent: 208 88% 45%;
+    --accent-foreground: 210 40% 98%;
 
-    /* Red Alert Colors for Triggered Alerts */
-    --alert-red: 0 84% 60%;                     /* Bright red #F56565 */
-    --alert-red-dark: 0 84% 50%;               /* Darker red #E53E3E */
-    --alert-red-light: 0 84% 70%;              /* Lighter red #FC8181 */
-    --alert-red-subtle: 0 50% 90%;             /* Subtle red background */
-    --alert-red-foreground: 0 0% 100%;         /* White text */
+    --muted: 214 38% 95%;
+    --muted-foreground: 220 26% 35%;
 
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 0 0% 20%;
+    --success: 158 55% 42%;
+    --success-foreground: 210 40% 98%;
 
-    --muted: 240 5% 96%;
-    --muted-foreground: 0 0% 45%;
+    --warning: 40 94% 52%;
+    --warning-foreground: 24 74% 16%;
 
-    --accent: 200 100% 30%;                        /* Dark sky blue accent */
-    --accent-foreground: 0 0% 100%;
+    --danger: 0 76% 52%;
+    --danger-foreground: 210 40% 98%;
 
-    --destructive: 354 70% 54%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 76% 52%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 240 6% 75%;                           /* Darker borders */
-    --input: 240 6% 75%;                            /* Darker input borders */
-    --input-focus: 200 100% 30%;                   /* Dark sky blue focus */
-    --ring: 200 100% 30%;                          /* Dark sky blue ring */
+    --border: 215 28% 82%;
+    --input: 215 28% 82%;
+    --input-focus: 220 72% 38%;
+    --ring: 220 82% 45%;
 
-    /* Professional Radius */
-    --radius: 1rem;                             /* rounded-2xl for modern look */
+    --radius: 1.1rem;
 
-    /* Shadows for depth */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-sm: 0 6px 20px -12px rgba(20, 58, 112, 0.2);
+    --shadow-md: 0 22px 60px -32px rgba(20, 58, 112, 0.25);
+    --shadow-lg: 0 38px 110px -42px rgba(15, 45, 96, 0.3);
 
-    /* Dark Sky Blue gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--dark-sky-blue)), hsl(var(--dark-sky-blue-dark)));
-    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(134 61% 35%));
-    --gradient-warning: linear-gradient(135deg, hsl(var(--warning)), hsl(45 100% 45%));
-    --gradient-danger: linear-gradient(135deg, hsl(var(--danger)), hsl(354 70% 48%));
+    --gradient-primary: linear-gradient(135deg, rgba(46, 112, 200, 0.8), rgba(24, 64, 140, 0.85));
+    --gradient-success: linear-gradient(135deg, rgba(30, 158, 120, 0.82), rgba(20, 130, 108, 0.85));
+    --gradient-warning: linear-gradient(135deg, rgba(255, 179, 71, 0.82), rgba(240, 140, 32, 0.85));
+    --gradient-danger: linear-gradient(135deg, rgba(226, 78, 78, 0.82), rgba(184, 38, 38, 0.85));
 
-    --sidebar-background: 0 0% 98%;
+    /* legacy tokens reused across components */
+    --dark-sky-blue: 220 72% 38%;
+    --dark-sky-blue-light: 220 72% 44%;
+    --dark-sky-blue-dark: 220 72% 28%;
+    --dark-sky-blue-lighter: 220 72% 50%;
+    --dark-sky-blue-subtle: 214 45% 96%;
+    --dark-sky-blue-muted: 214 36% 88%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --banner-blue: 220 72% 38%;
+    --banner-blue-light: 220 72% 46%;
+    --banner-blue-foreground: 210 40% 98%;
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 216 42% 97%;
+    --sidebar-foreground: 222 45% 20%;
+    --sidebar-primary: 220 72% 38%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 60% 88%;
+    --sidebar-accent-foreground: 222 40% 24%;
+    --sidebar-border: 214 30% 80%;
+    --sidebar-ring: 220 82% 45%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 26% 10%;
+    --background-subtle: 220 24% 14%;
+    --foreground: 210 45% 94%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 24% 13%;
+    --card-foreground: 210 40% 90%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 24% 13%;
+    --popover-foreground: 210 40% 90%;
 
-    /* Dark Sky Blue Primary Theme for Dark Mode */
-    --primary: 200 100% 45%;                       /* Lighter dark sky blue for dark mode */
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 200 100% 40%;
+    --primary: 215 45% 31%;
+    --primary-foreground: 210 45% 96%;
+    --primary-hover: 192 67% 40%;
 
-    /* Dark Sky Blue Banner Colors for dark mode */
-    --banner-blue: 200 100% 45%;                   /* Lighter Dark Sky Blue for dark mode */
-    --banner-blue-light: 200 100% 50%;            /* Even lighter Dark Sky Blue */
-    --banner-blue-foreground: 0 0% 100%;          /* White text on Dark Sky Blue */
-    
-    /* Unified Dark Sky Blue Palette for Dark Mode */
-    --dark-sky-blue: 200 100% 45%;                 /* Main dark sky blue for dark mode */
-    --dark-sky-blue-light: 200 100% 50%;          /* Light variant */
-    --dark-sky-blue-dark: 200 100% 40%;           /* Dark variant */
-    --dark-sky-blue-lighter: 200 100% 55%;        /* Lighter variant */
-    --dark-sky-blue-subtle: 200 50% 90%;          /* Subtle backgrounds */
-    --dark-sky-blue-muted: 200 30% 80%;           /* Muted variant */
+    --secondary: 210 36% 30%;
+    --secondary-foreground: 210 40% 94%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --accent: 200 72% 48%;
+    --accent-foreground: 210 45% 96%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 18% 22%;
+    --muted-foreground: 220 14% 70%;
 
-    --accent: 200 100% 45%;                        /* Dark sky blue accent for dark mode */
-    --accent-foreground: 0 0% 100%;
+    --success: 156 55% 45%;
+    --warning: 38 82% 52%;
+    --danger: 0 70% 46%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --border: 218 24% 22%;
+    --input: 218 24% 22%;
+    --input-focus: 192 67% 46%;
+    --ring: 192 67% 52%;
 
-    --border: 217.2 32.6% 25%;                      /* Darker borders in dark mode */
-    --input: 217.2 32.6% 25%;                       /* Darker input borders */
-    --ring: 200 100% 45%;                           /* Dark sky blue ring for dark mode */
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 200 100% 45%;               /* Dark sky blue sidebar */
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 200 100% 45%;                  /* Dark sky blue sidebar ring */
+    --shadow-sm: 0 12px 36px -24px rgba(5, 16, 26, 0.55);
+    --shadow-md: 0 28px 70px -36px rgba(8, 28, 43, 0.65);
+    --shadow-lg: 0 50px 120px -42px rgba(4, 18, 30, 0.7);
+
+    --gradient-primary: linear-gradient(135deg, rgba(10, 64, 84, 0.9), rgba(16, 104, 130, 0.9));
+    --gradient-success: linear-gradient(135deg, rgba(20, 108, 96, 0.9), rgba(10, 138, 108, 0.9));
+    --gradient-warning: linear-gradient(135deg, rgba(176, 122, 32, 0.9), rgba(209, 150, 40, 0.9));
+    --gradient-danger: linear-gradient(135deg, rgba(140, 40, 40, 0.9), rgba(188, 58, 58, 0.9));
+
+    --dark-sky-blue: 200 68% 42%;
+    --dark-sky-blue-light: 200 68% 48%;
+    --dark-sky-blue-dark: 200 68% 30%;
+    --dark-sky-blue-lighter: 200 68% 54%;
+    --dark-sky-blue-subtle: 216 30% 18%;
+    --dark-sky-blue-muted: 216 24% 26%;
+
+    --banner-blue: 200 68% 42%;
+    --banner-blue-light: 200 70% 50%;
+    --banner-blue-foreground: 210 45% 96%;
+
+    --sidebar-background: 220 26% 12%;
+    --sidebar-foreground: 210 45% 94%;
+    --sidebar-primary: 200 68% 45%;
+    --sidebar-primary-foreground: 210 45% 96%;
+    --sidebar-accent: 210 34% 28%;
+    --sidebar-accent-foreground: 210 45% 92%;
+    --sidebar-border: 218 24% 20%;
+    --sidebar-ring: 200 72% 50%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
+    font-family: var(--font-sans);
+    @apply bg-background text-foreground min-h-screen antialiased;
+    position: relative;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(68% 68% at 22% 18%, rgba(66, 128, 220, 0.12), transparent 72%),
+      radial-gradient(60% 60% at 82% 12%, rgba(142, 186, 255, 0.16), transparent 78%),
+      linear-gradient(140deg, rgba(247, 249, 255, 0.96), rgba(235, 242, 255, 0.94));
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
-}
 
-@layer components {
-  /* Professional Button Styles */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(70, 120, 210, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(70, 120, 210, 0.08) 1px, transparent 1px);
+    background-size: 100px 100px;
+    opacity: 0.28;
+    mix-blend-mode: normal;
+    z-index: -1;
+  }
+
+  .dark body {
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(60% 60% at 20% 20%, rgba(16, 110, 140, 0.12), transparent 65%),
+      radial-gradient(55% 55% at 80% 10%, rgba(10, 40, 65, 0.4), transparent 70%),
+      linear-gradient(120deg, rgba(8, 18, 28, 0.95), rgba(6, 14, 23, 0.95));
+  }
+
+  .dark body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(32, 60, 80, 0.12) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(32, 60, 80, 0.12) 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0.4;
+    mix-blend-mode: soft-light;
+    z-index: -1;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-tech-mono {
+    font-family: var(--font-mono);
+  }
+
+  .card-professional {
+    border-radius: calc(var(--radius) + 0.2rem);
+    border: 1px solid hsl(var(--border));
+    background: rgba(255, 255, 255, 0.92);
+    color: hsl(var(--card-foreground));
+    backdrop-filter: blur(22px);
+    box-shadow: 0 18px 60px -32px rgba(36, 82, 160, 0.22);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dark .card-professional {
+    background: rgba(14, 22, 32, 0.9);
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 28px 90px -48px rgba(5, 20, 32, 0.65);
+  }
+
+  .card-professional::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, transparent 35%, rgba(115, 160, 245, 0.16), rgba(66, 120, 210, 0.14));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .card-professional:hover::after,
+  .card-professional:focus-within::after {
+    opacity: 1;
+  }
+
   .btn-professional {
-    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-8 py-3 text-sm font-medium;
-    @apply transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
-    @apply disabled:pointer-events-none disabled:opacity-50;
-    @apply shadow-sm hover:shadow-md;
+    @apply inline-flex items-center justify-center gap-2 rounded-[calc(var(--radius)-0.4rem)] px-6 py-3 text-sm font-medium tracking-[0.14em] uppercase transition-all duration-300;
+    background: var(--gradient-primary);
+    color: hsl(var(--primary-foreground));
+    box-shadow: 0 18px 48px -28px rgba(9, 100, 128, 0.55);
   }
 
-  .btn-primary {
-    @apply btn-professional bg-primary text-primary-foreground hover:bg-primary/90;
-    @apply active:scale-95 transform;
+  .btn-professional:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+    box-shadow: 0 24px 62px -26px rgba(11, 130, 158, 0.6);
   }
 
   .btn-success {
-    @apply btn-professional bg-success text-success-foreground hover:bg-success/90;
+    background: var(--gradient-success);
+    color: hsl(var(--success-foreground));
   }
 
   .btn-warning {
-    @apply btn-professional bg-warning text-warning-foreground hover:bg-warning/90;
+    background: var(--gradient-warning);
+    color: hsl(var(--warning-foreground));
   }
 
   .btn-danger {
-    @apply btn-professional bg-danger text-danger-foreground hover:bg-danger/90;
+    background: var(--gradient-danger);
+    color: hsl(var(--danger-foreground));
   }
 
-  /* Professional Card Styles */
-  .card-professional {
-    @apply rounded-2xl border bg-card text-card-foreground shadow-md hover:shadow-lg transition-shadow duration-200;
-  }
-
-  /* Status Badge with Pulse Animation */
   .status-badge {
-    @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold;
-    @apply transition-all duration-200;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    border: 1px solid transparent;
   }
 
   .status-safe {
-    @apply status-badge bg-success text-success-foreground;
-    animation: pulse-green 2s infinite;
+    background: rgba(28, 120, 110, 0.18);
+    color: hsl(var(--success));
+    border-color: rgba(28, 120, 110, 0.35);
+    animation: pulse-green 2.6s infinite;
   }
 
   .status-threat {
-    @apply status-badge bg-warning text-warning-foreground;
-    animation: pulse-orange 2s infinite;
+    background: rgba(181, 121, 38, 0.16);
+    color: hsl(var(--warning));
+    border-color: rgba(181, 121, 38, 0.35);
+    animation: pulse-orange 2.6s infinite;
   }
 
   .status-blocked {
-    @apply status-badge bg-danger text-danger-foreground;
-    animation: pulse-red 2s infinite;
+    background: rgba(158, 43, 43, 0.18);
+    color: hsl(var(--danger));
+    border-color: rgba(158, 43, 43, 0.38);
+    animation: pulse-red 2.6s infinite;
   }
 
   .status-triggered {
-    @apply bg-[hsl(var(--alert-red))] text-[hsl(var(--alert-red-foreground))] px-3 py-1 rounded-full text-xs font-medium border border-[hsl(var(--alert-red-dark))];
-    animation: pulse-alert-red 2s infinite;
+    background: rgba(158, 43, 43, 0.2);
+    color: hsl(var(--danger-foreground));
+    border-color: rgba(158, 43, 43, 0.45);
+    animation: pulse-red 2.6s infinite;
   }
 
-  /* Professional Input Styles */
   .input-professional {
-    @apply flex h-12 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm;
-    @apply ring-offset-background placeholder:text-muted-foreground;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-focus focus-visible:ring-offset-2;
-    @apply disabled:cursor-not-allowed disabled:opacity-50;
-    @apply transition-all duration-200;
+    display: flex;
+    height: 3.25rem;
+    width: 100%;
+    border-radius: calc(var(--radius) - 0.45rem);
+    border: 1px solid hsl(var(--border));
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.28s ease;
+    color: hsl(var(--foreground));
+    box-shadow: 0 12px 32px -24px rgba(36, 82, 160, 0.2);
   }
 
-  /* Header Styles */
+  .input-professional:focus-visible {
+    outline: none;
+    border-color: hsl(var(--input-focus));
+    box-shadow: 0 0 0 3px hsl(var(--input-focus) / 0.2), 0 18px 42px -26px rgba(36, 82, 160, 0.25);
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .dark .input-professional {
+    background: rgba(10, 18, 26, 0.75);
+    box-shadow: none;
+  }
+
+  .dark .input-professional:focus-visible {
+    background: rgba(12, 24, 36, 0.85);
+  }
+
   .header-professional {
-    @apply fixed top-0 left-0 right-0 z-50 h-16 bg-background border-b shadow-sm;
-    @apply flex items-center justify-between px-8;
+    position: fixed;
+    inset: 0 auto auto 0;
+    right: 0;
+    height: 4.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.4rem;
+    background: rgba(248, 251, 255, 0.92);
+    border-bottom: 1px solid hsl(var(--border));
+    box-shadow: 0 26px 70px -34px rgba(36, 82, 160, 0.28);
+    backdrop-filter: blur(24px);
+    z-index: 40;
   }
 
-  /* Sidebar Styles */
+  .dark .header-professional {
+    background: rgba(12, 18, 26, 0.82);
+    box-shadow: 0 18px 45px -30px rgba(5, 16, 26, 0.6);
+  }
+
   .sidebar-professional {
-    @apply fixed left-0 top-16 bottom-0 w-64 bg-background border-r shadow-lg;
-    @apply transition-transform duration-300 ease-in-out;
+    position: fixed;
+    top: 4.5rem;
+    bottom: 0;
+    left: 0;
+    width: 18rem;
+    background: rgba(242, 247, 255, 0.96);
+    border-right: 1px solid hsl(var(--border));
+    box-shadow: 0 20px 55px -36px rgba(36, 82, 160, 0.24);
+    backdrop-filter: blur(26px);
+    transition: transform 0.28s ease;
+  }
+
+  .dark .sidebar-professional {
+    background: rgba(8, 14, 22, 0.88);
+    box-shadow: 0 16px 42px -32px rgba(5, 16, 26, 0.55);
   }
 
   .sidebar-collapsed {
-    @apply -translate-x-full;
+    transform: translateX(-100%);
   }
 
-  /* Main Content Area */
   .main-content {
-    @apply pt-16 pl-0 min-h-screen transition-all duration-300;
+    padding-top: 4.5rem;
+    min-height: 100vh;
+    transition: padding-left 0.3s ease;
   }
 
   .main-content-with-sidebar {
-    @apply pl-64;
+    padding-left: 18rem;
   }
 }
 
 @layer utilities {
-  /* Custom Keyframes for Status Animations */
   @keyframes pulse-green {
     0%, 100% {
-      box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
+      box-shadow: 0 0 0 0 hsl(var(--success) / 0.25);
     }
-    70% {
-      box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+    50% {
+      box-shadow: 0 0 0 14px hsl(var(--success) / 0);
     }
   }
 
   @keyframes pulse-orange {
     0%, 100% {
-      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+      box-shadow: 0 0 0 0 hsl(var(--warning) / 0.25);
     }
-    70% {
-      box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+    50% {
+      box-shadow: 0 0 0 14px hsl(var(--warning) / 0);
     }
   }
 
   @keyframes pulse-red {
     0%, 100% {
-      box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+      box-shadow: 0 0 0 0 hsl(var(--danger) / 0.28);
     }
-    70% {
-      box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
-    }
-  }
-
-  @keyframes pulse-alert-red {
-    0%, 100% {
-      box-shadow: 0 0 0 0 hsl(var(--alert-red) / 0.4);
-    }
-    70% {
-      box-shadow: 0 0 0 10px hsl(var(--alert-red) / 0);
+    50% {
+      box-shadow: 0 0 0 16px hsl(var(--danger) / 0);
     }
   }
 
-  /* Spacing utilities for generous padding */
-  .spacing-generous {
-    @apply p-8;
+  .glow-ring {
+    position: relative;
   }
 
-  .spacing-generous-x {
-    @apply px-12;
+  .glow-ring::after {
+    content: "";
+    position: absolute;
+    inset: -35%;
+    background: radial-gradient(circle, rgba(24, 118, 146, 0.3), transparent 55%);
+    filter: blur(34px);
+    opacity: 0.45;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
   }
 
-  /* Typography utilities */
-  .text-heading {
-    @apply text-xl font-semibold text-[hsl(var(--dark-sky-blue))];
+  .glow-ring:hover::after,
+  .glow-ring:focus-visible::after {
+    opacity: 0.9;
   }
 
-  .text-subheading {
-    @apply text-lg font-medium text-[hsl(var(--dark-sky-blue))];
+  .tech-divider {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(32, 92, 118, 0.4), transparent);
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid hsl(var(--border));
+    border-radius: calc(var(--radius) + 0.4rem);
+    backdrop-filter: blur(30px);
+    box-shadow: 0 34px 90px -46px rgba(36, 82, 160, 0.26);
+  }
+
+  .dark .glass-panel {
+    background: rgba(6, 12, 20, 0.82);
+    box-shadow: 0 36px 88px -48px rgba(5, 16, 26, 0.6);
+  }
+
+  .neon-text {
+    text-shadow: 0 0 20px rgba(22, 120, 148, 0.45);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +25,6 @@ import {
   X,
   ShieldCheck,
   Edit,
-  Menu,
   Home,
   Bell,
   Lock,
@@ -33,7 +32,12 @@ import {
   ChevronDown,
   ChevronRight,
   Send,
-  MessageSquare
+  MessageSquare,
+  FileText,
+  Download,
+  Filter,
+  Calendar,
+  History
 } from 'lucide-react';
 
 interface Device {
@@ -64,7 +68,42 @@ interface NetworkMetrics {
   network_activity: Array<{timestamp: string; data_rate: number}>;
 }
 
-type Page = 'overview' | 'alerts' | 'devices' | 'settings';
+type ReportType = 'incident-summary' | 'device-inventory' | 'network-health' | 'compliance';
+type ReportFormat = 'csv' | 'json';
+type ReportDateRange = '24h' | '7d' | '30d' | 'custom';
+
+interface ReportConfig {
+  reportType: ReportType;
+  format: ReportFormat;
+  dateRange: ReportDateRange;
+  customStartDate: string;
+  customEndDate: string;
+  severities: SecurityAlert['severity'][];
+  statuses: SecurityAlert['status'][];
+  deviceStatuses: Device['status'][];
+  includeAIInsights: boolean;
+  includeDeviceMetadata: boolean;
+  includeNetworkMetrics: boolean;
+  includeRecommendations: boolean;
+  includeTimeline: boolean;
+}
+
+interface ReportTemplate {
+  id: ReportType;
+  title: string;
+  description: string;
+  highlights: string[];
+}
+
+interface GeneratedReportMeta {
+  fileName: string;
+  timestamp: Date;
+  summary: string;
+}
+
+type ReportBooleanKey = 'includeAIInsights' | 'includeDeviceMetadata' | 'includeNetworkMetrics' | 'includeRecommendations' | 'includeTimeline';
+
+type Page = 'overview' | 'alerts' | 'devices' | 'reports' | 'settings';
 
 interface EditDevice {
   id: string;
@@ -73,6 +112,118 @@ interface EditDevice {
   mac_address: string;
   client_id: string;
 }
+
+const reportTemplates: ReportTemplate[] = [
+  {
+    id: 'incident-summary',
+    title: 'Incident Summary',
+    description: 'Export a detailed view of security alerts with contextual AI insights.',
+    highlights: [
+      'Filter by severity, status, and timeline requirements',
+      'Blend device metadata with AI recommended actions',
+      'Ideal for incident retrospectives and SOC handoffs'
+    ]
+  },
+  {
+    id: 'device-inventory',
+    title: 'Device Inventory',
+    description: 'Produce an asset-centric snapshot with risk posture at a glance.',
+    highlights: [
+      'Segment inventory by security posture and enrollment dates',
+      'Surface unresolved alert counts per device automatically',
+      'Great for asset lifecycle and onboarding reviews'
+    ]
+  },
+  {
+    id: 'network-health',
+    title: 'Network Health',
+    description: 'Summarize network activity baselines alongside threat observations.',
+    highlights: [
+      'Overlay traffic metrics with threat detection cadence',
+      'Compare rolling windows to identify anomalies quickly',
+      'Useful for executive briefings and availability reports'
+    ]
+  },
+  {
+    id: 'compliance',
+    title: 'Compliance Readiness',
+    description: 'Track closure evidence and remediation guidance for audits.',
+    highlights: [
+      'Focus on resolved and closed incidents only',
+      'Capture AI remediation guidance as supporting evidence',
+      'Supports recurring governance and risk attestations'
+    ]
+  }
+];
+
+const severityOptions: SecurityAlert['severity'][] = ['critical', 'high', 'medium', 'low'];
+const alertStatusOptions: SecurityAlert['status'][] = ['unresolved', 'resolved', 'closed'];
+const deviceStatusOptions: Device['status'][] = ['safe', 'threat', 'blocked'];
+
+const templateOverrides: Record<ReportType, Partial<ReportConfig>> = {
+  'incident-summary': {},
+  'device-inventory': {
+    includeAIInsights: false,
+    includeRecommendations: false,
+    includeTimeline: false,
+  },
+  'network-health': {
+    includeAIInsights: false,
+    includeRecommendations: false,
+    includeTimeline: true,
+    includeNetworkMetrics: true,
+  },
+  'compliance': {
+    severities: ['critical', 'high'] as SecurityAlert['severity'][],
+    statuses: ['resolved', 'closed'] as SecurityAlert['status'][],
+    includeAIInsights: true,
+    includeRecommendations: true,
+    includeTimeline: true,
+  },
+};
+
+const defaultReportConfig: ReportConfig = {
+  reportType: 'incident-summary',
+  format: 'csv',
+  dateRange: '7d',
+  customStartDate: '',
+  customEndDate: '',
+  severities: [...severityOptions],
+  statuses: [...alertStatusOptions],
+  deviceStatuses: [...deviceStatusOptions],
+  includeAIInsights: true,
+  includeDeviceMetadata: true,
+  includeNetworkMetrics: true,
+  includeRecommendations: true,
+  includeTimeline: true,
+};
+
+const dateRangeOptions: Array<{ id: ReportDateRange; label: string; description: string }> = [
+  { id: '24h', label: 'Last 24 Hours', description: 'Focused view for real-time investigations' },
+  { id: '7d', label: 'Last 7 Days', description: 'Weekly cadence to correlate alerts and coverage' },
+  { id: '30d', label: 'Last 30 Days', description: 'Monthly review across compliance and reporting cycles' },
+  { id: 'custom', label: 'Custom Range', description: 'Define a bespoke window for targeted analysis' },
+];
+
+const formatOptions: Array<{ id: ReportFormat; label: string; description: string }> = [
+  { id: 'csv', label: 'CSV', description: 'Spreadsheet-ready export with column headers' },
+  { id: 'json', label: 'JSON', description: 'Structured payload for automation and APIs' },
+];
+
+const severityRank: Record<SecurityAlert['severity'], number> = {
+  critical: 4,
+  high: 3,
+  medium: 2,
+  low: 1,
+};
+
+const booleanOptionConfigs: Array<{ key: ReportBooleanKey; label: string; description: string }> = [
+  { key: 'includeAIInsights', label: 'AI Insights', description: 'Attach assistant-generated summaries to applicable alerts.' },
+  { key: 'includeRecommendations', label: 'Recommended Actions', description: 'Include remediation steps extracted from AI guidance.' },
+  { key: 'includeDeviceMetadata', label: 'Device Metadata', description: 'Add device identifiers, IP addressing, and enrollment context.' },
+  { key: 'includeTimeline', label: 'Timeline Columns', description: 'Surface exact timestamps and relative timing for each record.' },
+  { key: 'includeNetworkMetrics', label: 'Network Metrics', description: 'Augment rows with network throughput and density calculations.' },
+];
 
 export const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState<Page>('overview');
@@ -88,6 +239,9 @@ export const Dashboard = () => {
   const [showAddDevice, setShowAddDevice] = useState(false);
   const [editingDevice, setEditingDevice] = useState<EditDevice | null>(null);
   const [showEditDevice, setShowEditDevice] = useState(false);
+  const [reportConfig, setReportConfig] = useState<ReportConfig>(defaultReportConfig);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [reportHistory, setReportHistory] = useState<GeneratedReportMeta[]>([]);
   
   // New state for expandable AI analysis sections
   const [expandedSections, setExpandedSections] = useState<{[alertId: string]: {causes: boolean; actions: boolean}}>({});
@@ -99,6 +253,600 @@ export const Dashboard = () => {
   
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+
+  const devicesById = useMemo(() => {
+    const map = new Map<string, Device>();
+    devices.forEach((device) => {
+      map.set(device.id, device);
+    });
+    return map;
+  }, [devices]);
+
+  const dateWindow = useMemo(() => {
+    const now = new Date();
+
+    if (reportConfig.dateRange === 'custom') {
+      if (!reportConfig.customStartDate || !reportConfig.customEndDate) {
+        return { start: null as Date | null, end: null as Date | null, label: 'Custom range pending' };
+      }
+
+      const rawStart = new Date(reportConfig.customStartDate);
+      const rawEnd = new Date(reportConfig.customEndDate);
+      const start = rawStart <= rawEnd ? rawStart : rawEnd;
+      const end = rawEnd >= rawStart ? rawEnd : rawStart;
+
+      return {
+        start,
+        end,
+        label: `${format(start, 'MMM d, yyyy')} - ${format(end, 'MMM d, yyyy')}`
+      };
+    }
+
+    const start = new Date(now);
+    switch (reportConfig.dateRange) {
+      case '24h':
+        start.setHours(start.getHours() - 24);
+        break;
+      case '7d':
+        start.setDate(start.getDate() - 7);
+        break;
+      case '30d':
+        start.setDate(start.getDate() - 30);
+        break;
+      default:
+        break;
+    }
+
+    const option = dateRangeOptions.find((item) => item.id === reportConfig.dateRange);
+
+    return {
+      start,
+      end: now,
+      label: option ? option.label : 'Custom range'
+    };
+  }, [reportConfig.dateRange, reportConfig.customStartDate, reportConfig.customEndDate]);
+
+  const filteredAlerts = useMemo(() => {
+    return alerts.filter((alert) => {
+      if (!reportConfig.severities.includes(alert.severity)) {
+        return false;
+      }
+
+      if (!reportConfig.statuses.includes(alert.status)) {
+        return false;
+      }
+
+      const device = devicesById.get(alert.device_id);
+      if (device && !reportConfig.deviceStatuses.includes(device.status)) {
+        return false;
+      }
+
+      const alertTimestamp = new Date(alert.timestamp);
+      if (dateWindow.start && alertTimestamp < dateWindow.start) {
+        return false;
+      }
+
+      if (dateWindow.end && alertTimestamp > dateWindow.end) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [alerts, reportConfig.severities, reportConfig.statuses, reportConfig.deviceStatuses, devicesById, dateWindow]);
+
+  const filteredDevices = useMemo(() => {
+    return devices.filter((device) => {
+      if (!reportConfig.deviceStatuses.includes(device.status)) {
+        return false;
+      }
+
+      if (!device.connected_since) {
+        return true;
+      }
+
+      const connectedAt = new Date(device.connected_since);
+      if (dateWindow.start && connectedAt < dateWindow.start) {
+        return false;
+      }
+
+      if (dateWindow.end && connectedAt > dateWindow.end) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [devices, reportConfig.deviceStatuses, dateWindow]);
+
+  const filteredNetworkActivity = useMemo(() => {
+    return metrics.network_activity.filter((activity) => {
+      const activityTime = new Date(activity.timestamp);
+      if (dateWindow.start && activityTime < dateWindow.start) {
+        return false;
+      }
+
+      if (dateWindow.end && activityTime > dateWindow.end) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [metrics.network_activity, dateWindow]);
+
+  const applyTemplateDefaults = (templateId: ReportType) => {
+    setReportConfig((prevConfig) => {
+      const overrides = templateOverrides[templateId] ?? {};
+
+      const next: ReportConfig = {
+        ...defaultReportConfig,
+        reportType: templateId,
+        format: overrides.format ?? prevConfig.format,
+        dateRange: overrides.dateRange ?? prevConfig.dateRange,
+        customStartDate: prevConfig.customStartDate,
+        customEndDate: prevConfig.customEndDate,
+        severities: overrides.severities ? [...overrides.severities] : [...defaultReportConfig.severities],
+        statuses: overrides.statuses ? [...overrides.statuses] : [...defaultReportConfig.statuses],
+        deviceStatuses: overrides.deviceStatuses ? [...overrides.deviceStatuses] : [...defaultReportConfig.deviceStatuses],
+        includeAIInsights: overrides.includeAIInsights ?? defaultReportConfig.includeAIInsights,
+        includeDeviceMetadata: overrides.includeDeviceMetadata ?? defaultReportConfig.includeDeviceMetadata,
+        includeNetworkMetrics: overrides.includeNetworkMetrics ?? defaultReportConfig.includeNetworkMetrics,
+        includeRecommendations: overrides.includeRecommendations ?? defaultReportConfig.includeRecommendations,
+        includeTimeline: overrides.includeTimeline ?? defaultReportConfig.includeTimeline,
+      };
+
+      if (overrides.deviceStatuses) {
+        next.deviceStatuses = [...overrides.deviceStatuses];
+      }
+
+      if (next.dateRange !== 'custom') {
+        next.customStartDate = '';
+        next.customEndDate = '';
+      }
+
+      return next;
+    });
+  };
+
+  const toggleSeverity = (severity: SecurityAlert['severity']) => {
+    setReportConfig((prev) => {
+      const exists = prev.severities.includes(severity);
+      const severities = exists
+        ? prev.severities.filter((value) => value !== severity)
+        : [...prev.severities, severity];
+      return { ...prev, severities };
+    });
+  };
+
+  const toggleStatus = (status: SecurityAlert['status']) => {
+    setReportConfig((prev) => {
+      const exists = prev.statuses.includes(status);
+      const statuses = exists
+        ? prev.statuses.filter((value) => value !== status)
+        : [...prev.statuses, status];
+      return { ...prev, statuses };
+    });
+  };
+
+  const toggleDeviceStatus = (status: Device['status']) => {
+    setReportConfig((prev) => {
+      const exists = prev.deviceStatuses.includes(status);
+      const deviceStatuses = exists
+        ? prev.deviceStatuses.filter((value) => value !== status)
+        : [...prev.deviceStatuses, status];
+      return { ...prev, deviceStatuses };
+    });
+  };
+
+  const toggleBooleanOption = (key: ReportBooleanKey) => {
+    setReportConfig((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const updateReportFormat = (format: ReportFormat) => {
+    setReportConfig((prev) => ({ ...prev, format }));
+  };
+
+  const updateReportDateRange = (range: ReportDateRange) => {
+    setReportConfig((prev) => {
+      const updates = range === 'custom'
+        ? {}
+        : { customStartDate: '', customEndDate: '' };
+      return { ...prev, dateRange: range, ...updates };
+    });
+  };
+
+  const handleCustomDateChange = (field: 'customStartDate' | 'customEndDate', value: string) => {
+    setReportConfig((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const getHighestSeverity = (alertList: SecurityAlert[]): SecurityAlert['severity'] | null => {
+    if (!alertList.length) {
+      return null;
+    }
+
+    return alertList.reduce<SecurityAlert['severity'] | null>((current, alert) => {
+      if (!current) {
+        return alert.severity;
+      }
+
+      return severityRank[alert.severity] > severityRank[current] ? alert.severity : current;
+    }, null);
+  };
+
+  const extractAiInsightSegments = (chat: SecurityAlert['ai_analysis_chat']) => {
+    if (!chat || chat.length === 0) {
+      return {
+        summary: 'No AI insights captured for this alert yet.',
+        actions: 'No recommended actions recorded.',
+      };
+    }
+
+    const assistantMessage = [...chat].reverse().find((message) => message.role === 'assistant');
+
+    if (!assistantMessage || !assistantMessage.content) {
+      return {
+        summary: 'No AI insights captured for this alert yet.',
+        actions: 'No recommended actions recorded.',
+      };
+    }
+
+    const content = assistantMessage.content.trim();
+    const actionsMatch = content.match(/(?:Recommended Actions?|Remediation Steps?):?([\s\S]*)/i);
+    const summary = actionsMatch ? content.slice(0, actionsMatch.index).trim() : content;
+    const actions = actionsMatch ? actionsMatch[1].trim() : 'No recommended actions recorded.';
+
+    return {
+      summary: summary || 'No AI insights captured for this alert yet.',
+      actions: actions || 'No recommended actions recorded.',
+    };
+  };
+
+  const validateReportConfiguration = (): string | null => {
+    if (!reportConfig.deviceStatuses.length) {
+      return 'Select at least one device status to include.';
+    }
+
+    if (['incident-summary', 'compliance'].includes(reportConfig.reportType) && !reportConfig.severities.length) {
+      return 'Choose at least one alert severity.';
+    }
+
+    if (['incident-summary', 'compliance'].includes(reportConfig.reportType) && !reportConfig.statuses.length) {
+      return 'Choose at least one alert status.';
+    }
+
+    if (reportConfig.dateRange === 'custom') {
+      if (!reportConfig.customStartDate || !reportConfig.customEndDate) {
+        return 'Provide both start and end dates for the custom range.';
+      }
+
+      const start = new Date(reportConfig.customStartDate);
+      const end = new Date(reportConfig.customEndDate);
+
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+        return 'One of the provided dates is invalid.';
+      }
+
+      if (start > end) {
+        return 'The custom range start date must be before the end date.';
+      }
+    }
+
+    return null;
+  };
+
+  const createIncidentRow = (alert: SecurityAlert) => {
+    const device = devicesById.get(alert.device_id);
+    const detectedAt = new Date(alert.timestamp);
+    const insights = extractAiInsightSegments(alert.ai_analysis_chat);
+
+    const row: Record<string, unknown> = {
+      alert_id: alert.id,
+      alert_type: alert.alert_type,
+      severity: alert.severity,
+      status: alert.status,
+      description: cleanAlertDescription(alert.description),
+    };
+
+    if (reportConfig.includeTimeline) {
+      row.detected_at = format(detectedAt, 'yyyy-MM-dd HH:mm:ss');
+      row.relative_time = formatDistanceToNow(detectedAt, { addSuffix: true });
+    }
+
+    if (reportConfig.includeDeviceMetadata) {
+      row.device_name = device?.device_name ?? 'Unknown device';
+      row.device_status = device?.status ?? 'unavailable';
+      row.ip_address = device?.ip_address ?? 'N/A';
+      row.mac_address = device?.mac_address ?? 'N/A';
+    }
+
+    if (reportConfig.includeAIInsights) {
+      row.ai_summary = insights.summary;
+    }
+
+    if (reportConfig.includeRecommendations) {
+      row.recommended_actions = insights.actions;
+    }
+
+    return row;
+  };
+
+  const buildIncidentSummaryRows = () => {
+    return filteredAlerts.map((alert) => createIncidentRow(alert));
+  };
+
+  const buildComplianceRows = () => {
+    return filteredAlerts.map((alert) => ({
+      ...createIncidentRow(alert),
+      compliance_ready: ['resolved', 'closed'].includes(alert.status) ? 'Ready' : 'Pending',
+    }));
+  };
+
+  const buildDeviceInventoryRows = () => {
+    return filteredDevices.map((device) => {
+      const relatedAlerts = filteredAlerts.filter((alert) => alert.device_id === device.id);
+      const openAlerts = relatedAlerts.filter((alert) => alert.status === 'unresolved').length;
+      const highestSeverity = getHighestSeverity(relatedAlerts);
+
+      const row: Record<string, unknown> = {
+        device_id: device.id,
+        device_name: device.device_name,
+        device_status: device.status,
+        total_alerts: relatedAlerts.length,
+        open_alerts: openAlerts,
+      };
+
+      if (highestSeverity) {
+        row.highest_alert_severity = highestSeverity;
+      }
+
+      if (reportConfig.includeTimeline) {
+        row.connected_since = device.connected_since
+          ? format(new Date(device.connected_since), 'yyyy-MM-dd')
+          : 'Not captured';
+
+        if (relatedAlerts.length) {
+          const latestAlert = relatedAlerts.reduce((latest, candidate) => (
+            new Date(candidate.timestamp) > new Date(latest.timestamp) ? candidate : latest
+          ), relatedAlerts[0]);
+
+          row.last_alert_at = format(new Date(latestAlert.timestamp), 'yyyy-MM-dd HH:mm:ss');
+        }
+      }
+
+      if (reportConfig.includeDeviceMetadata) {
+        row.ip_address = device.ip_address;
+        row.mac_address = device.mac_address || 'N/A';
+        row.client_id = device.client_id;
+      }
+
+      if (reportConfig.includeAIInsights) {
+        const aiAlert = [...relatedAlerts].reverse().find((candidate) => candidate.ai_analysis_chat?.length);
+        if (aiAlert) {
+          const insights = extractAiInsightSegments(aiAlert.ai_analysis_chat);
+          row.latest_ai_summary = insights.summary;
+        } else {
+          row.latest_ai_summary = 'No AI insights captured for this device.';
+        }
+      }
+
+      return row;
+    });
+  };
+
+  const buildNetworkHealthRows = () => {
+    return filteredNetworkActivity.map((activity) => {
+      const sampleTime = new Date(activity.timestamp);
+      const correlatedAlerts = filteredAlerts.filter((alert) => {
+        const alertTime = new Date(alert.timestamp);
+        return Math.abs(alertTime.getTime() - sampleTime.getTime()) <= 60 * 60 * 1000;
+      });
+
+      const row: Record<string, unknown> = {
+        observed_at: format(sampleTime, 'yyyy-MM-dd HH:mm'),
+        data_rate_mb: activity.data_rate,
+        correlated_alerts: correlatedAlerts.length,
+      };
+
+      const highestSeverity = getHighestSeverity(correlatedAlerts);
+      if (highestSeverity) {
+        row.highest_correlated_severity = highestSeverity;
+      }
+
+      if (reportConfig.includeTimeline) {
+        row.relative_time = formatDistanceToNow(sampleTime, { addSuffix: true });
+      }
+
+      if (reportConfig.includeNetworkMetrics) {
+        const totalAlerts = filteredAlerts.length || 1;
+        row.alert_density_pct = Number(((correlatedAlerts.length / totalAlerts) * 100).toFixed(2));
+      }
+
+      return row;
+    });
+  };
+
+  const buildReportRows = () => {
+    switch (reportConfig.reportType) {
+      case 'incident-summary':
+        return buildIncidentSummaryRows();
+      case 'device-inventory':
+        return buildDeviceInventoryRows();
+      case 'network-health':
+        return buildNetworkHealthRows();
+      case 'compliance':
+        return buildComplianceRows();
+      default:
+        return [] as Record<string, unknown>[];
+    }
+  };
+
+  const escapeCsvValue = (value: unknown) => {
+    if (value === null || value === undefined) {
+      return '';
+    }
+
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    if (Array.isArray(value)) {
+      value = value.join('; ');
+    } else if (typeof value === 'object') {
+      value = JSON.stringify(value);
+    }
+
+    const stringValue = String(value).replace(/"/g, '""');
+    const requiresQuoting =
+      stringValue.includes(',') ||
+      stringValue.includes("\"") ||
+      stringValue.indexOf('\n') !== -1 ||
+      stringValue.indexOf('\r') !== -1;
+
+    return requiresQuoting ? `"${stringValue}"` : stringValue;
+  };
+
+  const convertRowsToCsv = (rows: Record<string, unknown>[]) => {
+    if (!rows.length) {
+      return '';
+    }
+
+    const headerSet = new Set<string>();
+    rows.forEach((row) => {
+      Object.keys(row).forEach((key) => headerSet.add(key));
+    });
+    const headers = Array.from(headerSet);
+
+    const lines = [
+      headers.join(','),
+      ...rows.map((row) => headers.map((header) => escapeCsvValue(row[header])).join(',')),
+    ];
+
+    return lines.join('\n');
+  };
+
+  const createFiltersSnapshot = () => ({
+    reportType: reportConfig.reportType,
+    format: reportConfig.format,
+    dateRange: reportConfig.dateRange,
+    start: dateWindow.start ? dateWindow.start.toISOString() : null,
+    end: dateWindow.end ? dateWindow.end.toISOString() : null,
+    severities: reportConfig.severities,
+    statuses: reportConfig.statuses,
+    deviceStatuses: reportConfig.deviceStatuses,
+    includeAIInsights: reportConfig.includeAIInsights,
+    includeDeviceMetadata: reportConfig.includeDeviceMetadata,
+    includeNetworkMetrics: reportConfig.includeNetworkMetrics,
+    includeRecommendations: reportConfig.includeRecommendations,
+    includeTimeline: reportConfig.includeTimeline,
+  });
+
+  const buildReportSummary = (rowsCount: number) => ({
+    rows: rowsCount,
+    alertsMatched: filteredAlerts.length,
+    devicesMatched: filteredDevices.length,
+    activitySamples: filteredNetworkActivity.length,
+    highestSeverity: getHighestSeverity(filteredAlerts),
+  });
+
+  const createHistorySummary = (rowsCount: number) => {
+    const template = reportTemplates.find((item) => item.id === reportConfig.reportType);
+    const label = template?.title ?? reportConfig.reportType;
+    return `${label} - ${rowsCount} rows - ${reportConfig.format.toUpperCase()} - ${dateWindow.label}`;
+  };
+
+  const handleDownloadReport = () => {
+    const validationMessage = validateReportConfiguration();
+    if (validationMessage) {
+      toast({
+        title: 'Update filters before exporting',
+        description: validationMessage,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsGeneratingReport(true);
+
+    try {
+      const rows = buildReportRows();
+
+      if (!rows.length) {
+        toast({
+          title: 'No records matched',
+          description: 'Adjust your filters or time range and try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const template = reportTemplates.find((item) => item.id === reportConfig.reportType);
+      const summary = buildReportSummary(rows.length);
+      const filters = createFiltersSnapshot();
+
+      let content = '';
+      let mimeType = '';
+
+      if (reportConfig.format === 'json') {
+        content = JSON.stringify({
+          generatedAt: new Date().toISOString(),
+          template,
+          filters,
+          summary,
+          records: rows,
+        }, null, 2);
+        mimeType = 'application/json';
+      } else {
+        content = convertRowsToCsv(rows);
+        mimeType = 'text/csv;charset=utf-8;';
+      }
+
+      if (!content.trim()) {
+        toast({
+          title: 'Report was empty',
+          description: 'No data was available for the selected configuration.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const timestamp = format(new Date(), 'yyyyMMdd-HHmmss');
+      const safeName = (template?.title ?? reportConfig.reportType)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      const fileName = `${safeName || 'report'}-${timestamp}.${reportConfig.format}`;
+
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      const historyEntry: GeneratedReportMeta = {
+        fileName,
+        timestamp: new Date(),
+        summary: createHistorySummary(rows.length),
+      };
+
+      setReportHistory((prev) => [historyEntry, ...prev].slice(0, 6));
+
+      toast({
+        title: 'Report ready',
+        description: `Downloaded ${fileName} with ${rows.length} rows.`,
+      });
+    } catch (error) {
+      console.error('Error generating report:', error);
+      toast({
+        title: 'Report generation failed',
+        description: error instanceof Error ? error.message : 'Unexpected error while building report.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -856,6 +1604,427 @@ export const Dashboard = () => {
     </div>
   );
 
+
+  const renderReports = () => {
+    const currentTemplate = reportTemplates.find((item) => item.id === reportConfig.reportType);
+    const formatOption = formatOptions.find((option) => option.id === reportConfig.format);
+    const severityBreakdown = severityOptions.map((severity) => ({
+      severity,
+      count: filteredAlerts.filter((alert) => alert.severity === severity).length,
+    }));
+    const statusBreakdown = alertStatusOptions.map((status) => ({
+      status,
+      count: filteredAlerts.filter((alert) => alert.status === status).length,
+    }));
+    const deviceBreakdown = deviceStatusOptions.map((status) => ({
+      status,
+      count: filteredDevices.filter((device) => device.status === status).length,
+    }));
+    const previewAlerts = filteredAlerts.slice(0, 3);
+    const impactedDevices = new Set(filteredAlerts.map((alert) => alert.device_id));
+
+    return (
+      <div className="space-y-8">
+        <div className="relative overflow-hidden rounded-2xl border-2 border-[hsl(var(--banner-blue))] bg-gradient-to-r from-[hsl(var(--banner-blue))]/15 via-[hsl(var(--banner-blue))]/8 to-transparent p-6 shadow-professional-lg">
+          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--banner-blue))]/10 to-transparent" />
+          <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
+                <h2 className="text-3xl font-bold text-[hsl(var(--banner-blue))]">Downloadable Reports</h2>
+              </div>
+              <p className="text-foreground/80 text-sm md:text-base max-w-2xl">
+                {currentTemplate?.description ?? 'Tailor a report using alert, device, and network filters before exporting.'}
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Badge variant="secondary" className="bg-white/70 text-foreground">
+                  {formatOption?.label ?? reportConfig.format.toUpperCase()} format
+                </Badge>
+                <Badge variant="outline" className="bg-white/40 text-foreground">
+                  {filteredAlerts.length} alerts - {impactedDevices.size} devices - {filteredNetworkActivity.length} activity points
+                </Badge>
+                <Badge variant="outline" className="bg-white/40 text-foreground">
+                  Window: {dateWindow.label}
+                </Badge>
+              </div>
+            </div>
+            <Button
+              size="lg"
+              className="self-start md:self-center shadow-professional-lg"
+              onClick={handleDownloadReport}
+              disabled={isGeneratingReport}
+            >
+              {isGeneratingReport ? (
+                <>
+                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  Preparing...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Report
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+          <div className="space-y-6">
+            <Card className="card-professional">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Report Templates
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Pick a starting configuration and adjust filters to match your use case.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {reportTemplates.map((template) => {
+                  const isActive = template.id === reportConfig.reportType;
+                  return (
+                    <button
+                      key={template.id}
+                      type="button"
+                      onClick={() => applyTemplateDefaults(template.id)}
+                      className={`w-full text-left rounded-xl border p-4 transition-all ${isActive ? 'border-primary bg-primary/5 shadow-professional-md' : 'border-border hover:border-primary/40 hover:bg-primary/5'}`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-semibold text-base text-foreground">{template.title}</h3>
+                          <p className="text-sm text-muted-foreground mt-1">{template.description}</p>
+                        </div>
+                        {isActive ? (
+                          <Badge variant="default">Active</Badge>
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground mt-1" />
+                        )}
+                      </div>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {template.highlights.map((highlight) => (
+                          <div key={highlight} className="flex items-start gap-2 text-xs text-muted-foreground">
+                            <ShieldCheck className="h-3.5 w-3.5 text-primary mt-0.5" />
+                            <span>{highlight}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </button>
+                  );
+                })}
+              </CardContent>
+            </Card>
+            <Card className="card-professional">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  Recent Downloads
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Snapshot of the most recently exported report configurations.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {reportHistory.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">
+                    No reports exported yet. Your downloads will appear here for quick reference.
+                  </div>
+                ) : (
+                  reportHistory.map((entry) => (
+                    <div key={`${entry.fileName}-${entry.timestamp.getTime()}`} className="rounded-lg border border-border/60 p-3 hover:border-primary/40 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-sm text-foreground truncate pr-2">{entry.fileName}</span>
+                        <Badge variant="outline">
+                          {format(entry.timestamp, 'MMM d, yyyy HH:mm')}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">{entry.summary}</p>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          <div className="space-y-6">
+            <Card className="card-professional">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  Conditions
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Combine alert, device, and timeline filters to shape the export.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="flex items-center gap-2">
+                      Severity
+                      <Badge variant="outline">{reportConfig.severities.length} selected</Badge>
+                    </Label>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {severityOptions.map((severity) => {
+                      const active = reportConfig.severities.includes(severity);
+                      const severityData = severityBreakdown.find((item) => item.severity === severity);
+                      return (
+                        <Button
+                          key={severity}
+                          type="button"
+                          variant={active ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => toggleSeverity(severity)}
+                          className="capitalize"
+                        >
+                          {severity}
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            {severityData?.count ?? 0}
+                          </span>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="flex items-center gap-2">
+                      Alert Status
+                      <Badge variant="outline">{reportConfig.statuses.length} selected</Badge>
+                    </Label>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {alertStatusOptions.map((status) => {
+                      const active = reportConfig.statuses.includes(status);
+                      const statusData = statusBreakdown.find((item) => item.status === status);
+                      return (
+                        <Button
+                          key={status}
+                          type="button"
+                          variant={active ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => toggleStatus(status)}
+                          className="capitalize"
+                        >
+                          {status}
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            {statusData?.count ?? 0}
+                          </span>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="flex items-center gap-2">
+                      Device Posture
+                      <Badge variant="outline">{reportConfig.deviceStatuses.length} selected</Badge>
+                    </Label>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {deviceStatusOptions.map((status) => {
+                      const active = reportConfig.deviceStatuses.includes(status);
+                      const deviceData = deviceBreakdown.find((item) => item.status === status);
+                      return (
+                        <Button
+                          key={status}
+                          type="button"
+                          variant={active ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => toggleDeviceStatus(status)}
+                          className="capitalize"
+                        >
+                          {status}
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            {deviceData?.count ?? 0}
+                          </span>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Date Range
+                    </Label>
+                    <span className="text-xs text-muted-foreground">{dateWindow.label}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {dateRangeOptions.map((option) => {
+                      const active = reportConfig.dateRange === option.id;
+                      return (
+                        <Button
+                          key={option.id}
+                          type="button"
+                          variant={active ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => updateReportDateRange(option.id)}
+                        >
+                          {option.label}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  {reportConfig.dateRange === 'custom' && (
+                    <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <Label htmlFor="customStartDate" className="text-xs text-muted-foreground">
+                          Start date
+                        </Label>
+                        <Input
+                          id="customStartDate"
+                          type="date"
+                          value={reportConfig.customStartDate}
+                          onChange={(event) => handleCustomDateChange('customStartDate', event.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="customEndDate" className="text-xs text-muted-foreground">
+                          End date
+                        </Label>
+                        <Input
+                          id="customEndDate"
+                          type="date"
+                          value={reportConfig.customEndDate}
+                          onChange={(event) => handleCustomDateChange('customEndDate', event.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="card-professional">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Format & Options
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Pick an export format and choose which contextual columns to keep.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground mb-2 block">File Format</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {formatOptions.map((option) => {
+                      const active = reportConfig.format === option.id;
+                      return (
+                        <Button
+                          key={option.id}
+                          type="button"
+                          variant={active ? 'default' : 'outline'}
+                          onClick={() => updateReportFormat(option.id)}
+                          className="capitalize"
+                        >
+                          {option.label}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {booleanOptionConfigs.map((option) => {
+                    const active = reportConfig[option.key];
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => toggleBooleanOption(option.key)}
+                        className={`rounded-xl border p-3 text-left transition-colors ${active ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40 hover:bg-muted/30'}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-foreground">{option.label}</span>
+                          <Badge variant={active ? 'default' : 'outline'}>{active ? 'Included' : 'Skipped'}</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">{option.description}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="card-professional">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  Preview Snapshot
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Understand how many records will export and review a quick sample.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="rounded-lg border border-border/60 p-4 bg-background/80">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Alerts Matched</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">{filteredAlerts.length}</p>
+                  </div>
+                  <div className="rounded-lg border border-border/60 p-4 bg-background/80">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Impacted Devices</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">{impactedDevices.size}</p>
+                  </div>
+                  <div className="rounded-lg border border-border/60 p-4 bg-background/80">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Network Samples</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">{filteredNetworkActivity.length}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Severity distribution</p>
+                  <div className="flex flex-wrap gap-2">
+                    {severityBreakdown.map((item) => (
+                      <Badge key={item.severity} variant="outline" className="capitalize">
+                        {item.severity}: {item.count}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Sample alerts</p>
+                  <div className="space-y-3">
+                    {previewAlerts.length === 0 ? (
+                      <div className="rounded-lg border border-dashed border-border/60 p-4 text-sm text-muted-foreground">
+                        No alerts matched the current filters. Adjust conditions to populate the export.
+                      </div>
+                    ) : (
+                      previewAlerts.map((alert) => {
+                        const device = devicesById.get(alert.device_id);
+                        return (
+                          <div key={alert.id} className="rounded-lg border border-border/60 p-4">
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-2">
+                                <Badge className={`capitalize ${getSeverityColor(alert.severity)}`}>
+                                  {alert.severity}
+                                </Badge>
+                                <span className="text-sm font-medium text-foreground">
+                                  {cleanAlertDescription(alert.description)}
+                                </span>
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
+                              </span>
+                            </div>
+                            <div className="mt-2 text-xs text-muted-foreground">
+                              Device: {device?.device_name ?? 'Unknown'} - Status: {device?.status ?? 'unavailable'} - {alert.status}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderSettings = () => (
     <div className="space-y-8">
       {/* Banner-like header for Settings */}
@@ -1092,6 +2261,7 @@ export const Dashboard = () => {
                   { id: 'overview', label: 'Overview', icon: Home },
                   { id: 'alerts', label: 'Alerts', icon: Bell },
                   { id: 'devices', label: 'Devices', icon: Monitor },
+                  { id: 'reports', label: 'Reports', icon: FileText },
                   { id: 'settings', label: 'Settings', icon: Settings }
                 ].map(({ id, label, icon: Icon }) => (
                   <button
@@ -1139,6 +2309,7 @@ export const Dashboard = () => {
         {currentPage === 'overview' && renderOverview()}
         {currentPage === 'alerts' && renderAlerts()}
         {currentPage === 'devices' && renderDevices()}
+        {currentPage === 'reports' && renderReports()}
         {currentPage === 'settings' && renderSettings()}
       </main>
     </div>

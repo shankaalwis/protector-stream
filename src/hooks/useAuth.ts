@@ -1,6 +1,17 @@
-import { useState, useEffect } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { useEffect, useState } from 'react';
+import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+
+type AuthErrorPayload = { message: string };
+type AuthResponse = { error: AuthErrorPayload | null };
+
+const toErrorPayload = (error: { message: string } | null): AuthErrorPayload | null => {
+  if (!error) {
+    return null;
+  }
+
+  return { message: error.message };
+};
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -8,28 +19,35 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, currentSession) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    supabase.auth
+      .getSession()
+      .then(({ data: { session: initialSession } }) => {
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const signUp = async (email: string, password: string, firewallApiKey: string, phoneNumber: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    firewallApiKey: string,
+    phoneNumber: string,
+  ): Promise<AuthResponse> => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -37,24 +55,27 @@ export const useAuth = () => {
         emailRedirectTo: redirectUrl,
         data: {
           firewall_api_key: firewallApiKey,
-          phone_number: phoneNumber
-        }
-      }
+          phone_number: phoneNumber,
+        },
+      },
     });
-    return { error };
+
+    return { error: toErrorPayload(error) };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<AuthResponse> => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
-      password
+      password,
     });
-    return { error };
+
+    return { error: toErrorPayload(error) };
   };
 
-  const signOut = async () => {
+  const signOut = async (): Promise<AuthResponse> => {
     const { error } = await supabase.auth.signOut();
-    return { error };
+
+    return { error: toErrorPayload(error) };
   };
 
   return {
@@ -63,6 +84,7 @@ export const useAuth = () => {
     loading,
     signUp,
     signIn,
-    signOut
+    signOut,
   };
 };
+
