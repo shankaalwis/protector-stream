@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { CalendarIcon, Download, FileText, FileSpreadsheet, Eye, Loader2, Shield, ArrowLeft } from 'lucide-react';
+import { CalendarIcon, Download, FileText, FileSpreadsheet, Eye, Loader2, Shield, ArrowLeft, Activity, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import jsPDF from 'jspdf';
@@ -132,14 +132,13 @@ export default function Reports() {
         }
       }
 
-      // Fetch dashboard metrics if selected
+      // Fetch latest dashboard metrics (regardless of date range)
       if (includeMetrics) {
         const { data: metricsData, error } = await supabase
           .from('dashboard_metrics')
           .select('*')
-          .gte('created_at', startDate.toISOString())
-          .lte('created_at', endDate.toISOString())
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(20); // Get the 20 most recent metrics
         
         if (!error && metricsData) {
           data.metrics = metricsData;
@@ -594,19 +593,23 @@ export default function Reports() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Total Devices</p>
+                    <p className="text-sm text-muted-foreground">Connected Devices</p>
+                    <p className="text-xs text-muted-foreground">(During Period)</p>
                     <p className="text-3xl font-bold text-[hsl(var(--dark-sky-blue))]">{reportData.devices.length}</p>
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">Security Alerts</p>
+                    <p className="text-xs text-muted-foreground">(During Period)</p>
                     <p className="text-3xl font-bold text-[hsl(var(--alert-red))]">{reportData.alerts.length}</p>
                   </div>
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">Anomalies Detected</p>
+                    <p className="text-xs text-muted-foreground">(During Period)</p>
                     <p className="text-3xl font-bold text-warning">{reportData.anomalies.filter(a => a.is_anomaly).length}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Metric Records</p>
+                    <p className="text-sm text-muted-foreground">Latest Metrics</p>
+                    <p className="text-xs text-muted-foreground">(Snapshot)</p>
                     <p className="text-3xl font-bold text-success">{reportData.metrics.length}</p>
                   </div>
                 </div>
@@ -746,53 +749,88 @@ export default function Reports() {
               </Card>
             )}
 
-            {/* Metrics Display - Visually Appealing */}
+            {/* Metrics Display - Latest Snapshot */}
             {reportData.metrics.length > 0 && (
               <Card className="card-professional">
                 <CardHeader>
-                  <CardTitle className="text-heading">Dashboard Metrics Summary</CardTitle>
+                  <CardTitle className="text-heading">Dashboard Metrics Summary - Latest Snapshot</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    This section shows the most recent dashboard metrics (not filtered by date range)
+                  </p>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {reportData.metrics.map((metric) => {
-                      const metricValue = metric.metric_value;
-                      const isObject = typeof metricValue === 'object' && metricValue !== null;
-                      
-                      return (
-                        <Card key={metric.id} className="bg-gradient-to-br from-background to-muted/20 border-2">
-                          <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                              {metric.metric_key.split('_').map(word => 
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                              ).join(' ')}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-2">
-                            {isObject ? (
-                              <div className="space-y-2">
-                                {Object.entries(metricValue).map(([key, value]) => (
-                                  <div key={key} className="flex justify-between items-center">
-                                    <span className="text-xs text-muted-foreground">
-                                      {key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                                    </span>
-                                    <span className="text-lg font-bold text-[hsl(var(--dark-sky-blue))]">
-                                      {typeof value === 'number' ? value.toLocaleString() : String(value)}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="text-3xl font-bold text-[hsl(var(--dark-sky-blue))]">
-                                {typeof metricValue === 'number' ? metricValue.toLocaleString() : String(metricValue)}
+                <CardContent className="space-y-8">
+                  {/* SIEM Dashboard Preview Section */}
+                  <div className="space-y-4 p-6 rounded-lg border-2 border-[hsl(var(--dark-sky-blue))]/30 bg-gradient-to-br from-[hsl(var(--dark-sky-blue))]/10 to-transparent">
+                    <div className="flex items-center gap-3">
+                      <Shield className="h-6 w-6 text-[hsl(var(--dark-sky-blue))]" />
+                      <h3 className="text-xl font-bold text-foreground">SIEM Dashboard Preview</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Current state of your security monitoring dashboard
+                    </p>
+                    <div className="rounded-lg border-2 border-dashed border-[hsl(var(--dark-sky-blue))]/40 bg-muted/50 p-12 text-center space-y-4">
+                      <Activity className="h-16 w-16 text-[hsl(var(--dark-sky-blue))]/60 mx-auto" />
+                      <div>
+                        <p className="text-lg font-semibold text-foreground mb-2">
+                          📊 SIEM Dashboard Visualization
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Available in your authenticated session
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-4">
+                          Navigate to <span className="font-mono text-[hsl(var(--dark-sky-blue))]">SIEM Dashboard</span> from the main menu to view real-time metrics
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Metrics Cards Grid */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <TrendingUp className="h-6 w-6 text-success" />
+                      <h3 className="text-xl font-bold text-foreground">Latest Metrics Data</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {reportData.metrics.map((metric) => {
+                        const metricValue = metric.metric_value;
+                        const isObject = typeof metricValue === 'object' && metricValue !== null;
+                        
+                        return (
+                          <Card key={metric.id} className="bg-gradient-to-br from-background to-muted/20 border-2 hover:border-[hsl(var(--dark-sky-blue))]/50 transition-all">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm font-medium text-muted-foreground">
+                                {metric.metric_key.split('_').map(word => 
+                                  word.charAt(0).toUpperCase() + word.slice(1)
+                                ).join(' ')}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                              {isObject ? (
+                                <div className="space-y-2">
+                                  {Object.entries(metricValue).map(([key, value]) => (
+                                    <div key={key} className="flex justify-between items-center">
+                                      <span className="text-xs text-muted-foreground">
+                                        {key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                                      </span>
+                                      <span className="text-lg font-bold text-[hsl(var(--dark-sky-blue))]">
+                                        {typeof value === 'number' ? value.toLocaleString() : String(value)}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-3xl font-bold text-[hsl(var(--dark-sky-blue))]">
+                                  {typeof metricValue === 'number' ? metricValue.toLocaleString() : String(metricValue)}
+                                </p>
+                              )}
+                              <p className="text-xs text-muted-foreground pt-2 border-t">
+                                Updated: {format(new Date(metric.created_at), 'PPp')}
                               </p>
-                            )}
-                            <p className="text-xs text-muted-foreground pt-2 border-t">
-                              {format(new Date(metric.created_at), 'PPp')}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
