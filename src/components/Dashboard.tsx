@@ -1089,25 +1089,28 @@ export const Dashboard = () => {
                 <span className="text-xl font-bold text-foreground">SecureNet Dashboard</span>
               </div>
               <div className="hidden md:ml-8 md:flex md:space-x-1">
-                {[
-                  { id: 'overview', label: 'Overview', icon: Home },
-                  { id: 'alerts', label: 'Alerts', icon: Bell },
-                  { id: 'devices', label: 'Devices', icon: Monitor },
-                  { id: 'settings', label: 'Settings', icon: Settings }
-                ].map(({ id, label, icon: Icon }) => (
-                  <button
-                    key={id}
-                    onClick={() => setCurrentPage(id as Page)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
-                      currentPage === id
-                        ? 'bg-primary text-primary-foreground shadow-lg'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{label}</span>
-                  </button>
-                ))}
+                <button
+                  onClick={() => setCurrentPage('overview')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                    currentPage === 'overview'
+                      ? 'bg-primary text-primary-foreground shadow-lg'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  }`}
+                >
+                  <Home className="w-4 h-4" />
+                  <span>Overview</span>
+                </button>
+                <button
+                  onClick={() => setCurrentPage('alerts')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                    currentPage === 'alerts'
+                      ? 'bg-primary text-primary-foreground shadow-lg'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  }`}
+                >
+                  <Bell className="w-4 h-4" />
+                  <span>Alerts</span>
+                </button>
                 <Link
                   to="/siem-dashboard"
                   className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -1122,17 +1125,39 @@ export const Dashboard = () => {
                   <FileText className="w-4 h-4" />
                   <span>Reports</span>
                 </Link>
+                <button
+                  onClick={() => setCurrentPage('devices')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                    currentPage === 'devices'
+                      ? 'bg-primary text-primary-foreground shadow-lg'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  }`}
+                >
+                  <Monitor className="w-4 h-4" />
+                  <span>Devices</span>
+                </button>
+                <button
+                  onClick={() => setCurrentPage('settings')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                    currentPage === 'settings'
+                      ? 'bg-primary text-primary-foreground shadow-lg'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>Settings</span>
+                </button>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-muted-foreground">
+            <div className="flex items-center">
+              <div className="text-sm text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
                 Welcome, {user?.email}
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={signOut}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 ml-4"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
