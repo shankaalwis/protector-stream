@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import AlertDetailCard from './AlertDetailCard';
 import AuraChat from './AuraChat';
 import { ModeToggle } from './theme-toggle';
 import guarddogImage from '@/assets/guarddog.png';
+import barkSound from '@/assets/dog-bark.mp3';
 import { 
   Shield, 
   AlertTriangle, 
@@ -98,6 +99,7 @@ export const Dashboard = () => {
   const [showEditDevice, setShowEditDevice] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [buttonClicked, setButtonClicked] = useState(false);
+  const barkAudioRef = useRef<HTMLAudioElement>(null);
   
   // New state for expandable AI analysis sections
   const [expandedSections, setExpandedSections] = useState<{[alertId: string]: {causes: boolean; actions: boolean}}>({});
@@ -1392,6 +1394,12 @@ export const Dashboard = () => {
             setButtonClicked(false);
           }, 300);
         }}
+        onMouseEnter={() => {
+          if (barkAudioRef.current) {
+            barkAudioRef.current.currentTime = 0;
+            barkAudioRef.current.play().catch(e => console.log('Audio play failed:', e));
+          }
+        }}
         className={`fixed bottom-8 right-8 z-40 group ${
           buttonClicked ? 'animate-scale-in' : ''
         }`}
@@ -1437,6 +1445,9 @@ export const Dashboard = () => {
 
       {/* Aura Chat */}
       <AuraChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+
+      {/* Audio element for bark sound */}
+      <audio ref={barkAudioRef} src={barkSound} preload="auto" />
     </div>
   );
 };
