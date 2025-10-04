@@ -1180,8 +1180,8 @@ export const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Desktop Navigation */}
-              <div className="hidden lg:ml-12 lg:flex lg:space-x-2">
+            {/* Desktop Navigation */}
+              <div className="hidden lg:ml-12 lg:flex lg:space-x-2 lg:mr-4">
                 <button
                   onClick={() => setCurrentPage('overview')}
                   className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center space-x-2 relative group ${
