@@ -127,6 +127,13 @@ serve(async (req) => {
         }
       }
 
+      // Determine if this is an application/console or physical device
+      const deviceName = deviceContext?.name || 'Unknown device';
+      const isApplication = /console|application|app|dashboard|interface|control|manager/i.test(deviceName);
+      const deviceType = isApplication 
+        ? `an application/software called "${deviceName}"` 
+        : `a device called "${deviceName}"`;
+      
       // Create detailed system message with original analysis context
       let systemMessage = `You are a friendly cybersecurity advisor. Answer questions about this specific security alert in simple, conversational language.
 
@@ -136,9 +143,15 @@ ALERT DETAILS:
 - Severity: ${alert.severity}
 - Device Name: ${deviceContext?.name || 'Unknown device'}
 - Device ID: ${deviceContext?.clientId || 'Unknown'}
+- Device Type: ${isApplication ? 'Application/Software' : 'Physical Device'}
 - Timestamp: ${alert.timestamp}
 
-CRITICAL: Always use the EXACT device name "${deviceContext?.name || 'device'}" when referring to the device. DO NOT use generic terms or make assumptions.`;
+CRITICAL UNDERSTANDING:
+- This is ${deviceType}
+- ${isApplication 
+    ? `"${deviceName}" is an APPLICATION/SOFTWARE (like a control interface or dashboard), NOT a physical device. Discuss application access, permissions, unusual usage patterns, and software-related security issues.`
+    : `"${deviceName}" is a physical device. Discuss device connections, hardware issues, and physical security concerns.`}
+- ALWAYS use the exact name "${deviceName}" when referring to it - DO NOT use generic terms or make assumptions.`;
 
       if (originalAnalysis) {
         systemMessage += `
@@ -206,6 +219,13 @@ CONVERSATION RULES:
       // INITIAL ANALYSIS MODE: Generate structured analysis
       console.log('Initial analysis mode: generating structured report');
       
+      // Determine if this is an application/console or physical device
+      const deviceName = deviceContext?.name || 'device';
+      const isApplication = /console|application|app|dashboard|interface|control|manager/i.test(deviceName);
+      const deviceType = isApplication 
+        ? `an application/software called "${deviceName}"` 
+        : `a device called "${deviceName}"`;
+      
       // Create a concise, focused prompt for structured analysis
       const systemPrompt = `Analyze this security alert and provide a JSON response with exactly these fields:
 {
@@ -220,14 +240,18 @@ Alert Details:
 - Description: ${alert.description}
 - Severity: ${alert.severity}${deviceContext ? `
 - Device Name: ${deviceContext.name}
-- Device ID: ${deviceContext.clientId}` : ''}
+- Device ID: ${deviceContext.clientId}
+- Device Type: ${isApplication ? 'Application/Software' : 'Physical Device'}` : ''}
 
 CRITICAL RULES:
-1. ALWAYS use the EXACT device name "${deviceContext?.name || 'device'}" in your response - DO NOT use generic terms like "smart light" or make assumptions about what the device is
-2. Refer to the device by its actual name: "${deviceContext?.name || 'device'}"
-3. Avoid technical jargon and tool names like "Splunk" or "logs"
-4. Focus on simple actions users can actually do like disconnecting devices, checking settings, contacting support, or restarting devices
-5. Make everything understandable for non-technical users
+1. This is ${deviceType} - understand the difference between applications and physical devices
+2. ${isApplication 
+    ? `Since "${deviceName}" contains "console" or similar terms, it is an APPLICATION/SOFTWARE (like a control interface, dashboard, or management tool), NOT a physical device. Talk about the application, its access, permissions, and usage patterns.`
+    : `This is a physical device. Talk about the device itself, its connections, and hardware-level issues.`}
+3. ALWAYS use the EXACT name "${deviceName}" in your response - DO NOT use generic terms or make assumptions
+4. Avoid technical jargon and tool names like "Splunk" or "logs"
+5. Focus on simple actions users can actually do like checking application access, reviewing permissions, disconnecting devices, checking settings, or contacting support
+6. Make everything understandable for non-technical users
 
 Respond with valid JSON only.`;
 
