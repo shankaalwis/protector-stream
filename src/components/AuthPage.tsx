@@ -70,12 +70,9 @@ export const AuthPage = () => {
           // Password verified, now sign out and proceed to OTP
           await supabase.auth.signOut();
           
-          // Send OTP
-          const { error: otpError } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-              shouldCreateUser: false
-            }
+          // Send custom OTP via edge function
+          const { error: otpError } = await supabase.functions.invoke('send-otp', {
+            body: { email }
           });
 
           if (otpError) {
@@ -88,7 +85,7 @@ export const AuthPage = () => {
             setLoginStep('otp');
             toast({
               title: "Password Verified",
-              description: "Please check your email for the OTP code"
+              description: "Please check your email for the 6-digit OTP code"
             });
           }
         }
@@ -109,24 +106,50 @@ export const AuthPage = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token: otpCode,
-        type: 'email'
-      });
+      // Verify OTP code from database
+      const { data: otpData, error: otpError } = await supabase
+        .from('otp_codes')
+        .select('*')
+        .eq('email', email.toLowerCase())
+        .eq('code', otpCode)
+        .eq('verified', false)
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
 
-      if (error) {
+      if (otpError || !otpData) {
         toast({
           title: "Verification Failed",
-          description: error.message,
+          description: "Invalid or expired OTP code",
           variant: "destructive"
         });
       } else {
-        toast({
-          title: "Login Successful",
-          description: "Welcome back!"
+        // Mark OTP as verified
+        await supabase
+          .from('otp_codes')
+          .update({ verified: true })
+          .eq('id', otpData.id);
+
+        // Sign in the user with password
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
         });
-        // User will be redirected automatically by auth state change
+
+        if (signInError) {
+          toast({
+            title: "Authentication Error",
+            description: signInError.message,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Login Successful",
+            description: "Welcome back!"
+          });
+          // User will be redirected automatically by auth state change
+        }
       }
     } catch (error) {
       toast({
@@ -142,11 +165,8 @@ export const AuthPage = () => {
   const handleResendOtp = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: false
-        }
+      const { error } = await supabase.functions.invoke('send-otp', {
+        body: { email }
       });
 
       if (error) {
@@ -158,7 +178,7 @@ export const AuthPage = () => {
       } else {
         toast({
           title: "OTP Sent",
-          description: "A new OTP code has been sent to your email"
+          description: "A new 6-digit OTP code has been sent to your email"
         });
       }
     } catch (error) {

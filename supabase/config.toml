@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.metrics-ingest]
 verify_jwt = false
+
+[functions.send-otp]
+verify_jwt = false
