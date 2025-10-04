@@ -80,7 +80,7 @@ serve(async (req) => {
       }
     }
     
-    const severity = (payload?.severity ?? primary?.severity ?? incoming?.severity ?? 'high') as string;
+    const severity = (payload?.severity ?? primary?.severity ?? incoming?.severity ?? 'medium') as string;
 
     console.log('Received Splunk alert (normalized):', { contentType, incoming, normalized: { client_id, ip_address, alert_type, description, severity } });
 
