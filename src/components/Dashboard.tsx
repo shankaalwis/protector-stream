@@ -498,23 +498,26 @@ export const Dashboard = () => {
 
   const renderOverview = () => (
     <div className="space-y-8">
-      {/* Banner-like header for Security Overview */}
-      <div className="relative overflow-hidden rounded-2xl border-2 border-[hsl(var(--banner-blue))] bg-gradient-to-r from-[hsl(var(--banner-blue))]/15 via-[hsl(var(--banner-blue))]/8 to-transparent p-6 shadow-professional-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--banner-blue))]/10 to-transparent"></div>
-        <div className="absolute top-4 right-6 text-sm text-muted-foreground font-medium">
-          Welcome, {userProfile?.first_name && userProfile?.last_name 
-            ? `${userProfile.first_name} ${userProfile.last_name}` 
-            : user?.email}
-        </div>
-        <div className="relative text-center space-y-3">
-          <div className="flex items-center justify-center space-x-3">
-            <Shield className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-[hsl(var(--banner-blue))] to-[hsl(var(--banner-blue-light))] bg-clip-text text-transparent">
-              Security Overview
-            </h1>
-            <Shield className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
+      {/* Clean Header */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+              <Shield className="h-8 w-8 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-foreground">Security Overview</h1>
+              <p className="text-muted-foreground mt-1">Monitor your network security in real-time</p>
+            </div>
           </div>
-          <p className="text-lg font-medium text-foreground/80">Monitor your network security in real-time</p>
+          <div className="text-right">
+            <p className="text-sm text-muted-foreground">Welcome back,</p>
+            <p className="text-base font-semibold text-foreground">
+              {userProfile?.first_name && userProfile?.last_name 
+                ? `${userProfile.first_name} ${userProfile.last_name}` 
+                : user?.email}
+            </p>
+          </div>
         </div>
       </div>
       

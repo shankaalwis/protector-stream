@@ -277,41 +277,45 @@ export default function SiemDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header with Back Button */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Shield className="h-10 w-10 text-primary" />
-            <div>
-              <h1 className="text-4xl font-bold text-foreground">🛡️ SIEM Dashboard: Threat Monitor</h1>
-              <p className="text-muted-foreground mt-2">Real-time security intelligence and event monitoring</p>
+        {/* Clean Header */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+                <Shield className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-foreground">SIEM Dashboard</h1>
+                <p className="text-muted-foreground mt-1">Real-time security intelligence and event monitoring</p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => {
-                setButtonClicked(true);
-                setTimeout(() => {
-                  setIsChatOpen(true);
-                  setButtonClicked(false);
-                }, 300);
-              }}
-              variant="outline"
-              className={`flex items-center gap-2 relative transition-all hover:scale-105 ${
-                buttonClicked ? 'button-morph' : ''
-              }`}
-            >
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="hidden sm:inline">Aura Assistant</span>
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-            </Button>
-            <Button
-              onClick={() => navigate('/')}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => {
+                  setButtonClicked(true);
+                  setTimeout(() => {
+                    setIsChatOpen(true);
+                    setButtonClicked(false);
+                  }, 300);
+                }}
+                variant="outline"
+                className={`flex items-center gap-2 relative transition-all hover:scale-105 ${
+                  buttonClicked ? 'button-morph' : ''
+                }`}
+              >
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="hidden sm:inline">Aura Assistant</span>
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+              </Button>
+              <Button
+                onClick={() => navigate('/')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Dashboard
+              </Button>
+            </div>
           </div>
         </div>
 

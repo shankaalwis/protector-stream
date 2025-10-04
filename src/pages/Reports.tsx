@@ -529,44 +529,45 @@ export default function Reports() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="relative overflow-hidden rounded-2xl border-2 border-[hsl(var(--banner-blue))] bg-gradient-to-r from-[hsl(var(--banner-blue))]/15 via-[hsl(var(--banner-blue))]/8 to-transparent p-6 shadow-lg">
-          <div className="relative text-center space-y-3">
-            <div className="flex items-center justify-center space-x-3">
-              <Shield className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-[hsl(var(--banner-blue))] to-[hsl(var(--banner-blue-light))] bg-clip-text text-transparent">
-                Historical Security Reports
-              </h1>
-              <FileText className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
+        {/* Clean Header */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+                <FileText className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-foreground">Security Reports</h1>
+                <p className="text-muted-foreground mt-1">Generate comprehensive security reports for any time period</p>
+              </div>
             </div>
-            <p className="text-lg font-medium text-foreground/80">Generate comprehensive security reports for any time period</p>
-          </div>
-          <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
-            <Button
-              onClick={() => {
-                setButtonClicked(true);
-                setTimeout(() => {
-                  setIsChatOpen(true);
-                  setButtonClicked(false);
-                }, 300);
-              }}
-              variant="outline"
-              className={`flex items-center gap-2 relative transition-all hover:scale-105 ${
-                buttonClicked ? 'button-morph' : ''
-              }`}
-            >
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="hidden sm:inline">Aura</span>
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-            </Button>
-            <Button
-              onClick={() => navigate('/')}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => {
+                  setButtonClicked(true);
+                  setTimeout(() => {
+                    setIsChatOpen(true);
+                    setButtonClicked(false);
+                  }, 300);
+                }}
+                variant="outline"
+                className={`flex items-center gap-2 relative transition-all hover:scale-105 ${
+                  buttonClicked ? 'button-morph' : ''
+                }`}
+              >
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="hidden sm:inline">Aura Assistant</span>
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+              </Button>
+              <Button
+                onClick={() => navigate('/')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Dashboard
+              </Button>
+            </div>
           </div>
         </div>
 
