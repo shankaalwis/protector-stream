@@ -316,6 +316,104 @@ export default function Reports() {
       });
     }
 
+    // Dashboard Metrics Summary Section
+    if (reportData.metrics.length > 0) {
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setTextColor(0, 109, 182);
+      doc.text('Dashboard Metrics Summary', 14, yPosition);
+      yPosition += 5;
+
+      // Key Metrics
+      const failedAuthMetric = reportData.metrics.find(m => m.metric_key === 'Failed Auth Attempts (24h) Webhook');
+      const successConnectionsMetric = reportData.metrics.find(m => m.metric_key === 'successful_connections_24h');
+
+      const metricsData = [];
+      if (failedAuthMetric) {
+        const value = failedAuthMetric.metric_value?.total_failed_attempts || failedAuthMetric.metric_value;
+        metricsData.push(['Failed Auth Attempts (24h)', value.toString()]);
+      }
+      if (successConnectionsMetric) {
+        const value = successConnectionsMetric.metric_value?.value || successConnectionsMetric.metric_value;
+        metricsData.push(['Successful Connections (24h)', value.toString()]);
+      }
+
+      if (metricsData.length > 0) {
+        autoTable(doc, {
+          startY: yPosition,
+          head: [['Metric', 'Value']],
+          body: metricsData,
+          theme: 'striped',
+          headStyles: { fillColor: [0, 109, 182] },
+          styles: { fontSize: 9 },
+        });
+        yPosition = (doc as any).lastAutoTable.finalY + 15;
+      }
+
+      // Top Targeted Clients
+      const topClientsMetric = reportData.metrics.find(m => m.metric_key === 'top_targeted_clients');
+      if (topClientsMetric && topClientsMetric.metric_value?.data) {
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 20;
+        }
+
+        doc.setFontSize(12);
+        doc.setTextColor(220, 53, 69);
+        doc.text('Top Targeted Clients', 14, yPosition);
+        yPosition += 5;
+
+        const clientsData = topClientsMetric.metric_value.data.slice(0, 5).map((client: any, index: number) => [
+          `#${index + 1}`,
+          client.targeted_client,
+          client.failure_count.toString()
+        ]);
+
+        autoTable(doc, {
+          startY: yPosition,
+          head: [['Rank', 'Client ID', 'Failed Attempts']],
+          body: clientsData,
+          theme: 'striped',
+          headStyles: { fillColor: [220, 53, 69] },
+          styles: { fontSize: 8 },
+        });
+        yPosition = (doc as any).lastAutoTable.finalY + 15;
+      }
+
+      // Top Busiest Topics
+      const topTopicsMetric = reportData.metrics.find(m => m.metric_key === 'top_busiest_topics');
+      if (topTopicsMetric && topTopicsMetric.metric_value?.data) {
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 20;
+        }
+
+        doc.setFontSize(12);
+        doc.setTextColor(34, 197, 94);
+        doc.text('Top Busiest Topics', 14, yPosition);
+        yPosition += 5;
+
+        const topicsData = topTopicsMetric.metric_value.data.slice(0, 5).map((topic: any, index: number) => [
+          `#${index + 1}`,
+          topic.topic_name,
+          topic.message_count.toString()
+        ]);
+
+        autoTable(doc, {
+          startY: yPosition,
+          head: [['Rank', 'Topic Name', 'Messages']],
+          body: topicsData,
+          theme: 'striped',
+          headStyles: { fillColor: [34, 197, 94] },
+          styles: { fontSize: 8 },
+        });
+      }
+    }
+
     // Save PDF
     doc.save(`security-report-${format(startDate, 'yyyy-MM-dd')}-to-${format(endDate, 'yyyy-MM-dd')}.pdf`);
 
@@ -361,16 +459,45 @@ export default function Reports() {
       csvContent += '\n';
     }
 
-    // Metrics (formatted properly)
+    // Dashboard Metrics Summary
     if (reportData.metrics.length > 0) {
-      csvContent += 'DASHBOARD METRICS\n';
-      csvContent += 'Metric Key,Value,Created At\n';
-      reportData.metrics.forEach(metric => {
-        const value = typeof metric.metric_value === 'object' 
-          ? Object.entries(metric.metric_value).map(([k, v]) => `${k}: ${v}`).join('; ')
-          : metric.metric_value;
-        csvContent += `"${metric.metric_key}","${value}","${format(new Date(metric.created_at), 'PPp')}"\n`;
-      });
+      csvContent += 'DASHBOARD METRICS SUMMARY\n\n';
+      
+      // Key Metrics
+      csvContent += 'Key Metrics\n';
+      const failedAuthMetric = reportData.metrics.find(m => m.metric_key === 'Failed Auth Attempts (24h) Webhook');
+      const successConnectionsMetric = reportData.metrics.find(m => m.metric_key === 'successful_connections_24h');
+      
+      if (failedAuthMetric) {
+        const value = failedAuthMetric.metric_value?.total_failed_attempts || failedAuthMetric.metric_value;
+        csvContent += `"Failed Auth Attempts (24h)","${value}"\n`;
+      }
+      if (successConnectionsMetric) {
+        const value = successConnectionsMetric.metric_value?.value || successConnectionsMetric.metric_value;
+        csvContent += `"Successful Connections (24h)","${value}"\n`;
+      }
+      csvContent += '\n';
+
+      // Top Targeted Clients
+      const topClientsMetric = reportData.metrics.find(m => m.metric_key === 'top_targeted_clients');
+      if (topClientsMetric && topClientsMetric.metric_value?.data) {
+        csvContent += 'Top Targeted Clients\n';
+        csvContent += 'Rank,Client ID,Failed Attempts\n';
+        topClientsMetric.metric_value.data.slice(0, 5).forEach((client: any, index: number) => {
+          csvContent += `"#${index + 1}","${client.targeted_client}","${client.failure_count}"\n`;
+        });
+        csvContent += '\n';
+      }
+
+      // Top Busiest Topics
+      const topTopicsMetric = reportData.metrics.find(m => m.metric_key === 'top_busiest_topics');
+      if (topTopicsMetric && topTopicsMetric.metric_value?.data) {
+        csvContent += 'Top Busiest Topics\n';
+        csvContent += 'Rank,Topic Name,Messages\n';
+        topTopicsMetric.metric_value.data.slice(0, 5).forEach((topic: any, index: number) => {
+          csvContent += `"#${index + 1}","${topic.topic_name}","${topic.message_count}"\n`;
+        });
+      }
     }
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
