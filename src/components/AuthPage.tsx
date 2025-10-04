@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,18 +10,32 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(() => sessionStorage.getItem('otp_email') || '');
+  const [password, setPassword] = useState(() => sessionStorage.getItem('otp_password') || '');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [firewallApiKey, setFirewallApiKey] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loginStep, setLoginStep] = useState<'password' | 'otp'>('password');
+  const [loginStep, setLoginStep] = useState<'password' | 'otp'>(() => {
+    return (sessionStorage.getItem('login_step') as 'password' | 'otp') || 'password';
+  });
   const [otpCode, setOtpCode] = useState('');
   const { signUp, signIn } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (loginStep === 'otp') {
+      sessionStorage.setItem('login_step', 'otp');
+      sessionStorage.setItem('otp_email', email);
+      sessionStorage.setItem('otp_password', password);
+    } else {
+      sessionStorage.removeItem('login_step');
+      sessionStorage.removeItem('otp_email');
+      sessionStorage.removeItem('otp_password');
+    }
+  }, [loginStep, email, password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,6 +158,11 @@ export const AuthPage = () => {
             variant: "destructive"
           });
         } else {
+          // Clear session storage
+          sessionStorage.removeItem('login_step');
+          sessionStorage.removeItem('otp_email');
+          sessionStorage.removeItem('otp_password');
+          
           toast({
             title: "Login Successful",
             description: "Welcome back!"
@@ -250,6 +269,9 @@ export const AuthPage = () => {
                   onClick={() => {
                     setLoginStep('password');
                     setOtpCode('');
+                    sessionStorage.removeItem('login_step');
+                    sessionStorage.removeItem('otp_email');
+                    sessionStorage.removeItem('otp_password');
                   }}
                 >
                   Back
