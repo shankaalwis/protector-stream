@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, Legend, BarChart, Bar } from "recharts";
-import { Activity, Shield, TrendingUp, ArrowLeft, Users, AlertTriangle } from "lucide-react";
+import { Activity, Shield, TrendingUp, ArrowLeft, Users, AlertTriangle, MessageSquare } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import AuraChat from "@/components/AuraChat";
 
 interface DashboardMetric {
   id: string;
@@ -52,6 +54,7 @@ export default function SiemDashboard() {
   const [topTargetedClients, setTopTargetedClients] = useState<TopTargetedClient[]>([]);
   const [busiestTopics, setBusiestTopics] = useState<BusiestTopic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -282,14 +285,25 @@ export default function SiemDashboard() {
               <p className="text-muted-foreground mt-2">Real-time security intelligence and event monitoring</p>
             </div>
           </div>
-          <Button
-            onClick={() => navigate('/')}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setIsChatOpen(true)}
+              variant="outline"
+              className="flex items-center gap-2 relative"
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Aura Assistant</span>
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+            </Button>
+            <Button
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </div>
         </div>
 
         {/* Main Metrics Grid */}
@@ -715,6 +729,13 @@ export default function SiemDashboard() {
         </Card>
 
       </div>
+
+      {/* Aura Chat Dialog */}
+      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <DialogContent className="max-w-4xl h-[80vh] sm:h-[600px] p-0 gap-0">
+          <AuraChat />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

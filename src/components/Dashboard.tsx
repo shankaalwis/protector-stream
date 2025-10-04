@@ -9,8 +9,10 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AnomalyChart from './AnomalyChart';
 import AlertDetailCard from './AlertDetailCard';
+import AuraChat from './AuraChat';
 import { 
   Shield, 
   AlertTriangle, 
@@ -91,6 +93,7 @@ export const Dashboard = () => {
   const [showAddDevice, setShowAddDevice] = useState(false);
   const [editingDevice, setEditingDevice] = useState<EditDevice | null>(null);
   const [showEditDevice, setShowEditDevice] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   
   // New state for expandable AI analysis sections
   const [expandedSections, setExpandedSections] = useState<{[alertId: string]: {causes: boolean; actions: boolean}}>({});
@@ -1163,7 +1166,17 @@ export const Dashboard = () => {
                 </button>
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsChatOpen(true)}
+                className="flex items-center space-x-2 relative"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span className="hidden sm:inline">Aura Assistant</span>
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -1185,6 +1198,13 @@ export const Dashboard = () => {
         {currentPage === 'devices' && renderDevices()}
         {currentPage === 'settings' && renderSettings()}
       </main>
+
+      {/* Aura Chat Dialog */}
+      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <DialogContent className="max-w-4xl h-[80vh] sm:h-[600px] p-0 gap-0">
+          <AuraChat />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

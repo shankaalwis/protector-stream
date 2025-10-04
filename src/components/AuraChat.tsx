@@ -157,8 +157,8 @@ const AuraChat = () => {
   };
 
   return (
-    <div className="flex flex-col h-[600px] max-w-4xl mx-auto border rounded-lg bg-background">
-      <div className="p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5">
+    <div className="flex flex-col h-full bg-background">
+      <div className="p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5 flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
             <Bot className="w-6 h-6 text-primary" />
@@ -211,7 +211,7 @@ const AuraChat = () => {
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t flex-shrink-0">
         <div className="flex gap-2">
           <Input
             value={input}

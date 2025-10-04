@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,11 +13,12 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { CalendarIcon, Download, FileText, FileSpreadsheet, Eye, Loader2, Shield, ArrowLeft, Activity, TrendingUp } from 'lucide-react';
+import { CalendarIcon, Download, FileText, FileSpreadsheet, Eye, Loader2, Shield, ArrowLeft, Activity, TrendingUp, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import AuraChat from '@/components/AuraChat';
 
 interface ReportData {
   devices: any[];
@@ -39,6 +41,7 @@ export default function Reports() {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const selectAll = () => {
     const allSelected = includeDevices && includeAlerts && includeAnomalies && includeMetrics;
@@ -537,14 +540,25 @@ export default function Reports() {
             </div>
             <p className="text-lg font-medium text-foreground/80">Generate comprehensive security reports for any time period</p>
           </div>
-          <Button
-            onClick={() => navigate('/')}
-            variant="outline"
-            className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
+          <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            <Button
+              onClick={() => setIsChatOpen(true)}
+              variant="outline"
+              className="flex items-center gap-2 relative"
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Aura</span>
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+            </Button>
+            <Button
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
         </div>
 
         {/* Control Panel */}
@@ -1024,6 +1038,13 @@ export default function Reports() {
           </div>
         )}
       </div>
+
+      {/* Aura Chat Dialog */}
+      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <DialogContent className="max-w-4xl h-[80vh] sm:h-[600px] p-0 gap-0">
+          <AuraChat />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
