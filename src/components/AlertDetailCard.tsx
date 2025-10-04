@@ -163,32 +163,8 @@ const AlertDetailCard = ({
           )}
 
           {/* Alert Description */}
-          <div className="space-y-2">
-            <Collapsible open={showFullDescription} onOpenChange={setShowFullDescription}>
-              <div className="text-sm text-foreground">
-                {cleanAlertDescription(alert.description).length > 150 && !showFullDescription
-                  ? `${cleanAlertDescription(alert.description).substring(0, 150)}...`
-                  : cleanAlertDescription(alert.description)
-                }
-              </div>
-              {cleanAlertDescription(alert.description).length > 150 && (
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-primary">
-                    {showFullDescription ? (
-                      <>
-                        <ChevronDown className="h-3 w-3 mr-1" />
-                        Show less
-                      </>
-                    ) : (
-                      <>
-                        <ChevronRight className="h-3 w-3 mr-1" />
-                        Show more
-                      </>
-                    )}
-                  </Button>
-                </CollapsibleTrigger>
-              )}
-            </Collapsible>
+          <div className="text-sm text-muted-foreground">
+            Please click the 'AI Analysis' button to learn more about this alert.
           </div>
 
           {/* AI Summary */}
