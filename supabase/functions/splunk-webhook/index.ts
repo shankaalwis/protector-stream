@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -126,6 +127,50 @@ serve(async (req) => {
           threats_detected: (metrics.threats_detected || 0) + 1 
         })
         .eq('user_id', device.user_id);
+    }
+
+    // Send email notification to user
+    try {
+      const { data: user } = await supabase
+        .from('users')
+        .select('email')
+        .eq('id', device.user_id)
+        .single();
+
+      if (user?.email) {
+        const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+        await resend.emails.send({
+          from: "AuraShield Security <security@shankaalwis.dev>",
+          to: [user.email],
+          subject: "🚨 Security Alert Detected",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #dc2626; font-size: 24px; margin-bottom: 20px;">Security Alert Detected</h1>
+              <p style="color: #666; font-size: 16px; margin-bottom: 20px;">
+                AuraShield has detected a security alert on your network.
+              </p>
+              <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin-bottom: 20px;">
+                <p style="margin: 0; color: #991b1b; font-weight: bold;">Alert Type: ${alert_type}</p>
+                <p style="margin: 5px 0 0 0; color: #7f1d1d;">${description}</p>
+              </div>
+              <p style="color: #666; font-size: 16px; margin-bottom: 20px;">
+                Please log in to your AuraShield dashboard to review and take action on this alert.
+              </p>
+              <a href="${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '') || ''}" 
+                 style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                View Dashboard
+              </a>
+              <p style="color: #999; font-size: 14px; margin-top: 30px;">
+                This is an automated security notification from AuraShield.
+              </p>
+            </div>
+          `,
+        });
+        console.log('Alert email sent to:', user.email);
+      }
+    } catch (emailError) {
+      console.error('Failed to send email notification:', emailError);
+      // Don't fail the webhook if email fails
     }
 
     console.log('Successfully processed Splunk alert for device:', device.id);
