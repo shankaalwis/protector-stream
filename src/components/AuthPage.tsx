@@ -10,8 +10,16 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState(() => sessionStorage.getItem('otp_email') || '');
-  const [password, setPassword] = useState(() => sessionStorage.getItem('otp_password') || '');
+  const [email, setEmail] = useState(() => {
+    const stored = sessionStorage.getItem('otp_email');
+    console.log('Initial email from sessionStorage:', stored);
+    return stored || '';
+  });
+  const [password, setPassword] = useState(() => {
+    const stored = sessionStorage.getItem('otp_password');
+    console.log('Initial password from sessionStorage:', stored ? '***' : 'none');
+    return stored || '';
+  });
   const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -19,21 +27,27 @@ export const AuthPage = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [loginStep, setLoginStep] = useState<'password' | 'otp'>(() => {
-    return (sessionStorage.getItem('login_step') as 'password' | 'otp') || 'password';
+    const stored = sessionStorage.getItem('login_step') as 'password' | 'otp';
+    console.log('Initial loginStep from sessionStorage:', stored || 'password');
+    return stored || 'password';
   });
   const [otpCode, setOtpCode] = useState('');
   const { signUp, signIn } = useAuth();
   const { toast } = useToast();
+
+  console.log('AuthPage render - loginStep:', loginStep, 'isSignUp:', isSignUp, 'email:', email);
 
   useEffect(() => {
     if (loginStep === 'otp') {
       sessionStorage.setItem('login_step', 'otp');
       sessionStorage.setItem('otp_email', email);
       sessionStorage.setItem('otp_password', password);
+      console.log('Saved to sessionStorage - loginStep: otp');
     } else {
       sessionStorage.removeItem('login_step');
       sessionStorage.removeItem('otp_email');
       sessionStorage.removeItem('otp_password');
+      console.log('Cleared sessionStorage');
     }
   }, [loginStep, email, password]);
 
