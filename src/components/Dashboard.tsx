@@ -1415,11 +1415,12 @@ export const Dashboard = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] rounded-full blur-xl opacity-30 animate-ping"></div>
             
             {/* "Hey!" Speech Bubble */}
-            <div className="absolute -left-20 top-2 z-20 animate-fade-in">
-              <div className="relative bg-gradient-to-br from-primary to-[hsl(var(--dark-sky-blue))] text-primary-foreground px-4 py-2 rounded-2xl rounded-br-sm shadow-lg shadow-primary/50 animate-pulse">
-                <span className="font-bold text-lg">hey !</span>
-                {/* Speech bubble tail */}
-                <div className="absolute -right-2 bottom-0 w-0 h-0 border-l-8 border-l-[hsl(var(--dark-sky-blue))] border-t-8 border-t-transparent border-b-8 border-b-transparent"></div>
+            <div className="absolute -left-16 top-4 z-20 animate-fade-in">
+              <div className="relative bg-gradient-to-br from-primary to-[hsl(var(--dark-sky-blue))] text-primary-foreground px-3 py-1.5 rounded-full shadow-lg shadow-primary/50 animate-pulse">
+                <span className="font-bold text-sm">hey !</span>
+                {/* Cloud-like tail */}
+                <div className="absolute -right-1 bottom-2 w-3 h-3 bg-gradient-to-br from-primary to-[hsl(var(--dark-sky-blue))] rounded-full"></div>
+                <div className="absolute right-0 bottom-0 w-2 h-2 bg-gradient-to-br from-primary to-[hsl(var(--dark-sky-blue))] rounded-full"></div>
               </div>
             </div>
             
