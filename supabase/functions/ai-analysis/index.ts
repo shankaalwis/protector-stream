@@ -134,8 +134,11 @@ ALERT DETAILS:
 - Type: ${alert.alert_type}
 - Description: ${alert.description}  
 - Severity: ${alert.severity}
-- Device: ${deviceContext?.name || 'Unknown device'} ${deviceContext?.clientId ? `(ID: ${deviceContext.clientId})` : ''}
-- Timestamp: ${alert.timestamp}`;
+- Device Name: ${deviceContext?.name || 'Unknown device'}
+- Device ID: ${deviceContext?.clientId || 'Unknown'}
+- Timestamp: ${alert.timestamp}
+
+CRITICAL: Always use the EXACT device name "${deviceContext?.name || 'device'}" when referring to the device. DO NOT use generic terms or make assumptions.`;
 
       if (originalAnalysis) {
         systemMessage += `
@@ -216,9 +219,15 @@ Alert Details:
 - Type: ${alert.alert_type}
 - Description: ${alert.description}
 - Severity: ${alert.severity}${deviceContext ? `
-- Device: ${deviceContext.name} (${deviceContext.clientId})` : ''}
+- Device Name: ${deviceContext.name}
+- Device ID: ${deviceContext.clientId}` : ''}
 
-IMPORTANT: Avoid technical jargon and tool names like "Splunk" or "logs". Focus on simple actions users can actually do like disconnecting devices, checking settings, contacting support, or restarting devices. Make everything understandable for non-technical users.
+CRITICAL RULES:
+1. ALWAYS use the EXACT device name "${deviceContext?.name || 'device'}" in your response - DO NOT use generic terms like "smart light" or make assumptions about what the device is
+2. Refer to the device by its actual name: "${deviceContext?.name || 'device'}"
+3. Avoid technical jargon and tool names like "Splunk" or "logs"
+4. Focus on simple actions users can actually do like disconnecting devices, checking settings, contacting support, or restarting devices
+5. Make everything understandable for non-technical users
 
 Respond with valid JSON only.`;
 
