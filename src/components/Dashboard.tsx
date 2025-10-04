@@ -76,6 +76,8 @@ interface EditDevice {
 }
 
 export const Dashboard = () => {
+  const { user, signOut } = useAuth();
+  const [userProfile, setUserProfile] = useState<{ first_name: string | null; last_name: string | null } | null>(null);
   const [currentPage, setCurrentPage] = useState<Page>('overview');
   const [devices, setDevices] = useState<Device[]>([]);
   const [alerts, setAlerts] = useState<SecurityAlert[]>([]);
@@ -98,8 +100,26 @@ export const Dashboard = () => {
   const [alertChatMessages, setAlertChatMessages] = useState<{[alertId: string]: Array<{role: 'user' | 'assistant'; content: string; timestamp: Date}>}>({});
   const [alertChatInputs, setAlertChatInputs] = useState<{[alertId: string]: string}>({});
   
-  const { user, signOut } = useAuth();
   const { toast } = useToast();
+
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from('users')
+        .select('first_name, last_name')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      if (data && !error) {
+        setUserProfile(data);
+      }
+    };
+    
+    fetchUserProfile();
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -476,7 +496,9 @@ export const Dashboard = () => {
       <div className="relative overflow-hidden rounded-2xl border-2 border-[hsl(var(--banner-blue))] bg-gradient-to-r from-[hsl(var(--banner-blue))]/15 via-[hsl(var(--banner-blue))]/8 to-transparent p-6 shadow-professional-lg">
         <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--banner-blue))]/10 to-transparent"></div>
         <div className="absolute top-4 right-6 text-sm text-muted-foreground font-medium">
-          Welcome, {user?.email}
+          Welcome, {userProfile?.first_name && userProfile?.last_name 
+            ? `${userProfile.first_name} ${userProfile.last_name}` 
+            : user?.email}
         </div>
         <div className="relative text-center space-y-3">
           <div className="flex items-center justify-center space-x-3">

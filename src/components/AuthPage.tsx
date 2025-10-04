@@ -11,6 +11,9 @@ export const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [firewallApiKey, setFirewallApiKey] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,10 +24,21 @@ export const AuthPage = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Validate password confirmation on signup
+    if (isSignUp && password !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match. Please try again.",
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       let error;
       if (isSignUp) {
-        ({ error } = await signUp(email, password, firewallApiKey, phoneNumber));
+        ({ error } = await signUp(email, password, firstName, lastName, firewallApiKey, phoneNumber));
       } else {
         ({ error } = await signIn(email, password));
       }
@@ -66,6 +80,34 @@ export const AuthPage = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {isSignUp && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                    placeholder="First name"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                    placeholder="Last name"
+                  />
+                </div>
+              </div>
+            )}
+
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
@@ -93,16 +135,17 @@ export const AuthPage = () => {
             {isSignUp && (
               <>
                 <div>
-                  <Label htmlFor="firewallApiKey">Firewall API Key</Label>
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
                   <Input
-                    id="firewallApiKey"
+                    id="confirmPassword"
                     type="password"
-                    value={firewallApiKey}
-                    onChange={(e) => setFirewallApiKey(e.target.value)}
-                    placeholder="Enter your firewall API key"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="Re-enter your password"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="phoneNumber">Phone Number</Label>
                   <Input
@@ -111,6 +154,17 @@ export const AuthPage = () => {
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     placeholder="Enter your phone number"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="firewallApiKey">Firewall API Key</Label>
+                  <Input
+                    id="firewallApiKey"
+                    type="password"
+                    value={firewallApiKey}
+                    onChange={(e) => setFirewallApiKey(e.target.value)}
+                    placeholder="Enter your firewall API key"
                   />
                 </div>
               </>

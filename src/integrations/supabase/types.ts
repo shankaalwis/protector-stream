@@ -231,7 +231,9 @@ export type Database = {
           created_at: string | null
           email: string
           firewall_api_key: string | null
+          first_name: string | null
           id: string
+          last_name: string | null
           phone_number: string | null
           updated_at: string | null
         }
@@ -240,7 +242,9 @@ export type Database = {
           created_at?: string | null
           email: string
           firewall_api_key?: string | null
+          first_name?: string | null
           id: string
+          last_name?: string | null
           phone_number?: string | null
           updated_at?: string | null
         }
@@ -249,7 +253,9 @@ export type Database = {
           created_at?: string | null
           email?: string
           firewall_api_key?: string | null
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           phone_number?: string | null
           updated_at?: string | null
         }
