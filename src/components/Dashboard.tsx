@@ -503,10 +503,18 @@ export const Dashboard = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-2xl bg-primary/20 border border-primary/30 shadow-lg">
-              <Shield className="h-8 w-8 text-primary" />
+            <div className="flex gap-2">
+              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+              </div>
+              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                <Activity className="h-5 w-5 text-primary" />
+              </div>
+              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                <Lock className="h-5 w-5 text-primary" />
+              </div>
             </div>
-            <div>
+            <div className="ml-2">
               <p className="text-sm font-medium text-muted-foreground">Welcome back,</p>
               <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 {userProfile?.first_name && userProfile?.last_name 
