@@ -1192,9 +1192,6 @@ export const Dashboard = () => {
                 >
                   <Home className="w-4 h-4" />
                   <span>Overview</span>
-                  {currentPage === 'overview' && (
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-primary rounded-full"></div>
-                  )}
                 </button>
                 
                 <button
@@ -1211,9 +1208,6 @@ export const Dashboard = () => {
                     <Badge className="ml-1 h-5 min-w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs font-bold px-1.5 animate-pulse">
                       {alerts.filter(a => a.status === 'unresolved').length}
                     </Badge>
-                  )}
-                  {currentPage === 'alerts' && (
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-primary rounded-full"></div>
                   )}
                 </button>
                 
@@ -1243,9 +1237,6 @@ export const Dashboard = () => {
                 >
                   <Monitor className="w-4 h-4" />
                   <span>Devices</span>
-                  {currentPage === 'devices' && (
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-primary rounded-full"></div>
-                  )}
                 </button>
                 
                 <button
@@ -1258,9 +1249,6 @@ export const Dashboard = () => {
                 >
                   <Settings className="w-4 h-4" />
                   <span>Settings</span>
-                  {currentPage === 'settings' && (
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-primary rounded-full"></div>
-                  )}
                 </button>
               </div>
             </div>
