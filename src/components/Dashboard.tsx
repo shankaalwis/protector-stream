@@ -1083,13 +1083,10 @@ export const Dashboard = () => {
       <nav className="bg-card border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 flex items-center">
                 <Shield className="h-8 w-8 text-primary mr-3" />
-                <div className="flex flex-col">
-                  <span className="text-xl font-bold text-foreground">SecureNet Dashboard</span>
-                  <span className="text-xs text-muted-foreground">Welcome, {user?.email}</span>
-                </div>
+                <span className="text-xl font-bold text-foreground">SecureNet Dashboard</span>
               </div>
               <div className="hidden md:ml-8 md:flex md:space-x-1">
                 <button
@@ -1153,11 +1150,14 @@ export const Dashboard = () => {
               </div>
             </div>
             <div className="flex items-center">
+              <div className="text-sm text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
+                Welcome, {user?.email}
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={signOut}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 ml-4"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
