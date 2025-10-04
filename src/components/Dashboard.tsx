@@ -662,18 +662,16 @@ export const Dashboard = () => {
     
     return (
     <div className="space-y-8">
-      {/* Banner-like header */}
-      <div className="relative overflow-hidden rounded-2xl border-2 border-[hsl(var(--banner-blue))] bg-gradient-to-r from-[hsl(var(--banner-blue))]/15 via-[hsl(var(--banner-blue))]/8 to-transparent p-6 shadow-professional-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--banner-blue))]/10 to-transparent"></div>
-        <div className="relative text-center space-y-3">
-          <div className="flex items-center justify-center space-x-3">
-            <AlertTriangle className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-[hsl(var(--banner-blue))] to-[hsl(var(--banner-blue-light))] bg-clip-text text-transparent">
-              Security Alerts
-            </h1>
-            <AlertTriangle className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
+      {/* Clean Header */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+            <AlertTriangle className="h-8 w-8 text-primary" />
           </div>
-          <p className="text-lg font-medium text-foreground/80">Monitor and respond to security threats</p>
+          <div>
+            <h1 className="text-4xl font-bold text-foreground">Security Alerts</h1>
+            <p className="text-muted-foreground mt-1">Monitor and respond to security threats</p>
+          </div>
         </div>
       </div>
       
@@ -709,30 +707,26 @@ export const Dashboard = () => {
 
   const renderDevices = () => (
     <div className="space-y-8">
-      {/* Banner-like header for Devices */}
-      <div className="relative overflow-hidden rounded-2xl border-2 border-[hsl(var(--banner-blue))] bg-gradient-to-r from-[hsl(var(--banner-blue))]/15 via-[hsl(var(--banner-blue))]/8 to-transparent p-6 shadow-professional-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--banner-blue))]/10 to-transparent"></div>
-        <div className="relative">
-          <div className="flex justify-between items-center">
-            <div className="text-center space-y-3 flex-1">
-              <div className="flex items-center justify-center space-x-3">
-                <Monitor className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-[hsl(var(--banner-blue))] to-[hsl(var(--banner-blue-light))] bg-clip-text text-transparent">
-                  My Devices
-                </h1>
-                <Monitor className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
-              </div>
-              <p className="text-lg font-medium text-foreground/80">Manage and monitor all connected devices</p>
+      {/* Clean Header */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+              <Monitor className="h-8 w-8 text-primary" />
             </div>
-            <Button 
-              onClick={() => setShowAddDevice(true)}
-              className="btn-primary border border-primary/20 shadow-professional"
-              size="lg"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add Device
-            </Button>
+            <div>
+              <h1 className="text-4xl font-bold text-foreground">My Devices</h1>
+              <p className="text-muted-foreground mt-1">Manage and monitor all connected devices</p>
+            </div>
           </div>
+          <Button 
+            onClick={() => setShowAddDevice(true)}
+            className="btn-primary border border-primary/20 shadow-professional"
+            size="lg"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Add Device
+          </Button>
         </div>
       </div>
 
@@ -884,18 +878,16 @@ export const Dashboard = () => {
 
   const renderSettings = () => (
     <div className="space-y-8">
-      {/* Banner-like header for Settings */}
-      <div className="relative overflow-hidden rounded-2xl border-2 border-[hsl(var(--banner-blue))] bg-gradient-to-r from-[hsl(var(--banner-blue))]/15 via-[hsl(var(--banner-blue))]/8 to-transparent p-6 shadow-professional-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--banner-blue))]/10 to-transparent"></div>
-        <div className="relative text-center space-y-3">
-          <div className="flex items-center justify-center space-x-3">
-            <Settings className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-[hsl(var(--banner-blue))] to-[hsl(var(--banner-blue-light))] bg-clip-text text-transparent">
-              Settings
-            </h1>
-            <Settings className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
+      {/* Clean Header */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+            <Settings className="h-8 w-8 text-primary" />
           </div>
-          <p className="text-lg font-medium text-foreground/80">Manage your account and device preferences</p>
+          <div>
+            <h1 className="text-4xl font-bold text-foreground">Settings</h1>
+            <p className="text-muted-foreground mt-1">Manage your account and device preferences</p>
+          </div>
         </div>
       </div>
       
