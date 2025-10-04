@@ -1255,27 +1255,6 @@ export const Dashboard = () => {
 
             {/* Right Side Actions */}
             <div className="flex items-center space-x-3">
-              {/* Aura Assistant Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setButtonClicked(true);
-                  setTimeout(() => {
-                    setIsChatOpen(true);
-                    setButtonClicked(false);
-                  }, 300);
-                }}
-                className={`flex items-center space-x-2 relative transition-all hover:scale-105 bg-gradient-to-r from-primary/10 to-[hsl(var(--dark-sky-blue))]/10 border border-primary/20 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/20 ${
-                  buttonClicked ? 'button-morph' : ''
-                }`}
-              >
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="hidden sm:inline font-semibold">Aura Assistant</span>
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50"></span>
-              </Button>
-
-
               {/* Sign Out Button */}
               <Button
                 variant="ghost"
@@ -1398,6 +1377,45 @@ export const Dashboard = () => {
         {currentPage === 'devices' && renderDevices()}
         {currentPage === 'settings' && renderSettings()}
       </main>
+
+      {/* Floating Aura Assistant Button */}
+      <button
+        onClick={() => {
+          setButtonClicked(true);
+          setTimeout(() => {
+            setIsChatOpen(true);
+            setButtonClicked(false);
+          }, 300);
+        }}
+        className={`fixed bottom-8 right-8 z-40 group ${
+          buttonClicked ? 'animate-scale-in' : ''
+        }`}
+      >
+        {/* Animated Background Rings */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] animate-pulse opacity-30 blur-xl group-hover:opacity-50 transition-opacity duration-300"></div>
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] animate-ping opacity-20"></div>
+        
+        {/* Main Button */}
+        <div className="relative flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-primary via-[hsl(var(--dark-sky-blue))] to-primary bg-size-200 bg-pos-0 hover:bg-pos-100 rounded-full shadow-2xl shadow-primary/50 border-2 border-primary/30 transition-all duration-500 group-hover:scale-110 group-hover:shadow-primary/70 group-hover:border-primary/50">
+          {/* Icon */}
+          <div className="relative">
+            <Sparkles className="w-6 h-6 text-primary-foreground drop-shadow-lg animate-pulse" />
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-pulse shadow-lg shadow-white/50"></span>
+          </div>
+          
+          {/* Text - Hidden on mobile, shown on desktop with slide animation */}
+          <span className="hidden lg:block text-primary-foreground font-bold text-lg whitespace-nowrap drop-shadow-md group-hover:tracking-wide transition-all duration-300">
+            Aura Assistant
+          </span>
+          
+          {/* Floating particles effect */}
+          <div className="absolute -inset-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute top-0 left-1/4 w-1 h-1 bg-white rounded-full animate-ping"></div>
+            <div className="absolute top-1/2 right-1/4 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
+            <div className="absolute bottom-0 left-1/2 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
+          </div>
+        </div>
+      </button>
 
       {/* Aura Chat */}
       <AuraChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
