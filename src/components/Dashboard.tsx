@@ -510,9 +510,6 @@ export const Dashboard = () => {
             <Shield className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
           </div>
           <p className="text-lg font-medium text-foreground/80">Monitor your network security in real-time</p>
-          <div className="flex items-center justify-center space-x-2 pt-2">
-            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-[hsl(var(--banner-blue))] to-transparent rounded-full"></div>
-          </div>
         </div>
       </div>
       
@@ -669,9 +666,6 @@ export const Dashboard = () => {
             <AlertTriangle className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
           </div>
           <p className="text-lg font-medium text-foreground/80">Monitor and respond to security threats</p>
-          <div className="flex items-center justify-center space-x-2 pt-2">
-            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-[hsl(var(--banner-blue))] to-transparent rounded-full"></div>
-          </div>
         </div>
       </div>
       
@@ -721,9 +715,6 @@ export const Dashboard = () => {
                 <Monitor className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
               </div>
               <p className="text-lg font-medium text-foreground/80">Manage and monitor all connected devices</p>
-              <div className="flex items-center justify-center space-x-2 pt-2">
-                <div className="h-1 w-20 bg-gradient-to-r from-transparent via-[hsl(var(--banner-blue))] to-transparent rounded-full"></div>
-              </div>
             </div>
             <Button 
               onClick={() => setShowAddDevice(true)}
@@ -897,9 +888,6 @@ export const Dashboard = () => {
             <Settings className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
           </div>
           <p className="text-lg font-medium text-foreground/80">Manage your account and device preferences</p>
-          <div className="flex items-center justify-center space-x-2 pt-2">
-            <div className="h-1 w-20 bg-gradient-to-r from-transparent via-[hsl(var(--banner-blue))] to-transparent rounded-full"></div>
-          </div>
         </div>
       </div>
       
