@@ -213,10 +213,10 @@ export const Dashboard = () => {
   };
 
   const addDevice = async () => {
-    if (!newDevice.name || !newDevice.ip) {
+    if (!newDevice.name) {
       toast({
         title: "Error",
-        description: "Please fill in device name and IP address",
+        description: "Please fill in device name",
         variant: "destructive"
       });
       return;
@@ -425,10 +425,10 @@ export const Dashboard = () => {
   };
 
   const updateDevice = async () => {
-    if (!editingDevice || !editingDevice.device_name || !editingDevice.ip_address) {
+    if (!editingDevice || !editingDevice.device_name) {
       toast({
         title: "Error",
-        description: "Please fill in device name and IP address",
+        description: "Please fill in device name",
         variant: "destructive"
       });
       return;
