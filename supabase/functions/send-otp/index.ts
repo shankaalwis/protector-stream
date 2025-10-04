@@ -62,7 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send OTP email via Resend
     const emailResponse = await resend.emails.send({
-      from: "Security <onboarding@resend.dev>",
+      from: "AuraShield Security <security@shankaalwis.dev>",
       to: [email],
       subject: "Your Login OTP Code",
       html: `
