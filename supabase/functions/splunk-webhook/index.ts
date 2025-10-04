@@ -140,7 +140,7 @@ serve(async (req) => {
       if (user?.email) {
         const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
         await resend.emails.send({
-          from: "AuraShield Security <security@shankaalwis.dev>",
+          from: "AuraShield Security <onboarding@resend.dev>",
           to: [user.email],
           subject: "🚨 Security Alert Detected",
           html: `
