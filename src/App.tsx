@@ -10,7 +10,6 @@ import Reports from "@/pages/Reports";
 import AuraAssistant from "@/pages/AuraAssistant";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/theme-provider";
-import ModeToggle from "@/components/theme-toggle";
 
 const queryClient = new QueryClient();
 
@@ -35,9 +34,6 @@ const App = () => {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
-            <div className="fixed top-4 right-4 z-[9999] pointer-events-auto">
-              <ModeToggle />
-            </div>
             <Toaster />
             <Sonner />
             <BrowserRouter>
