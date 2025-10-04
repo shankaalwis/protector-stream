@@ -475,6 +475,9 @@ export const Dashboard = () => {
       {/* Banner-like header for Security Overview */}
       <div className="relative overflow-hidden rounded-2xl border-2 border-[hsl(var(--banner-blue))] bg-gradient-to-r from-[hsl(var(--banner-blue))]/15 via-[hsl(var(--banner-blue))]/8 to-transparent p-6 shadow-professional-lg">
         <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--banner-blue))]/10 to-transparent"></div>
+        <div className="absolute top-4 right-6 text-sm text-muted-foreground font-medium">
+          Welcome, {user?.email}
+        </div>
         <div className="relative text-center space-y-3">
           <div className="flex items-center justify-center space-x-3">
             <Shield className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
@@ -1150,14 +1153,11 @@ export const Dashboard = () => {
               </div>
             </div>
             <div className="flex items-center">
-              <div className="text-sm text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
-                Welcome, {user?.email}
-              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={signOut}
-                className="flex items-center space-x-2 ml-4"
+                className="flex items-center space-x-2"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
