@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import AnomalyChart from './AnomalyChart';
 import AlertDetailCard from './AlertDetailCard';
 import AuraChat from './AuraChat';
+import { ModeToggle } from './theme-toggle';
 import { 
   Shield, 
   AlertTriangle, 
@@ -1255,6 +1256,9 @@ export const Dashboard = () => {
 
             {/* Right Side Actions */}
             <div className="flex items-center space-x-3">
+              {/* Theme Toggle */}
+              <ModeToggle />
+
               {/* Sign Out Button */}
               <Button
                 variant="ghost"
