@@ -57,7 +57,29 @@ serve(async (req) => {
     const client_id = primary?.Target_Username ?? primary?.client_id ?? primary?.clientId ?? get(primary, 'device.client_id') ?? payload?.client_id ?? incoming?.client_id;
     const ip_address = primary?.ip_address ?? primary?.ip ?? get(primary, 'device.ip_address') ?? payload?.ip_address ?? incoming?.ip_address;
     const alert_type = payload?.alert_type ?? primary?.alert_type ?? incoming?.alert_type ?? payload?.search_name ?? 'Unknown Threat';
-    const description = payload?.description ?? primary?.description ?? incoming?.description ?? `Security alert detected - ${primary?.failed_attempts || ''} failed attempts from ${primary?.Attacker_Client || 'unknown source'}`.trim();
+    
+    // Generate description based on alert type if not provided
+    let description = payload?.description ?? primary?.description ?? incoming?.description;
+    if (!description) {
+      const alertTypeLower = alert_type.toLowerCase();
+      if (alertTypeLower.includes('high volume') || alertTypeLower.includes('volume')) {
+        const count = primary?.count ?? 'high';
+        const topic = primary?.topic ?? 'unknown topic';
+        description = `High volume of messages detected: ${count} messages on topic ${topic}`;
+      } else if (alertTypeLower.includes('auth') || alertTypeLower.includes('login')) {
+        const failedAttempts = primary?.failed_attempts || primary?.count || '';
+        const attacker = primary?.Attacker_Client || primary?.source || 'unknown source';
+        description = `Authentication failure detected - ${failedAttempts} failed attempts from ${attacker}`.trim();
+      } else if (alertTypeLower.includes('brute force')) {
+        const attacker = primary?.Attacker_Client || primary?.source || 'unknown source';
+        description = `Brute force attack detected from ${attacker}`;
+      } else if (alertTypeLower.includes('unauthorized')) {
+        description = `Unauthorized access attempt detected`;
+      } else {
+        description = `Security alert detected: ${alert_type}`;
+      }
+    }
+    
     const severity = (payload?.severity ?? primary?.severity ?? incoming?.severity ?? 'high') as string;
 
     console.log('Received Splunk alert (normalized):', { contentType, incoming, normalized: { client_id, ip_address, alert_type, description, severity } });
