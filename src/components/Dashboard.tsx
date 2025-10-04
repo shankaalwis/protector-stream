@@ -67,7 +67,7 @@ interface SecurityAlert {
 interface NetworkMetrics {
   total_devices: number;
   threats_detected: number;
-  data_transferred_mb: number;
+  anomalies_detected_24h: number;
   network_activity: Array<{timestamp: string; data_rate: number}>;
 }
 
@@ -90,7 +90,7 @@ export const Dashboard = () => {
   const [metrics, setMetrics] = useState<NetworkMetrics>({
     total_devices: 0,
     threats_detected: 0,
-    data_transferred_mb: 0,
+    anomalies_detected_24h: 0,
     network_activity: []
   });
   const [newDevice, setNewDevice] = useState({ name: '', ip: '', mac: '', client_id: '' });
@@ -197,6 +197,15 @@ export const Dashboard = () => {
 
 
   const fetchMetrics = async () => {
+    // Fetch anomalies from the last 24 hours
+    const twentyFourHoursAgo = new Date();
+    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+    
+    const { data: anomalyData, error: anomalyError } = await supabase
+      .from('anomaly_alerts')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', twentyFourHoursAgo.toISOString());
+    
     const { data, error } = await supabase
       .from('network_metrics')
       .select('*')
@@ -206,7 +215,7 @@ export const Dashboard = () => {
       setMetrics({
         total_devices: data.total_devices || 0,
         threats_detected: data.threats_detected || 0,
-        data_transferred_mb: data.data_transferred_mb || 0,
+        anomalies_detected_24h: anomalyError ? 0 : (anomalyData?.length || 0),
         network_activity: (data.network_activity as Array<{timestamp: string; data_rate: number}>) || []
       });
     }
@@ -566,14 +575,14 @@ export const Dashboard = () => {
         
         <Card className="card-professional group hover:scale-105 hover:-translate-y-1 transition-all duration-300 border-[hsl(var(--dark-sky-blue))]/40 bg-gradient-to-br from-[hsl(var(--dark-sky-blue-subtle))]/20 to-[hsl(var(--dark-sky-blue-lighter))]/10 animate-fade-in [animation-delay:200ms]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-subheading text-[hsl(var(--dark-sky-blue))]">Data Transfer</CardTitle>
+            <CardTitle className="text-subheading text-[hsl(var(--dark-sky-blue))]">ML Anomalies (24h)</CardTitle>
             <div className="p-3 rounded-2xl bg-gradient-to-br from-[hsl(var(--dark-sky-blue))]/20 to-[hsl(var(--dark-sky-blue-light))]/15 group-hover:from-[hsl(var(--dark-sky-blue))]/30 group-hover:to-[hsl(var(--dark-sky-blue-light))]/25 transition-all duration-300 group-hover:rotate-12">
-              <Activity className="h-6 w-6 text-[hsl(var(--dark-sky-blue))] group-hover:scale-110 transition-transform duration-300" />
+              <BarChart3 className="h-6 w-6 text-[hsl(var(--dark-sky-blue))] group-hover:scale-110 transition-transform duration-300" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-[hsl(var(--dark-sky-blue))] group-hover:text-[hsl(var(--dark-sky-blue-light))] transition-colors duration-300">{metrics.data_transferred_mb}</div>
-            <p className="text-sm text-muted-foreground mt-2">MB transferred</p>
+            <div className="text-3xl font-bold text-[hsl(var(--dark-sky-blue))] group-hover:text-[hsl(var(--dark-sky-blue-light))] transition-colors duration-300">{metrics.anomalies_detected_24h}</div>
+            <p className="text-sm text-muted-foreground mt-2">Detected by ML model</p>
           </CardContent>
         </Card>
         
