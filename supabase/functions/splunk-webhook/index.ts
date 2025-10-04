@@ -58,8 +58,15 @@ serve(async (req) => {
     const ip_address = primary?.ip_address ?? primary?.ip ?? get(primary, 'device.ip_address') ?? payload?.ip_address ?? incoming?.ip_address;
     const alert_type = payload?.alert_type ?? primary?.alert_type ?? incoming?.alert_type ?? payload?.search_name ?? 'Unknown Threat';
     
-    // Generate description based on alert type if not provided
-    let description = payload?.description ?? primary?.description ?? incoming?.description;
+    // Extract description from all possible locations in Splunk payload
+    let description = payload?.description ?? 
+                      primary?.description ?? 
+                      incoming?.description ?? 
+                      payload?.message ?? 
+                      primary?.message ?? 
+                      incoming?.message ??
+                      primary?.alert_message ??
+                      payload?.alert_description;
     if (!description) {
       const alertTypeLower = alert_type.toLowerCase();
       if (alertTypeLower.includes('high volume') || alertTypeLower.includes('volume')) {
