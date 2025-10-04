@@ -23,6 +23,7 @@ export type Database = {
           is_anomaly: boolean
           packet_count: number
           timestamp: string
+          user_id: string | null
         }
         Insert: {
           anomaly_score: number
@@ -32,6 +33,7 @@ export type Database = {
           is_anomaly?: boolean
           packet_count: number
           timestamp: string
+          user_id?: string | null
         }
         Update: {
           anomaly_score?: number
@@ -41,8 +43,17 @@ export type Database = {
           is_anomaly?: boolean
           packet_count?: number
           timestamp?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "anomaly_alerts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dashboard_metrics: {
         Row: {
@@ -51,6 +62,7 @@ export type Database = {
           metric_key: string
           metric_value: Json
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -58,6 +70,7 @@ export type Database = {
           metric_key: string
           metric_value: Json
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -65,8 +78,17 @@ export type Database = {
           metric_key?: string
           metric_value?: Json
           updated_at?: string | null
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_metrics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       devices: {
         Row: {

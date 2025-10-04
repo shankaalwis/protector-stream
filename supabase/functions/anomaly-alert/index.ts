@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// Hardcoded user ID for single-user setup
+// TODO: Replace with dynamic user lookup when supporting multiple users/networks
+const HARDCODED_USER_ID = '9e41ec3a-367d-4104-8631-99fffa82fd07';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -81,7 +85,8 @@ serve(async (req) => {
         client_id: body.client_id,
         packet_count: body.packet_count,
         anomaly_score: body.anomaly_score,
-        is_anomaly: body.is_anomaly
+        is_anomaly: body.is_anomaly,
+        user_id: HARDCODED_USER_ID
       })
       .select();
 

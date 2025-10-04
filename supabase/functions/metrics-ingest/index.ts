@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 
+// Hardcoded user ID for single-user setup
+// TODO: Replace with dynamic user lookup when supporting multiple users/networks
+const HARDCODED_USER_ID = '9e41ec3a-367d-4104-8631-99fffa82fd07';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -41,7 +45,8 @@ serve(async (req) => {
         .upsert({
           metric_key,
           metric_value: { time_epoch, data: topClients },
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          user_id: HARDCODED_USER_ID
         }, {
           onConflict: 'metric_key'
         })
@@ -82,7 +87,8 @@ serve(async (req) => {
         .upsert({
           metric_key,
           metric_value: { time_epoch, data: topTopics },
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          user_id: HARDCODED_USER_ID
         }, {
           onConflict: 'metric_key'
         })
@@ -129,7 +135,8 @@ serve(async (req) => {
         .upsert({
           metric_key,
           metric_value: { time_epoch, total_failed_attempts },
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          user_id: HARDCODED_USER_ID
         }, {
           onConflict: 'metric_key'
         })
@@ -170,7 +177,8 @@ serve(async (req) => {
         .upsert({
           metric_key,
           metric_value: { time_epoch, value: successful_connections },
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          user_id: HARDCODED_USER_ID
         }, {
           onConflict: 'metric_key'
         })
@@ -245,7 +253,8 @@ serve(async (req) => {
       .upsert({
         metric_key,
         metric_value: dataPoints,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        user_id: HARDCODED_USER_ID
       }, {
         onConflict: 'metric_key'
       })
