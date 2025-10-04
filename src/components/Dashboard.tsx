@@ -671,15 +671,34 @@ export const Dashboard = () => {
     
     return (
     <div className="space-y-8">
-      {/* Clean Header */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
-            <AlertTriangle className="h-8 w-8 text-primary" />
+      {/* Enhanced Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-8 shadow-lg">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex gap-2">
+              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                <AlertTriangle className="h-5 w-5 text-primary" />
+              </div>
+              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                <Bell className="h-5 w-5 text-primary" />
+              </div>
+              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+            <div className="ml-2">
+              <p className="text-sm font-medium text-muted-foreground">Security Monitoring</p>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                {userProfile?.first_name && userProfile?.last_name 
+                  ? `${userProfile.first_name} ${userProfile.last_name}` 
+                  : user?.email}
+              </h2>
+            </div>
           </div>
-          <div>
-            <h1 className="text-4xl font-bold text-foreground">Security Alerts</h1>
-            <p className="text-muted-foreground mt-1">Monitor and respond to security threats</p>
+          <div className="mt-6">
+            <h1 className="text-5xl font-bold text-foreground mb-2">Security Alerts</h1>
+            <p className="text-lg text-muted-foreground">Monitor and respond to security threats</p>
           </div>
         </div>
       </div>
@@ -716,26 +735,45 @@ export const Dashboard = () => {
 
   const renderDevices = () => (
     <div className="space-y-8">
-      {/* Clean Header */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
-              <Monitor className="h-8 w-8 text-primary" />
+      {/* Enhanced Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-8 shadow-lg">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex gap-2">
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <Monitor className="h-5 w-5 text-primary" />
+                </div>
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <Activity className="h-5 w-5 text-primary" />
+                </div>
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+              <div className="ml-2">
+                <p className="text-sm font-medium text-muted-foreground">Device Management</p>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  {userProfile?.first_name && userProfile?.last_name 
+                    ? `${userProfile.first_name} ${userProfile.last_name}` 
+                    : user?.email}
+                </h2>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-foreground">My Devices</h1>
-              <p className="text-muted-foreground mt-1">Manage and monitor all connected devices</p>
-            </div>
+            <Button 
+              onClick={() => setShowAddDevice(true)}
+              className="btn-primary border border-primary/20 shadow-professional"
+              size="lg"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Add Device
+            </Button>
           </div>
-          <Button 
-            onClick={() => setShowAddDevice(true)}
-            className="btn-primary border border-primary/20 shadow-professional"
-            size="lg"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Add Device
-          </Button>
+          <div className="mt-6">
+            <h1 className="text-5xl font-bold text-foreground mb-2">My Devices</h1>
+            <p className="text-lg text-muted-foreground">Manage and monitor all connected devices</p>
+          </div>
         </div>
       </div>
 
@@ -887,15 +925,34 @@ export const Dashboard = () => {
 
   const renderSettings = () => (
     <div className="space-y-8">
-      {/* Clean Header */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
-            <Settings className="h-8 w-8 text-primary" />
+      {/* Enhanced Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-8 shadow-lg">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex gap-2">
+              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                <Settings className="h-5 w-5 text-primary" />
+              </div>
+              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                <Lock className="h-5 w-5 text-primary" />
+              </div>
+              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                <Monitor className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+            <div className="ml-2">
+              <p className="text-sm font-medium text-muted-foreground">Account Configuration</p>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                {userProfile?.first_name && userProfile?.last_name 
+                  ? `${userProfile.first_name} ${userProfile.last_name}` 
+                  : user?.email}
+              </h2>
+            </div>
           </div>
-          <div>
-            <h1 className="text-4xl font-bold text-foreground">Settings</h1>
-            <p className="text-muted-foreground mt-1">Manage your account and device preferences</p>
+          <div className="mt-6">
+            <h1 className="text-5xl font-bold text-foreground mb-2">Settings</h1>
+            <p className="text-lg text-muted-foreground">Manage your account and device preferences</p>
           </div>
         </div>
       </div>

@@ -529,44 +529,61 @@ export default function Reports() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Clean Header */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
-                <FileText className="h-8 w-8 text-primary" />
+        {/* Enhanced Header */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-8 shadow-lg">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex gap-2">
+                  <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                    <FileText className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                    <Activity className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                  </div>
+                </div>
+                <div className="ml-2">
+                  <p className="text-sm font-medium text-muted-foreground">Report Generation</p>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                    Security Analytics
+                  </h2>
+                </div>
               </div>
-              <div>
-                <h1 className="text-4xl font-bold text-foreground">Security Reports</h1>
-                <p className="text-muted-foreground mt-1">Generate comprehensive security reports for any time period</p>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => {
+                    setButtonClicked(true);
+                    setTimeout(() => {
+                      setIsChatOpen(true);
+                      setButtonClicked(false);
+                    }, 300);
+                  }}
+                  variant="outline"
+                  className={`flex items-center gap-2 relative transition-all hover:scale-105 ${
+                    buttonClicked ? 'button-morph' : ''
+                  }`}
+                >
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <span className="hidden sm:inline">Aura Assistant</span>
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                </Button>
+                <Button
+                  onClick={() => navigate('/')}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline">Back to Dashboard</span>
+                </Button>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => {
-                  setButtonClicked(true);
-                  setTimeout(() => {
-                    setIsChatOpen(true);
-                    setButtonClicked(false);
-                  }, 300);
-                }}
-                variant="outline"
-                className={`flex items-center gap-2 relative transition-all hover:scale-105 ${
-                  buttonClicked ? 'button-morph' : ''
-                }`}
-              >
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span className="hidden sm:inline">Aura Assistant</span>
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-              </Button>
-              <Button
-                onClick={() => navigate('/')}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Dashboard
-              </Button>
+            <div className="mt-6">
+              <h1 className="text-5xl font-bold text-foreground mb-2">Security Reports</h1>
+              <p className="text-lg text-muted-foreground">Generate comprehensive security reports for any time period</p>
             </div>
           </div>
         </div>
