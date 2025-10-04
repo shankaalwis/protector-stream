@@ -186,6 +186,7 @@ export const Dashboard = () => {
     }
   };
 
+
   const fetchMetrics = async () => {
     const { data, error } = await supabase
       .from('network_metrics')
