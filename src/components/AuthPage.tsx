@@ -82,21 +82,26 @@ export const AuthPage = () => {
           });
         }
       } else {
-        // Step 1: Verify password
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        // Don't sign in yet - just verify password first
+        const { data: sessionData, error: verifyError } = await supabase.auth.signInWithPassword({
           email,
           password
         });
 
-        if (signInError) {
+        if (verifyError) {
           toast({
             title: "Authentication Error",
-            description: signInError.message,
+            description: verifyError.message,
             variant: "destructive"
           });
         } else {
-          // Password verified, now sign out and proceed to OTP
+          // Password is correct, sign out immediately
           await supabase.auth.signOut();
+          
+          // Store credentials in sessionStorage BEFORE sending OTP
+          sessionStorage.setItem('login_step', 'otp');
+          sessionStorage.setItem('otp_email', email);
+          sessionStorage.setItem('otp_password', password);
           
           // Send custom OTP via edge function
           const { error: otpError } = await supabase.functions.invoke('send-otp', {
@@ -109,7 +114,12 @@ export const AuthPage = () => {
               description: "Failed to send OTP. Please try again.",
               variant: "destructive"
             });
+            // Clear sessionStorage on error
+            sessionStorage.removeItem('login_step');
+            sessionStorage.removeItem('otp_email');
+            sessionStorage.removeItem('otp_password');
           } else {
+            // Now update the state
             setLoginStep('otp');
             toast({
               title: "Password Verified",
