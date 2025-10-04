@@ -5,7 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Shield, Lock } from 'lucide-react';
+import { Shield, Lock, Mail } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 export const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -17,6 +18,8 @@ export const AuthPage = () => {
   const [firewallApiKey, setFirewallApiKey] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loginStep, setLoginStep] = useState<'password' | 'otp'>('password');
+  const [otpCode, setOtpCode] = useState('');
   const { signUp, signIn } = useAuth();
   const { toast } = useToast();
 
@@ -36,23 +39,126 @@ export const AuthPage = () => {
     }
 
     try {
-      let error;
       if (isSignUp) {
-        ({ error } = await signUp(email, password, firstName, lastName, firewallApiKey, phoneNumber));
+        const { error } = await signUp(email, password, firstName, lastName, firewallApiKey, phoneNumber);
+        if (error) {
+          toast({
+            title: "Authentication Error",
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Account Created",
+            description: "Please check your email to verify your account"
+          });
+        }
       } else {
-        ({ error } = await signIn(email, password));
+        // Step 1: Verify password
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (signInError) {
+          toast({
+            title: "Authentication Error",
+            description: signInError.message,
+            variant: "destructive"
+          });
+        } else {
+          // Password verified, now sign out and proceed to OTP
+          await supabase.auth.signOut();
+          
+          // Send OTP
+          const { error: otpError } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
+              shouldCreateUser: false
+            }
+          });
+
+          if (otpError) {
+            toast({
+              title: "Error",
+              description: "Failed to send OTP. Please try again.",
+              variant: "destructive"
+            });
+          } else {
+            setLoginStep('otp');
+            toast({
+              title: "Password Verified",
+              description: "Please check your email for the OTP code"
+            });
+          }
+        }
       }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpCode,
+        type: 'email'
+      });
 
       if (error) {
         toast({
-          title: "Authentication Error",
+          title: "Verification Failed",
           description: error.message,
           variant: "destructive"
         });
       } else {
         toast({
-          title: isSignUp ? "Account Created" : "Signed In",
-          description: isSignUp ? "Please check your email to verify your account" : "Welcome back!"
+          title: "Login Successful",
+          description: "Welcome back!"
+        });
+        // User will be redirected automatically by auth state change
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to resend OTP",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "OTP Sent",
+          description: "A new OTP code has been sent to your email"
         });
       }
     } catch (error) {
@@ -75,11 +181,63 @@ export const AuthPage = () => {
           </div>
           <CardTitle className="text-2xl font-bold">AuraShield</CardTitle>
           <CardDescription>
-            {isSignUp ? "Create your account" : "Sign in to your account"}
+            {isSignUp 
+              ? "Create your account" 
+              : loginStep === 'otp' 
+                ? "Enter verification code" 
+                : "Sign in to your account"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {!isSignUp && loginStep === 'otp' ? (
+            <form onSubmit={handleOtpVerification} className="space-y-4">
+              <div>
+                <Label htmlFor="otpCode">Verification Code</Label>
+                <Input
+                  id="otpCode"
+                  type="text"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  required
+                  placeholder="Enter 6-digit code"
+                  maxLength={6}
+                />
+                <p className="text-sm text-muted-foreground mt-2">
+                  Please enter the code sent to {email}
+                </p>
+              </div>
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                <Lock className="w-4 h-4 mr-2" />
+                {loading ? "Verifying..." : "Verify & Sign In"}
+              </Button>
+
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={handleResendOtp}
+                  disabled={loading}
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  Resend OTP
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  className="flex-1"
+                  onClick={() => {
+                    setLoginStep('password');
+                    setOtpCode('');
+                  }}
+                >
+                  Back
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -175,16 +333,17 @@ export const AuthPage = () => {
               {loading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
             </Button>
 
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-sm text-muted-foreground hover:text-primary"
-              >
-                {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
-              </button>
-            </div>
-          </form>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+                </button>
+              </div>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
