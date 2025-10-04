@@ -1,7 +1,10 @@
 import { Shield } from 'lucide-react';
 import AuraChat from '@/components/AuraChat';
+import { useState } from 'react';
 
 const AuraAssistant = () => {
+  const [isOpen, setIsOpen] = useState(true);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-6">
       <div className="max-w-6xl mx-auto">
@@ -16,7 +19,9 @@ const AuraAssistant = () => {
           </p>
         </div>
 
-        <AuraChat />
+        <div className="max-w-4xl mx-auto h-[600px] border rounded-lg bg-background shadow-lg overflow-hidden">
+          <AuraChat isOpen={true} onClose={() => {}} />
+        </div>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
           <div className="p-4 rounded-lg bg-card border">

@@ -311,4 +311,116 @@
   .text-subheading {
     @apply text-lg font-medium text-[hsl(var(--dark-sky-blue))];
   }
+
+  /* Aura Chatbot Animations */
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes buttonMorph {
+    0% {
+      transform: scale(1) rotate(0deg);
+    }
+    50% {
+      transform: scale(0.9) rotate(90deg);
+    }
+    100% {
+      transform: scale(1) rotate(180deg);
+    }
+  }
+
+  @keyframes messageBlossom {
+    0% {
+      transform: scale(0.8) translateY(10px);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.02) translateY(-2px);
+    }
+    100% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes lightDraw {
+    0% {
+      width: 0;
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      width: 100%;
+      opacity: 0;
+    }
+  }
+
+  @keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+
+  @keyframes errorPulse {
+    0%, 100% {
+      background-color: hsl(var(--destructive) / 0.1);
+    }
+    50% {
+      background-color: hsl(var(--destructive) / 0.2);
+    }
+  }
+
+  .chat-panel-enter {
+    animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .chat-panel-exit {
+    animation: slideOutRight 0.3s cubic-bezier(0.7, 0, 0.84, 0);
+  }
+
+  .button-morph {
+    animation: buttonMorph 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .message-blossom {
+    animation: messageBlossom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .typing-light::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      hsl(var(--primary)) 50%, 
+      transparent
+    );
+    animation: lightDraw 2s ease-in-out infinite;
+  }
+
+  .error-shake {
+    animation: errorShake 0.4s ease-in-out, errorPulse 0.4s ease-in-out;
+  }
 }

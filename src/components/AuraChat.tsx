@@ -4,14 +4,20 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Bot, User, X, AlertCircle } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  error?: boolean;
 }
 
-const AuraChat = () => {
+interface AuraChatProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const AuraChat = ({ isOpen, onClose }: AuraChatProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -20,14 +26,21 @@ const AuraChat = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showError, setShowError] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (showError) {
+      const timer = setTimeout(() => setShowError(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showError]);
 
   const streamChat = async (userMessage: string) => {
     const newMessages = [...messages, { role: 'user' as const, content: userMessage }];
@@ -129,13 +142,22 @@ const AuraChat = () => {
 
     } catch (error) {
       console.error('Chat error:', error);
+      setShowError(true);
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to send message',
         variant: 'destructive',
       });
-      // Remove the empty assistant message on error
-      setMessages(prev => prev.slice(0, -1));
+      // Replace the empty assistant message with error message
+      setMessages(prev => {
+        const updated = [...prev];
+        updated[updated.length - 1] = { 
+          role: 'assistant', 
+          content: "I'm having trouble connecting right now. Please try again in a moment.",
+          error: true
+        };
+        return updated;
+      });
     } finally {
       setIsLoading(false);
     }
@@ -156,82 +178,229 @@ const AuraChat = () => {
     }
   };
 
-  return (
-    <div className="flex flex-col h-full bg-background">
-      <div className="p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5 flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-            <Bot className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold">Aura</h2>
-            <p className="text-sm text-muted-foreground">Your Smart Home Security Assistant</p>
+  if (!isOpen) return null;
+
+  // Inline mode for standalone pages (like AuraAssistant)
+  const isInlineMode = onClose === (() => {});
+
+  if (isInlineMode) {
+    return (
+      <div className="h-full bg-background flex flex-col">
+        {/* Header */}
+        <div className="p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+              <Bot className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">Aura</h2>
+              <p className="text-sm text-muted-foreground">Smart Home Security Assistant</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-        <div className="space-y-4">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              {message.role === 'assistant' && (
+        {/* Error Banner */}
+        {showError && (
+          <div className="bg-destructive/10 border-b border-destructive/20 px-4 py-2 flex items-center gap-2 error-shake">
+            <AlertCircle className="w-4 h-4 text-destructive" />
+            <p className="text-sm text-destructive">Connection issue. Please try again.</p>
+          </div>
+        )}
+
+        {/* Messages */}
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-4 pb-4">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex gap-3 message-blossom ${
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                }`}
+              >
+                {message.role === 'assistant' && (
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-5 h-5 text-primary" />
+                  </div>
+                )}
+                <div
+                  className={`rounded-lg px-4 py-3 max-w-[80%] transition-all ${
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : message.error
+                      ? 'bg-destructive/10 border border-destructive/20'
+                      : 'bg-muted shadow-sm'
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                </div>
+                {message.role === 'user' && (
+                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                    <User className="w-5 h-5 text-secondary-foreground" />
+                  </div>
+                )}
+              </div>
+            ))}
+            
+            {/* Typing Indicator */}
+            {isLoading && messages[messages.length - 1]?.role === 'user' && (
+              <div className="flex gap-3 justify-start message-blossom">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                   <Bot className="w-5 h-5 text-primary" />
                 </div>
-              )}
-              <div
-                className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
-                }`}
-              >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-              </div>
-              {message.role === 'user' && (
-                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                  <User className="w-5 h-5 text-secondary-foreground" />
+                <div className="rounded-lg px-4 py-3 bg-muted relative">
+                  <div className="w-16 h-4 relative typing-light"></div>
                 </div>
-              )}
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
+
+        {/* Input */}
+        <div className="p-4 border-t flex-shrink-0 bg-background">
+          <div className="flex gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask Aura about your home security..."
+              disabled={isLoading}
+              className="flex-1 transition-all focus:shadow-md"
+            />
+            <Button 
+              onClick={handleSend} 
+              disabled={isLoading || !input.trim()}
+              className="transition-all hover:scale-105 active:scale-95"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Example: "Is my front door locked?" or "Show me recent alerts"
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Popup mode for navigation panels
+  return (
+    <div className="fixed inset-0 z-50 pointer-events-none">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-auto"
+        onClick={onClose}
+      />
+      
+      {/* Chat Panel */}
+      <div className="absolute right-0 top-0 bottom-0 w-full sm:w-[480px] pointer-events-auto chat-panel-enter">
+        <div className="h-full bg-background shadow-2xl flex flex-col border-l">
+          {/* Header */}
+          <div className="p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5 flex-shrink-0">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Bot className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold">Aura</h2>
+                  <p className="text-sm text-muted-foreground">Smart Home Security Assistant</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="rounded-full hover:bg-primary/10 transition-all"
+              >
+                <X className="w-5 h-5" />
+              </Button>
             </div>
-          ))}
-          {isLoading && messages[messages.length - 1]?.role === 'user' && (
-            <div className="flex gap-3 justify-start">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <Bot className="w-5 h-5 text-primary" />
-              </div>
-              <div className="rounded-lg px-4 py-2 bg-muted">
-                <Loader2 className="w-4 h-4 animate-spin" />
-              </div>
+          </div>
+
+          {/* Error Banner */}
+          {showError && (
+            <div className="bg-destructive/10 border-b border-destructive/20 px-4 py-2 flex items-center gap-2 error-shake">
+              <AlertCircle className="w-4 h-4 text-destructive" />
+              <p className="text-sm text-destructive">Connection issue. Please try again.</p>
             </div>
           )}
-        </div>
-      </ScrollArea>
 
-      <div className="p-4 border-t flex-shrink-0">
-        <div className="flex gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask Aura about your home security..."
-            disabled={isLoading}
-            className="flex-1"
-          />
-          <Button onClick={handleSend} disabled={isLoading || !input.trim()}>
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
-          </Button>
+          {/* Messages */}
+          <ScrollArea className="flex-1 p-4">
+            <div className="space-y-4 pb-4">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex gap-3 message-blossom ${
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  {message.role === 'assistant' && (
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-5 h-5 text-primary" />
+                    </div>
+                  )}
+                  <div
+                    className={`rounded-lg px-4 py-3 max-w-[80%] transition-all ${
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : message.error
+                        ? 'bg-destructive/10 border border-destructive/20'
+                        : 'bg-muted shadow-sm'
+                    }`}
+                  >
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  </div>
+                  {message.role === 'user' && (
+                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                      <User className="w-5 h-5 text-secondary-foreground" />
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {/* Typing Indicator */}
+              {isLoading && messages[messages.length - 1]?.role === 'user' && (
+                <div className="flex gap-3 justify-start message-blossom">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="rounded-lg px-4 py-3 bg-muted relative">
+                    <div className="w-16 h-4 relative typing-light"></div>
+                  </div>
+                </div>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+
+          {/* Input */}
+          <div className="p-4 border-t flex-shrink-0 bg-background">
+            <div className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask Aura about your home security..."
+                disabled={isLoading}
+                className="flex-1 transition-all focus:shadow-md"
+              />
+              <Button 
+                onClick={handleSend} 
+                disabled={isLoading || !input.trim()}
+                className="transition-all hover:scale-105 active:scale-95"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Example: "Is my front door locked?" or "Show me recent alerts"
+            </p>
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          Example: "Is my front door locked?" or "Show me recent alerts"
-        </p>
       </div>
     </div>
   );

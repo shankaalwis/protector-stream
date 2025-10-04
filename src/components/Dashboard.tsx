@@ -36,7 +36,8 @@ import {
   ChevronRight,
   Send,
   MessageSquare,
-  FileText
+  FileText,
+  Sparkles
 } from 'lucide-react';
 
 interface Device {
@@ -94,6 +95,7 @@ export const Dashboard = () => {
   const [editingDevice, setEditingDevice] = useState<EditDevice | null>(null);
   const [showEditDevice, setShowEditDevice] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [buttonClicked, setButtonClicked] = useState(false);
   
   // New state for expandable AI analysis sections
   const [expandedSections, setExpandedSections] = useState<{[alertId: string]: {causes: boolean; actions: boolean}}>({});
@@ -1170,10 +1172,18 @@ export const Dashboard = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsChatOpen(true)}
-                className="flex items-center space-x-2 relative"
+                onClick={() => {
+                  setButtonClicked(true);
+                  setTimeout(() => {
+                    setIsChatOpen(true);
+                    setButtonClicked(false);
+                  }, 300);
+                }}
+                className={`flex items-center space-x-2 relative transition-all hover:scale-105 ${
+                  buttonClicked ? 'button-morph' : ''
+                }`}
               >
-                <MessageSquare className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 text-primary" />
                 <span className="hidden sm:inline">Aura Assistant</span>
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
               </Button>
@@ -1199,12 +1209,8 @@ export const Dashboard = () => {
         {currentPage === 'settings' && renderSettings()}
       </main>
 
-      {/* Aura Chat Dialog */}
-      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-        <DialogContent className="max-w-4xl h-[80vh] sm:h-[600px] p-0 gap-0">
-          <AuraChat />
-        </DialogContent>
-      </Dialog>
+      {/* Aura Chat */}
+      <AuraChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </div>
   );
 };

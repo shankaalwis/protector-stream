@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { CalendarIcon, Download, FileText, FileSpreadsheet, Eye, Loader2, Shield, ArrowLeft, Activity, TrendingUp, MessageSquare } from 'lucide-react';
+import { CalendarIcon, Download, FileText, FileSpreadsheet, Eye, Loader2, Shield, ArrowLeft, Activity, TrendingUp, MessageSquare, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import jsPDF from 'jspdf';
@@ -42,6 +42,7 @@ export default function Reports() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [buttonClicked, setButtonClicked] = useState(false);
 
   const selectAll = () => {
     const allSelected = includeDevices && includeAlerts && includeAnomalies && includeMetrics;
@@ -542,11 +543,19 @@ export default function Reports() {
           </div>
           <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
             <Button
-              onClick={() => setIsChatOpen(true)}
+              onClick={() => {
+                setButtonClicked(true);
+                setTimeout(() => {
+                  setIsChatOpen(true);
+                  setButtonClicked(false);
+                }, 300);
+              }}
               variant="outline"
-              className="flex items-center gap-2 relative"
+              className={`flex items-center gap-2 relative transition-all hover:scale-105 ${
+                buttonClicked ? 'button-morph' : ''
+              }`}
             >
-              <MessageSquare className="h-4 w-4" />
+              <Sparkles className="h-4 w-4 text-primary" />
               <span className="hidden sm:inline">Aura</span>
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
             </Button>
@@ -1039,12 +1048,8 @@ export default function Reports() {
         )}
       </div>
 
-      {/* Aura Chat Dialog */}
-      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-        <DialogContent className="max-w-4xl h-[80vh] sm:h-[600px] p-0 gap-0">
-          <AuraChat />
-        </DialogContent>
-      </Dialog>
+      {/* Aura Chat */}
+      <AuraChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </div>
   );
 }
