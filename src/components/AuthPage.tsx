@@ -82,50 +82,33 @@ export const AuthPage = () => {
           });
         }
       } else {
-        // Don't sign in yet - just verify password first
-        const { data: sessionData, error: verifyError } = await supabase.auth.signInWithPassword({
-          email,
-          password
+        // Store credentials in sessionStorage BEFORE sending OTP
+        sessionStorage.setItem('login_step', 'otp');
+        sessionStorage.setItem('otp_email', email);
+        sessionStorage.setItem('otp_password', password);
+        
+        // Send custom OTP via edge function
+        const { error: otpError } = await supabase.functions.invoke('send-otp', {
+          body: { email }
         });
 
-        if (verifyError) {
+        if (otpError) {
           toast({
-            title: "Authentication Error",
-            description: verifyError.message,
+            title: "Error",
+            description: "Failed to send OTP. Please try again.",
             variant: "destructive"
           });
+          // Clear sessionStorage on error
+          sessionStorage.removeItem('login_step');
+          sessionStorage.removeItem('otp_email');
+          sessionStorage.removeItem('otp_password');
         } else {
-          // Password is correct, sign out immediately
-          await supabase.auth.signOut();
-          
-          // Store credentials in sessionStorage BEFORE sending OTP
-          sessionStorage.setItem('login_step', 'otp');
-          sessionStorage.setItem('otp_email', email);
-          sessionStorage.setItem('otp_password', password);
-          
-          // Send custom OTP via edge function
-          const { error: otpError } = await supabase.functions.invoke('send-otp', {
-            body: { email }
+          // Now update the state
+          setLoginStep('otp');
+          toast({
+            title: "Verification Code Sent",
+            description: "Please check your email for the 6-digit OTP code"
           });
-
-          if (otpError) {
-            toast({
-              title: "Error",
-              description: "Failed to send OTP. Please try again.",
-              variant: "destructive"
-            });
-            // Clear sessionStorage on error
-            sessionStorage.removeItem('login_step');
-            sessionStorage.removeItem('otp_email');
-            sessionStorage.removeItem('otp_password');
-          } else {
-            // Now update the state
-            setLoginStep('otp');
-            toast({
-              title: "Password Verified",
-              description: "Please check your email for the 6-digit OTP code"
-            });
-          }
         }
       }
     } catch (error) {
@@ -163,13 +146,7 @@ export const AuthPage = () => {
           variant: "destructive"
         });
       } else {
-        // Mark OTP as verified
-        await supabase
-          .from('otp_codes')
-          .update({ verified: true })
-          .eq('id', otpData.id);
-
-        // Sign in the user with password
+        // OTP is valid, now verify password and sign in
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password
@@ -182,6 +159,12 @@ export const AuthPage = () => {
             variant: "destructive"
           });
         } else {
+          // Mark OTP as verified after successful login
+          await supabase
+            .from('otp_codes')
+            .update({ verified: true })
+            .eq('id', otpData.id);
+
           // Clear session storage
           sessionStorage.removeItem('login_step');
           sessionStorage.removeItem('otp_email');
