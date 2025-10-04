@@ -527,14 +527,6 @@ export default function Reports() {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="relative overflow-hidden rounded-2xl border-2 border-[hsl(var(--banner-blue))] bg-gradient-to-r from-[hsl(var(--banner-blue))]/15 via-[hsl(var(--banner-blue))]/8 to-transparent p-6 shadow-lg">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/siem-dashboard')}
-            className="absolute left-4 top-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
           <div className="relative text-center space-y-3">
             <div className="flex items-center justify-center space-x-3">
               <Shield className="h-6 w-6 text-[hsl(var(--banner-blue))]" />
@@ -545,6 +537,14 @@ export default function Reports() {
             </div>
             <p className="text-lg font-medium text-foreground/80">Generate comprehensive security reports for any time period</p>
           </div>
+          <Button
+            onClick={() => navigate('/')}
+            variant="outline"
+            className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
         </div>
 
         {/* Control Panel */}
