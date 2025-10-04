@@ -21,6 +21,7 @@ import {
   Monitor
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import guarddogImage from '@/assets/guarddog.png';
 
 interface Device {
   id: string;
@@ -301,8 +302,11 @@ const AlertDetailCard = ({
             <div className="border-t border-border/30 pt-6">
               <div className="mb-4">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5 text-primary" />
-                  Continue Discussion
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center relative">
+                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-sm"></div>
+                    <img src={guarddogImage} alt="Auradog" className="w-6 h-6 object-contain relative z-10 drop-shadow-md" />
+                  </div>
+                  Continue Discussion with Auradog
                 </h3>
               </div>
               <div className="space-y-4">
@@ -314,16 +318,22 @@ const AlertDetailCard = ({
                         <div
                           key={idx}
                           className={cn(
-                            "flex",
+                            "flex gap-2",
                             message.role === 'user' ? 'justify-end' : 'justify-start'
                           )}
                         >
+                          {message.role === 'assistant' && (
+                            <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 relative self-end">
+                              <div className="absolute inset-0 bg-primary/10 rounded-full blur-sm"></div>
+                              <img src={guarddogImage} alt="Auradog" className="w-7 h-7 object-contain relative z-10 drop-shadow-md scale-x-[-1]" />
+                            </div>
+                          )}
                           <div
                             className={cn(
                               "max-w-[80%] px-3 py-2 rounded-lg text-sm",
                               message.role === 'user'
-                                ? 'bg-primary text-primary-foreground ml-4'
-                                : 'bg-muted text-foreground mr-4'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-foreground'
                             )}
                           >
                             <p>{message.content}</p>
@@ -343,7 +353,7 @@ const AlertDetailCard = ({
                     value={chatInput}
                     onChange={(e) => onChatInputChange(e.target.value)}
                     onKeyPress={onKeyPress}
-                    placeholder="Ask about this alert..."
+                    placeholder="Ask Auradog about this alert..."
                     className="flex-1"
                   />
                   <Button
