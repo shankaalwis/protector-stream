@@ -33,7 +33,8 @@ import {
   ChevronDown,
   ChevronRight,
   Send,
-  MessageSquare
+  MessageSquare,
+  FileText
 } from 'lucide-react';
 
 interface Device {
@@ -1113,6 +1114,13 @@ export const Dashboard = () => {
                 >
                   <BarChart3 className="w-4 h-4" />
                   <span>SIEM Dashboard</span>
+                </Link>
+                <Link
+                  to="/reports"
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-muted-foreground hover:text-foreground hover:bg-accent"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Reports</span>
                 </Link>
               </div>
             </div>

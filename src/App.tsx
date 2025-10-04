@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthPage } from "@/components/AuthPage";
 import { Dashboard } from "@/components/Dashboard";
 import SiemDashboard from "@/pages/SiemDashboard";
+import Reports from "@/pages/Reports";
 import { useAuth } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={user ? <Dashboard /> : <AuthPage />} />
               <Route path="/siem-dashboard" element={user ? <SiemDashboard /> : <Navigate to="/" />} />
+              <Route path="/reports" element={user ? <Reports /> : <Navigate to="/" />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </BrowserRouter>
