@@ -1395,46 +1395,42 @@ export const Dashboard = () => {
         className={`fixed bottom-8 right-8 z-40 group ${
           buttonClicked ? 'animate-scale-in' : ''
         }`}
+        aria-label="Open Aura Assistant"
       >
-        {/* Animated Background Rings */}
-        <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] animate-pulse opacity-30 blur-xl group-hover:opacity-50 transition-opacity duration-300"></div>
-        <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] animate-ping opacity-20"></div>
-        
-        {/* Main Button */}
-        <div className="relative flex flex-col items-center gap-3 px-6 py-5 bg-gradient-to-br from-primary via-[hsl(var(--dark-sky-blue))] to-primary bg-size-200 bg-pos-0 hover:bg-pos-100 rounded-3xl shadow-2xl shadow-primary/50 border-2 border-primary/30 transition-all duration-500 group-hover:scale-110 group-hover:shadow-primary/70 group-hover:border-primary/50">
+        {/* Main Button Container - No background, just flex layout */}
+        <div className="relative flex flex-col items-center gap-2 transition-all duration-500 group-hover:scale-110">
           
-          {/* Guard Dog Image - Top of button */}
-          <div className="relative -mt-2">
-            {/* Glow effect behind image */}
-            <div className="absolute inset-0 bg-white/30 rounded-full blur-lg animate-pulse scale-110"></div>
+          {/* Guard Dog Image - Main button element */}
+          <div className="relative">
+            {/* Animated glow rings behind dog */}
+            <div className="absolute inset-0 bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] rounded-full blur-2xl opacity-40 animate-pulse scale-125 group-hover:opacity-60 group-hover:scale-150 transition-all duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] rounded-full blur-xl opacity-30 animate-ping"></div>
+            
             {/* Guard Dog Image */}
             <img 
               src={guarddogImage} 
               alt="Aura Guard Dog Assistant" 
-              className="w-20 h-20 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.7)] group-hover:drop-shadow-[0_0_30px_rgba(255,255,255,0.9)] transition-all duration-300 group-hover:scale-110"
+              className="w-24 h-24 object-contain relative z-10 drop-shadow-[0_0_25px_rgba(59,130,246,0.8)] group-hover:drop-shadow-[0_0_40px_rgba(59,130,246,1)] transition-all duration-300 group-hover:scale-105"
             />
-            {/* Sparkle effect on image */}
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-pulse shadow-lg shadow-white/50"></div>
+            
+            {/* Sparkle effects */}
+            <div className="absolute -top-2 -right-2 w-3 h-3 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/80"></div>
+            <div className="absolute top-1/4 -left-2 w-2 h-2 bg-[hsl(var(--dark-sky-blue))] rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
           </div>
           
-          {/* Icon and Text Row */}
-          <div className="flex items-center gap-2">
-            {/* Icon */}
-            <div className="relative">
-              <Sparkles className="w-5 h-5 text-primary-foreground drop-shadow-lg animate-pulse" />
-            </div>
-            
-            {/* Text */}
-            <span className="text-primary-foreground font-bold text-base whitespace-nowrap drop-shadow-md group-hover:tracking-wide transition-all duration-300">
+          {/* Text Label with icon */}
+          <div className="relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/20 via-[hsl(var(--dark-sky-blue))]/20 to-primary/20 backdrop-blur-sm rounded-full border border-primary/30 shadow-lg shadow-primary/20 group-hover:border-primary/50 group-hover:shadow-primary/40 transition-all duration-300">
+            <Sparkles className="w-4 h-4 text-primary drop-shadow-lg animate-pulse" />
+            <span className="text-foreground font-bold text-sm whitespace-nowrap drop-shadow-md group-hover:tracking-wide transition-all duration-300">
               Aura Assistant
             </span>
           </div>
           
           {/* Floating particles effect */}
-          <div className="absolute -inset-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="absolute top-0 left-1/4 w-1 h-1 bg-white rounded-full animate-ping"></div>
-            <div className="absolute top-1/2 right-1/4 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
-            <div className="absolute bottom-0 left-1/2 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
+          <div className="absolute -inset-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+            <div className="absolute top-0 left-1/4 w-1.5 h-1.5 bg-primary rounded-full animate-ping"></div>
+            <div className="absolute top-1/2 right-1/4 w-1.5 h-1.5 bg-[hsl(var(--dark-sky-blue))] rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
+            <div className="absolute bottom-0 left-1/2 w-1.5 h-1.5 bg-primary rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
           </div>
         </div>
       </button>
