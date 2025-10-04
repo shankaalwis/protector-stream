@@ -132,17 +132,26 @@ export default function Reports() {
         }
       }
 
-      // Fetch latest dashboard metrics (regardless of date range)
+      // Fetch latest dashboard metrics (top busiest topics and top targeted clients)
       if (includeMetrics) {
-        const { data: metricsData, error } = await supabase
-          .from('dashboard_metrics')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(20); // Get the 20 most recent metrics
+        const metricsToFetch = ['top_targeted_clients', 'top_busiest_topics', 'Failed Auth Attempts (24h) Webhook', 'successful_connections_24h'];
         
-        if (!error && metricsData) {
-          data.metrics = metricsData;
-        }
+        const metricsPromises = metricsToFetch.map(metricKey =>
+          supabase
+            .from('dashboard_metrics')
+            .select('*')
+            .eq('metric_key', metricKey)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        );
+
+        const results = await Promise.all(metricsPromises);
+        const metricsData = results
+          .map(result => result.data)
+          .filter(data => data !== null);
+        
+        data.metrics = metricsData;
       }
 
       setReportData(data);
@@ -749,7 +758,7 @@ export default function Reports() {
               </Card>
             )}
 
-            {/* Metrics Display - Latest Key Metrics */}
+            {/* Metrics Display - Key Metrics, Top Targeted Clients & Busiest Topics */}
             {reportData.metrics.length > 0 && (
               <Card className="card-professional">
                 <CardHeader>
@@ -758,60 +767,125 @@ export default function Reports() {
                     Dashboard Metrics Summary
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {reportData.metrics.slice(0, 8).map((metric) => {
-                      const metricValue = metric.metric_value;
-                      const isObject = typeof metricValue === 'object' && metricValue !== null;
-                      const metricKey = metric.metric_key
-                        .split('_')
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(' ');
-                      
-                      // Extract main value for display
-                      let displayValue = metricValue;
-                      let subValues = [];
-                      
-                      if (isObject) {
-                        // For objects, try to find a main value
-                        if (metricValue.total_failed_attempts !== undefined) {
-                          displayValue = metricValue.total_failed_attempts;
-                        } else if (metricValue.value !== undefined) {
-                          displayValue = metricValue.value;
-                        } else if (metricValue.data !== undefined && Array.isArray(metricValue.data)) {
-                          displayValue = metricValue.data.length;
-                          subValues = metricValue.data.slice(0, 3);
-                        } else {
-                          // Get first key-value pair as main display
-                          const entries = Object.entries(metricValue);
-                          if (entries.length > 0) {
-                            displayValue = entries[0][1];
+                <CardContent className="space-y-8">
+                  {/* Key Metrics Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {reportData.metrics
+                      .filter(metric => 
+                        metric.metric_key === 'Failed Auth Attempts (24h) Webhook' || 
+                        metric.metric_key === 'successful_connections_24h'
+                      )
+                      .map((metric) => {
+                        const metricValue = metric.metric_value;
+                        const isFailedAuth = metric.metric_key === 'Failed Auth Attempts (24h) Webhook';
+                        
+                        let displayValue = metricValue;
+                        if (typeof metricValue === 'object' && metricValue !== null) {
+                          if (metricValue.total_failed_attempts !== undefined) {
+                            displayValue = metricValue.total_failed_attempts;
+                          } else if (metricValue.value !== undefined) {
+                            displayValue = metricValue.value;
                           }
                         }
-                      }
-                      
-                      return (
-                        <Card key={metric.id} className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--dark-sky-blue))]/10 via-background to-[hsl(var(--dark-sky-blue))]/5 border-2 border-[hsl(var(--dark-sky-blue))]/20 hover:border-[hsl(var(--dark-sky-blue))]/50 transition-all hover:shadow-lg">
-                          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[hsl(var(--dark-sky-blue))]/20 to-transparent rounded-bl-full" />
-                          <CardContent className="relative pt-6 space-y-3">
-                            <div className="flex items-center gap-2">
-                              <TrendingUp className="h-4 w-4 text-[hsl(var(--dark-sky-blue))]" />
-                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                {metricKey}
+                        
+                        return (
+                          <Card key={metric.id} className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--dark-sky-blue))]/10 via-background to-[hsl(var(--dark-sky-blue))]/5 border-2 border-[hsl(var(--dark-sky-blue))]/20 hover:border-[hsl(var(--dark-sky-blue))]/50 transition-all hover:shadow-lg">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[hsl(var(--dark-sky-blue))]/20 to-transparent rounded-bl-full" />
+                            <CardContent className="relative pt-6 space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Shield className="h-5 w-5 text-[hsl(var(--dark-sky-blue))]" />
+                                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                                  {isFailedAuth ? 'Failed Auth Attempts (24h)' : 'Successful Connections (24h)'}
+                                </p>
+                              </div>
+                              <p className="text-5xl font-bold text-[hsl(var(--dark-sky-blue))]">
+                                {typeof displayValue === 'number' ? displayValue.toLocaleString() : String(displayValue)}
                               </p>
-                            </div>
-                            <p className="text-4xl font-bold text-[hsl(var(--dark-sky-blue))]">
-                              {typeof displayValue === 'number' ? displayValue.toLocaleString() : String(displayValue)}
-                            </p>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                              <CalendarIcon className="h-3 w-3" />
-                              {format(new Date(metric.created_at), 'MMM dd, yyyy HH:mm')}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
+                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <CalendarIcon className="h-3 w-3" />
+                                Updated: {format(new Date(metric.created_at), 'MMM dd, HH:mm')}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                   </div>
+
+                  {/* Top Targeted Clients */}
+                  {reportData.metrics.find(m => m.metric_key === 'top_targeted_clients') && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-5 w-5 text-[hsl(var(--alert-red))]" />
+                        <h3 className="text-xl font-bold text-foreground">Top Targeted Clients</h3>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3">
+                        {(() => {
+                          const topClientsMetric = reportData.metrics.find(m => m.metric_key === 'top_targeted_clients');
+                          const clientsData = topClientsMetric?.metric_value?.data || [];
+                          
+                          return clientsData.slice(0, 5).map((client: any, index: number) => (
+                            <Card key={index} className="bg-gradient-to-r from-[hsl(var(--alert-red))]/10 to-transparent border-l-4 border-[hsl(var(--alert-red))] hover:shadow-md transition-all">
+                              <CardContent className="py-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-4">
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[hsl(var(--alert-red))]/20 text-[hsl(var(--alert-red))] font-bold text-lg">
+                                      #{index + 1}
+                                    </div>
+                                    <div>
+                                      <p className="font-mono text-sm font-semibold text-foreground">{client.targeted_client}</p>
+                                      <p className="text-xs text-muted-foreground">Client ID</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-3xl font-bold text-[hsl(var(--alert-red))]">{client.failure_count.toLocaleString()}</p>
+                                    <p className="text-xs text-muted-foreground">Failed Attempts</p>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Top Busiest Topics */}
+                  {reportData.metrics.find(m => m.metric_key === 'top_busiest_topics') && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-success" />
+                        <h3 className="text-xl font-bold text-foreground">Top Busiest Topics</h3>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3">
+                        {(() => {
+                          const topTopicsMetric = reportData.metrics.find(m => m.metric_key === 'top_busiest_topics');
+                          const topicsData = topTopicsMetric?.metric_value?.data || [];
+                          
+                          return topicsData.slice(0, 5).map((topic: any, index: number) => (
+                            <Card key={index} className="bg-gradient-to-r from-success/10 to-transparent border-l-4 border-success hover:shadow-md transition-all">
+                              <CardContent className="py-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-4">
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-success/20 text-success font-bold text-lg">
+                                      #{index + 1}
+                                    </div>
+                                    <div>
+                                      <p className="font-semibold text-foreground">{topic.topic_name}</p>
+                                      <p className="text-xs text-muted-foreground">Topic Name</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-3xl font-bold text-success">{topic.message_count.toLocaleString()}</p>
+                                    <p className="text-xs text-muted-foreground">Messages</p>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
