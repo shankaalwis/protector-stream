@@ -284,18 +284,18 @@ const AuraChat = ({ isOpen, onClose }: AuraChatProps) => {
     );
   }
 
-  // Popup mode for navigation panels
+  // Popup mode for navigation panels - Floating Window
   return (
     <div className="fixed inset-0 z-50 pointer-events-none">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-auto"
+        className="absolute inset-0 bg-black/5 pointer-events-auto"
         onClick={onClose}
       />
       
-      {/* Chat Panel */}
-      <div className="absolute right-0 top-0 bottom-0 w-full sm:w-[480px] pointer-events-auto chat-panel-enter">
-        <div className="h-full bg-background shadow-2xl flex flex-col border-l">
+      {/* Floating Chat Window */}
+      <div className="absolute bottom-6 right-6 w-[400px] h-[600px] pointer-events-auto chat-panel-enter">
+        <div className="h-full bg-background shadow-2xl flex flex-col rounded-2xl border overflow-hidden">
           {/* Header */}
           <div className="p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5 flex-shrink-0">
             <div className="flex items-center justify-between gap-3">

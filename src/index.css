@@ -337,13 +337,13 @@
 
   @keyframes buttonMorph {
     0% {
-      transform: scale(1) rotate(0deg);
+      transform: scale(1);
     }
     50% {
-      transform: scale(0.9) rotate(90deg);
+      transform: scale(0.95);
     }
     100% {
-      transform: scale(1) rotate(180deg);
+      transform: scale(1);
     }
   }
 
