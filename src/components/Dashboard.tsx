@@ -1170,7 +1170,7 @@ export const Dashboard = () => {
               <div className="flex-shrink-0 flex items-center group cursor-pointer">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary to-[hsl(var(--dark-sky-blue))] rounded-full blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
-                  <Shield className="h-10 w-10 text-primary relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                  <img src="/logo-shield.png" alt="AuraShield logo" className="h-10 w-10 relative z-10 object-contain group-hover:scale-110 transition-transform duration-300" />
                 </div>
                 <div className="ml-3">
                   <span className="text-2xl font-bold bg-gradient-to-r from-primary via-[hsl(var(--dark-sky-blue))] to-primary bg-clip-text text-transparent">

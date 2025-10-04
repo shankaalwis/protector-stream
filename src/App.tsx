@@ -9,6 +9,8 @@ import SiemDashboard from "@/pages/SiemDashboard";
 import Reports from "@/pages/Reports";
 import AuraAssistant from "@/pages/AuraAssistant";
 import { useAuth } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/components/theme-provider";
+import ModeToggle from "@/components/theme-toggle";
 
 const queryClient = new QueryClient();
 
@@ -30,11 +32,15 @@ const App = () => {
 
     console.log("Rendering main app, user authenticated:", !!user);
     return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <div className="fixed top-4 right-4 z-[9999] pointer-events-auto">
+              <ModeToggle />
+            </div>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <Routes>
               <Route path="/" element={user ? <Dashboard /> : <AuthPage />} />
               <Route path="/siem-dashboard" element={user ? <SiemDashboard /> : <Navigate to="/" />} />
@@ -45,6 +51,7 @@ const App = () => {
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
+      </ThemeProvider>
     );
   } catch (error) {
     console.error("Error in App component:", error);

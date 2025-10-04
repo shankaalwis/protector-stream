@@ -10,7 +10,7 @@ const AuraAssistant = () => {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Shield className="w-12 h-12 text-primary" />
+            <img src="/logo-shield.png" alt="AuraShield logo" className="w-12 h-12 object-contain" />
             <h1 className="text-4xl font-bold">Aura Assistant</h1>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
