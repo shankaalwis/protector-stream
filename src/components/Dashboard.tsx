@@ -1100,7 +1100,7 @@ export const Dashboard = () => {
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
                 <Shield className="h-8 w-8 text-primary mr-3" />
-                <span className="text-xl font-bold text-foreground">SecureNet Dashboard</span>
+                <span className="text-xl font-bold text-foreground">AuraShield</span>
               </div>
               <div className="hidden md:ml-8 md:flex md:space-x-1">
                 <button

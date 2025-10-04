@@ -73,7 +73,7 @@ export const AuthPage = () => {
           <div className="flex justify-center mb-4">
             <Shield className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Security Monitor</CardTitle>
+          <CardTitle className="text-2xl font-bold">AuraShield</CardTitle>
           <CardDescription>
             {isSignUp ? "Create your account" : "Sign in to your account"}
           </CardDescription>
