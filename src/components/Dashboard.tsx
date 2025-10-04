@@ -890,26 +890,30 @@ export const Dashboard = () => {
                 </div>
               </div>
               <div className="flex space-x-3 pt-4 border-t border-[hsl(var(--dark-sky-blue))]/30">
-                <Button 
-                  size="sm" 
-                  variant="destructive"
-                  className="border border-destructive/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                  onClick={() => updateDeviceStatus(device.id, 'blocked')}
-                  disabled={device.status === 'blocked'}
-                >
-                  <Shield className="w-4 h-4 mr-1" />
-                  Block
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  className="border border-[hsl(var(--dark-sky-blue))]/60 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/20 to-[hsl(var(--dark-sky-blue-light))]/10 text-[hsl(var(--dark-sky-blue))] hover:bg-gradient-to-r hover:from-[hsl(var(--dark-sky-blue))]/20 hover:to-[hsl(var(--dark-sky-blue-light))]/15 transition-all duration-300 hover:scale-105"
-                  onClick={() => updateDeviceStatus(device.id, 'safe')}
-                  disabled={device.status === 'safe'}
-                >
-                  <ShieldCheck className="w-4 h-4 mr-1" />
-                  Unblock
-                </Button>
+                {device.ip_address && (
+                  <>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      className="border border-destructive/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                      onClick={() => updateDeviceStatus(device.id, 'blocked')}
+                      disabled={device.status === 'blocked'}
+                    >
+                      <Shield className="w-4 h-4 mr-1" />
+                      Block
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="border border-[hsl(var(--dark-sky-blue))]/60 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/20 to-[hsl(var(--dark-sky-blue-light))]/10 text-[hsl(var(--dark-sky-blue))] hover:bg-gradient-to-r hover:from-[hsl(var(--dark-sky-blue))]/20 hover:to-[hsl(var(--dark-sky-blue-light))]/15 transition-all duration-300 hover:scale-105"
+                      onClick={() => updateDeviceStatus(device.id, 'safe')}
+                      disabled={device.status === 'safe'}
+                    >
+                      <ShieldCheck className="w-4 h-4 mr-1" />
+                      Unblock
+                    </Button>
+                  </>
+                )}
                 <Button 
                   size="sm" 
                   variant="secondary"

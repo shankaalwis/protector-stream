@@ -201,7 +201,7 @@ const AlertDetailCard = ({
               Resolve
             </Button>
             
-            {device && device.status !== 'blocked' && (
+            {device && device.ip_address && device.status !== 'blocked' && (
               <Button
                 onClick={onBlockDevice}
                 variant="destructive"
@@ -214,7 +214,7 @@ const AlertDetailCard = ({
               </Button>
             )}
             
-            {device && device.status === 'blocked' && (
+            {device && device.ip_address && device.status === 'blocked' && (
               <Button
                 onClick={onUnblockDevice}
                 variant="secondary"
