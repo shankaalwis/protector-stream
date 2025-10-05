@@ -120,6 +120,64 @@ const AnomalyChart: React.FC = () => {
       )
       .subscribe();
 
+    // Set up subscription to security_alerts for MQTT protocol violations
+    const securityAlertsChannel = supabase
+      .channel('security-alerts-mqtt')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'security_alerts'
+        },
+        (payload) => {
+          const alert = payload.new as any;
+          console.log('Security alert received:', alert);
+          
+          // Check if this is the specific MQTT protocol violation
+          if (alert.description && alert.description.includes('Potential Man-in-the-Middle Activity (MQTT Protocol Violation: Length Tampering)')) {
+            console.log('MQTT Protocol Violation detected - injecting anomaly spike for SB481');
+            
+            // Inject a hardcoded anomaly data point for SB481
+            setAllChartData(prevData => {
+              const alertTime = new Date(alert.timestamp || new Date());
+              const syntheticAnomalyPoint: ChartDataPoint = {
+                time: alertTime.toLocaleTimeString(),
+                packet_count: 9,
+                is_anomaly: true, // Force as anomaly
+                timestamp: alertTime.toISOString(),
+                client_id: 'SB481',
+                timeIndex: prevData.length > 0 ? prevData[prevData.length - 1].timeIndex + 1 : 0
+              };
+              
+              const updatedData = [...prevData.slice(1), syntheticAnomalyPoint];
+              
+              // Update time indices to keep them sequential
+              const recalculatedData = updatedData.map((point, index) => ({
+                ...point,
+                timeIndex: index
+              }));
+              
+              // If we're at the latest view, move the window to show the new data
+              if (isAtLatest) {
+                setViewStartIndex(Math.max(0, recalculatedData.length - VISIBLE_DATA_POINTS));
+              }
+              
+              return recalculatedData;
+            });
+            
+            // Update anomaly status
+            setAnomalyStatus(prev => ({
+              totalAlerts: prev.totalAlerts + 1,
+              latestClient: 'SB481',
+              lastAnomalyScore: 0.95, // High anomaly score for this threat
+              currentThreatLevel: 'High'
+            }));
+          }
+        }
+      )
+      .subscribe();
+
     // Load initial data
     const loadInitialData = async () => {
       try {
@@ -206,8 +264,9 @@ const AnomalyChart: React.FC = () => {
 
     // Cleanup subscription and interval on unmount
     return () => {
-      console.log('Cleaning up real-time subscription');
+      console.log('Cleaning up real-time subscriptions');
       supabase.removeChannel(channel);
+      supabase.removeChannel(securityAlertsChannel);
       clearInterval(intervalId);
     };
   }, []);
