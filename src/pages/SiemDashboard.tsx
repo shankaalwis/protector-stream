@@ -223,8 +223,8 @@ export default function SiemDashboard() {
   useEffect(() => {
     fetchMetrics();
 
-    // Set up real-time subscription for both metrics
-    const channel = supabase
+    // Set up real-time subscription for dashboard metrics
+    const metricsChannel = supabase
       .channel('dashboard-metrics-changes')
       .on(
         'postgres_changes',
@@ -240,8 +240,26 @@ export default function SiemDashboard() {
       )
       .subscribe();
 
+    // Set up real-time subscription for anomaly alerts to update the trend chart
+    const anomalyChannel = supabase
+      .channel('anomaly-alerts-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'anomaly_alerts'
+        },
+        (payload) => {
+          console.log('Real-time anomaly alert:', payload);
+          fetchMetrics();
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(metricsChannel);
+      supabase.removeChannel(anomalyChannel);
     };
   }, []);
 
