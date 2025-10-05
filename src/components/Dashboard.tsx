@@ -249,7 +249,21 @@ export const Dashboard = () => {
           event: 'INSERT',
           schema: 'public',
           table: 'anomaly_alerts'
+        }, (payload) => {
+          console.log('New anomaly alert detected, updating metrics...', payload);
+          fetchMetrics();
+        })
+        .subscribe();
+
+      // Real-time subscription for network metrics updates
+      const metricsChannel = supabase
+        .channel('network-metrics-changes')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'network_metrics'
         }, () => {
+          console.log('Network metrics updated, refreshing...');
           fetchMetrics();
         })
         .subscribe();
@@ -258,6 +272,7 @@ export const Dashboard = () => {
         supabase.removeChannel(devicesChannel);
         supabase.removeChannel(alertsChannel);
         supabase.removeChannel(anomalyChannel);
+        supabase.removeChannel(metricsChannel);
       };
     }
   }, [user]);
@@ -297,10 +312,12 @@ export const Dashboard = () => {
     const twentyFourHoursAgo = new Date();
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
     
-    const { data: anomalyData, error: anomalyError } = await supabase
+    const { count: anomalyCount, error: anomalyError } = await supabase
       .from('anomaly_alerts')
-      .select('id', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })
       .gte('created_at', twentyFourHoursAgo.toISOString());
+    
+    console.log('Anomaly count from last 24h:', anomalyCount, 'Error:', anomalyError);
     
     const { data, error } = await supabase
       .from('network_metrics')
@@ -311,9 +328,10 @@ export const Dashboard = () => {
       setMetrics({
         total_devices: data.total_devices || 0,
         threats_detected: data.threats_detected || 0,
-        anomalies_detected_24h: anomalyError ? 0 : (anomalyData?.length || 0),
+        anomalies_detected_24h: anomalyError ? 0 : (anomalyCount || 0),
         network_activity: (data.network_activity as Array<{timestamp: string; data_rate: number}>) || []
       });
+      console.log('Updated metrics with anomaly count:', anomalyCount);
     }
   };
 
