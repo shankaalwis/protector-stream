@@ -885,18 +885,18 @@ export const Dashboard = () => {
       
         <div className="grid gap-6">
         {devices.map((device) => (
-          <Card key={device.id} className="border-2 border-[hsl(var(--dark-sky-blue))]/40 shadow-2xl hover:shadow-[0_25px_50px_-12px_hsl(var(--dark-sky-blue-light))]/25 transition-all duration-500 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/15 to-[hsl(var(--dark-sky-blue-light))]/5 hover:from-[hsl(var(--dark-sky-blue-subtle))]/25 animate-fade-in hover:scale-[1.02]">
-            <CardHeader className="border-b border-[hsl(var(--dark-sky-blue))]/30 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/20 to-transparent">
+          <Card key={device.id} className="border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-muted/30 to-background hover:from-muted/40 animate-fade-in hover:scale-[1.01]">
+            <CardHeader className="border-b border-border/40 bg-gradient-to-r from-muted/20 to-transparent py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 rounded-full bg-gradient-to-br from-[hsl(var(--dark-sky-blue))]/20 to-[hsl(var(--dark-sky-blue-light))]/10">
+                  <div className="p-2 rounded-full bg-gradient-to-br from-primary/15 to-primary/5">
                     {getStatusIcon(device.status)}
                   </div>
-                  <CardTitle className="text-xl font-semibold text-[hsl(var(--dark-sky-blue))] group-hover:text-[hsl(var(--dark-sky-blue-light))] transition-colors">{device.device_name}</CardTitle>
+                  <CardTitle className="text-xl font-semibold text-foreground">{device.device_name}</CardTitle>
                   <Badge 
                     variant="outline" 
                     className={`${
-                      device.status === 'safe' ? 'border-[hsl(var(--dark-sky-blue))]/60 bg-[hsl(var(--dark-sky-blue-subtle))]/30 text-[hsl(var(--dark-sky-blue))]' :
+                      device.status === 'safe' ? 'border-success/50 bg-success/10 text-success' :
                       device.status === 'threat' ? 'border-warning/40 bg-warning/10 text-warning' :
                       'border-danger/40 bg-danger/10 text-danger'
                     } font-semibold animate-pulse`}
@@ -904,20 +904,20 @@ export const Dashboard = () => {
                     {device.status.toUpperCase()}
                   </Badge>
                 </div>
-                <span className="text-sm font-medium text-muted-foreground border border-[hsl(var(--dark-sky-blue))]/40 px-3 py-1 rounded-lg bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/30 to-[hsl(var(--dark-sky-blue-light))]/20">
+                <span className="text-sm font-medium text-muted-foreground border border-border/50 px-3 py-1 rounded-lg bg-muted/30">
                   Connected: {new Date(device.connected_since).toLocaleDateString()}
                 </span>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="p-3 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/25 to-[hsl(var(--dark-sky-blue-light))]/10 border border-[hsl(var(--dark-sky-blue))]/40 rounded-lg">
-                  <span className="font-semibold text-[hsl(var(--dark-sky-blue))]">IP Address:</span>
-                  <p className="text-[hsl(var(--dark-sky-blue))] font-mono mt-1 font-medium">{device.ip_address}</p>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="p-2.5 bg-gradient-to-r from-muted/40 to-muted/20 border border-border/40 rounded-lg">
+                  <span className="font-semibold text-foreground">IP Address:</span>
+                  <p className="text-foreground/80 font-mono mt-1 font-medium text-sm">{device.ip_address}</p>
                 </div>
-                <div className="p-3 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/25 to-[hsl(var(--dark-sky-blue-light))]/10 border border-[hsl(var(--dark-sky-blue))]/40 rounded-lg">
-                  <span className="font-semibold text-[hsl(var(--dark-sky-blue))]">MAC Address:</span>
-                  <p className="text-[hsl(var(--dark-sky-blue))] font-mono mt-1 font-medium">{device.mac_address || 'N/A'}</p>
+                <div className="p-2.5 bg-gradient-to-r from-muted/40 to-muted/20 border border-border/40 rounded-lg">
+                  <span className="font-semibold text-foreground">MAC Address:</span>
+                  <p className="text-foreground/80 font-mono mt-1 font-medium text-sm">{device.mac_address || 'N/A'}</p>
                 </div>
               </div>
               <div className="flex space-x-3 pt-4 border-t border-[hsl(var(--dark-sky-blue))]/30">
@@ -1047,7 +1047,7 @@ export const Dashboard = () => {
         <CardContent className="p-6">
           <div className="space-y-4">
             {devices.map((device) => (
-              <div key={device.id} className="flex items-center justify-between p-4 border-2 border-border/30 rounded-xl bg-background/50 hover:shadow-professional transition-all duration-200">
+              <div key={device.id} className="flex items-center justify-between p-3 border border-border/50 rounded-xl bg-muted/30 hover:bg-muted/40 hover:shadow-lg transition-all duration-200">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
                     <span className="font-semibold text-foreground text-lg">{device.device_name}</span>
