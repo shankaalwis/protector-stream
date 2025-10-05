@@ -83,7 +83,12 @@ interface EditDevice {
 
 export const Dashboard = () => {
   const { user, signOut } = useAuth();
-  const [userProfile, setUserProfile] = useState<{ first_name: string | null; last_name: string | null } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ first_name: string | null; last_name: string | null; phone_number: string | null } | null>(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({ first_name: '', last_name: '', phone_number: '' });
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [currentPage, setCurrentPage] = useState<Page>('overview');
   const [devices, setDevices] = useState<Device[]>([]);
   const [alerts, setAlerts] = useState<SecurityAlert[]>([]);
@@ -118,17 +123,94 @@ export const Dashboard = () => {
       
       const { data, error } = await supabase
         .from('users')
-        .select('first_name, last_name')
+        .select('first_name, last_name, phone_number')
         .eq('id', user.id)
         .maybeSingle();
       
       if (data && !error) {
         setUserProfile(data);
+        setProfileForm({
+          first_name: data.first_name || '',
+          last_name: data.last_name || '',
+          phone_number: data.phone_number || ''
+        });
       }
     };
     
     fetchUserProfile();
   }, [user]);
+
+  const updateProfile = async () => {
+    if (!user) return;
+    
+    const { error } = await supabase
+      .from('users')
+      .update({
+        first_name: profileForm.first_name,
+        last_name: profileForm.last_name,
+        phone_number: profileForm.phone_number
+      })
+      .eq('id', user.id);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      setUserProfile({
+        first_name: profileForm.first_name,
+        last_name: profileForm.last_name,
+        phone_number: profileForm.phone_number
+      });
+      setIsEditingProfile(false);
+      toast({
+        title: "Success",
+        description: "Profile updated successfully"
+      });
+    }
+  };
+
+  const changePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      setShowPasswordChange(false);
+      setNewPassword('');
+      setConfirmPassword('');
+      toast({
+        title: "Success",
+        description: "Password updated successfully"
+      });
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -996,52 +1078,173 @@ export const Dashboard = () => {
         </div>
       </div>
       
-      <Card className="border-2 border-[hsl(var(--dark-sky-blue))]/40 shadow-2xl bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/15 to-transparent animate-fade-in">
-        <CardHeader className="border-b border-[hsl(var(--dark-sky-blue))]/30 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/25 to-[hsl(var(--dark-sky-blue-light))]/10">
-          <CardTitle className="text-xl font-bold text-[hsl(var(--dark-sky-blue))] flex items-center gap-3">
-            <Settings className="w-6 h-6 text-[hsl(var(--dark-sky-blue))] animate-pulse" />
-            <span className="bg-gradient-to-r from-[hsl(var(--dark-sky-blue))] to-[hsl(var(--dark-sky-blue-light))] bg-clip-text text-transparent">Account Information</span>
-          </CardTitle>
+      <Card className="border border-border/50 shadow-lg bg-gradient-to-r from-muted/30 to-background animate-fade-in">
+        <CardHeader className="border-b border-border/40 bg-gradient-to-r from-muted/20 to-transparent">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl font-bold text-foreground flex items-center gap-3">
+              <Settings className="w-6 h-6 text-primary" />
+              <span>Account Information</span>
+            </CardTitle>
+            {!isEditingProfile && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsEditingProfile(true)}
+                className="border-border/50"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="space-y-6">
-            <div className="animate-fade-in [animation-delay:100ms]">
-              <Label className="text-base font-semibold text-[hsl(var(--dark-sky-blue))]">Email</Label>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-semibold text-foreground">First Name</Label>
+              <Input 
+                value={isEditingProfile ? profileForm.first_name : userProfile?.first_name || ''} 
+                onChange={(e) => setProfileForm({...profileForm, first_name: e.target.value})}
+                disabled={!isEditingProfile}
+                className="mt-2 border-border/40 bg-muted/30"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold text-foreground">Last Name</Label>
+              <Input 
+                value={isEditingProfile ? profileForm.last_name : userProfile?.last_name || ''} 
+                onChange={(e) => setProfileForm({...profileForm, last_name: e.target.value})}
+                disabled={!isEditingProfile}
+                className="mt-2 border-border/40 bg-muted/30"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold text-foreground">Phone Number</Label>
+              <Input 
+                value={isEditingProfile ? profileForm.phone_number : userProfile?.phone_number || ''} 
+                onChange={(e) => setProfileForm({...profileForm, phone_number: e.target.value})}
+                disabled={!isEditingProfile}
+                placeholder="+1 (555) 123-4567"
+                className="mt-2 border-border/40 bg-muted/30"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold text-foreground">Email</Label>
               <Input 
                 value={user?.email || ''} 
                 disabled 
-                className="mt-2 border-[hsl(var(--dark-sky-blue))]/40 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/20 to-[hsl(var(--dark-sky-blue-light))]/10 text-[hsl(var(--dark-sky-blue))] font-medium"
+                className="mt-2 border-border/40 bg-muted/20 text-muted-foreground"
               />
             </div>
-            <div className="animate-fade-in [animation-delay:200ms]">
-              <Label className="text-base font-semibold text-[hsl(var(--dark-sky-blue))]">User ID</Label>
+            <div>
+              <Label className="text-sm font-semibold text-foreground">User ID</Label>
               <Input 
                 value={user?.id || ''} 
                 disabled 
-                className="mt-2 border-[hsl(var(--dark-sky-blue))]/40 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/20 to-[hsl(var(--dark-sky-blue-light))]/10 text-[hsl(var(--dark-sky-blue))] font-medium font-mono text-sm"
+                className="mt-2 border-border/40 bg-muted/20 text-muted-foreground font-mono text-xs"
               />
             </div>
-            <div className="pt-4 border-t border-[hsl(var(--dark-sky-blue))]/30 animate-fade-in [animation-delay:300ms]">
-              <Button 
-                onClick={signOut}
-                variant="destructive"
-                className="w-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            </div>
+            
+            {isEditingProfile && (
+              <div className="flex gap-3 pt-4 border-t border-border/40">
+                <Button 
+                  onClick={updateProfile}
+                  className="flex-1"
+                >
+                  Save Changes
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setIsEditingProfile(false);
+                    setProfileForm({
+                      first_name: userProfile?.first_name || '',
+                      last_name: userProfile?.last_name || '',
+                      phone_number: userProfile?.phone_number || ''
+                    });
+                  }}
+                  variant="outline"
+                  className="flex-1 border-border/50"
+                >
+                  Cancel
+                </Button>
+              </div>
+            )}
+            
+            {!isEditingProfile && !showPasswordChange && (
+              <div className="pt-4 border-t border-border/40 space-y-3">
+                <Button 
+                  onClick={() => setShowPasswordChange(true)}
+                  variant="outline"
+                  className="w-full border-border/50"
+                >
+                  <Lock className="w-4 h-4 mr-2" />
+                  Change Password
+                </Button>
+                <Button 
+                  onClick={signOut}
+                  variant="destructive"
+                  className="w-full"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            )}
+            
+            {showPasswordChange && (
+              <div className="pt-4 border-t border-border/40 space-y-4">
+                <div>
+                  <Label className="text-sm font-semibold text-foreground">New Password</Label>
+                  <Input 
+                    type="password"
+                    value={newPassword} 
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password"
+                    className="mt-2 border-border/40 bg-muted/30"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-foreground">Confirm Password</Label>
+                  <Input 
+                    type="password"
+                    value={confirmPassword} 
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm new password"
+                    className="mt-2 border-border/40 bg-muted/30"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={changePassword}
+                    className="flex-1"
+                  >
+                    Update Password
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      setShowPasswordChange(false);
+                      setNewPassword('');
+                      setConfirmPassword('');
+                    }}
+                    variant="outline"
+                    className="flex-1 border-border/50"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
       
       {/* Enhanced Registered Devices Section */}
-      <Card className="border-2 border-[hsl(var(--dark-sky-blue))]/40 shadow-2xl bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/15 to-transparent animate-fade-in">
-        <CardHeader className="border-b border-[hsl(var(--dark-sky-blue))]/30 bg-gradient-to-r from-[hsl(var(--dark-sky-blue-subtle))]/25 to-[hsl(var(--dark-sky-blue-light))]/10">
-          <CardTitle className="text-xl font-bold text-[hsl(var(--dark-sky-blue))] flex items-center gap-3">
-            <Monitor className="w-6 h-6 text-[hsl(var(--dark-sky-blue))] animate-pulse" />
-            <span className="bg-gradient-to-r from-[hsl(var(--dark-sky-blue))] to-[hsl(var(--dark-sky-blue-light))] bg-clip-text text-transparent">Registered Devices</span>
+      <Card className="border border-border/50 shadow-lg bg-gradient-to-r from-muted/30 to-background animate-fade-in">
+        <CardHeader className="border-b border-border/40 bg-gradient-to-r from-muted/20 to-transparent">
+          <CardTitle className="text-xl font-bold text-foreground flex items-center gap-3">
+            <Monitor className="w-6 h-6 text-primary" />
+            <span>Registered Devices</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
