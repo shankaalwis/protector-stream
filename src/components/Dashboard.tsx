@@ -242,9 +242,22 @@ export const Dashboard = () => {
         })
         .subscribe();
 
+      // Real-time subscription for anomaly alerts to update ML metrics
+      const anomalyChannel = supabase
+        .channel('anomaly-alerts-changes')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'anomaly_alerts'
+        }, () => {
+          fetchMetrics();
+        })
+        .subscribe();
+
       return () => {
         supabase.removeChannel(devicesChannel);
         supabase.removeChannel(alertsChannel);
+        supabase.removeChannel(anomalyChannel);
       };
     }
   }, [user]);

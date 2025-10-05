@@ -87,7 +87,25 @@ serve(async (req) => {
       }
     }
     
-    const severity = (payload?.severity ?? primary?.severity ?? incoming?.severity ?? 'medium') as string;
+    // Map severity based on alert type
+    let severity = 'medium'; // default
+    const alertTypeLower = alert_type.toLowerCase();
+    
+    if (alertTypeLower.includes('man-in-the-middle') || 
+        alertTypeLower.includes('mqtt protocol violation') ||
+        alertTypeLower.includes('length tampering') ||
+        alertTypeLower.includes('brute force')) {
+      severity = 'critical';
+    } else if (alertTypeLower.includes('high-volume mqtt publish flood') ||
+               alertTypeLower.includes('publish flood') ||
+               alertTypeLower.includes('dos')) {
+      severity = 'high';
+    } else if (alertTypeLower.includes('high volume alert')) {
+      severity = 'medium';
+    } else {
+      // Use payload severity if provided, otherwise keep default
+      severity = (payload?.severity ?? primary?.severity ?? incoming?.severity ?? 'medium') as string;
+    }
 
     console.log('Received Splunk alert (normalized):', { contentType, incoming, normalized: { client_id, ip_address, alert_type, description, severity } });
 
