@@ -318,9 +318,9 @@ export const Dashboard = () => {
       .from('anomaly_alerts')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
-      .gte('created_at', twentyFourHoursAgo.toISOString());
+      .gte('timestamp', twentyFourHoursAgo.toISOString());
     
-    console.log('Anomaly count from last 24h for current user:', anomalyCount, 'Error:', anomalyError);
+    console.log('Anomaly count from last 24h (by timestamp) for current user:', anomalyCount, 'Error:', anomalyError);
     
     const { data, error } = await supabase
       .from('network_metrics')
