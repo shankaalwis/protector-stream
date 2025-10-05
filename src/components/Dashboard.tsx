@@ -626,11 +626,34 @@ export const Dashboard = () => {
             </div>
           </div>
           
-          {/* Network Health Monitor - ECG Style */}
-          <div className="hidden lg:block ml-8 w-[400px] h-[120px]">
-            <div className="relative h-full rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/30 p-4 shadow-lg overflow-hidden backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-pulse"></div>
-              <NetworkHealthMonitor />
+          {/* Network Health Monitor - ECG Style with surrounding icons */}
+          <div className="hidden lg:flex items-center gap-3 ml-8">
+            {/* Left side icons */}
+            <div className="flex flex-col gap-2">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-success/15 to-success/5 border border-success/30 hover:scale-110 transition-transform duration-300">
+                <Shield className="h-5 w-5 text-success" />
+              </div>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300">
+                <Activity className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+            
+            {/* ECG Monitor */}
+            <div className="w-[380px] h-[120px]">
+              <div className="relative h-full rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/30 p-4 shadow-lg overflow-hidden backdrop-blur-sm">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-pulse"></div>
+                <NetworkHealthMonitor />
+              </div>
+            </div>
+            
+            {/* Right side icons */}
+            <div className="flex flex-col gap-2">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300">
+                <Monitor className="h-5 w-5 text-primary" />
+              </div>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300">
+                <Lock className="h-5 w-5 text-primary" />
+              </div>
             </div>
           </div>
         </div>

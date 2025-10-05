@@ -2,44 +2,83 @@ import { useEffect, useState } from 'react';
 
 export const NetworkHealthMonitor = () => {
   const [pulseData, setPulseData] = useState<number[]>([]);
+  const [offset, setOffset] = useState(0);
   
   useEffect(() => {
-    // Generate ECG-like pulse data
-    const generatePulse = () => {
+    // Generate more realistic ECG-like pulse data with variations
+    const generateRealisticPulse = () => {
       const newData: number[] = [];
-      for (let i = 0; i < 100; i++) {
-        if (i % 20 === 10) {
-          // Spike (R-wave)
-          newData.push(80);
-        } else if (i % 20 === 9 || i % 20 === 11) {
-          // Gradual rise/fall
-          newData.push(60);
-        } else if (i % 20 === 8 || i % 20 === 12) {
-          newData.push(40);
-        } else if (i % 20 === 7) {
-          // P-wave
-          newData.push(25);
-        } else if (i % 20 === 13) {
-          // T-wave
-          newData.push(30);
-        } else {
-          // Baseline
-          newData.push(20);
+      const segments = 5; // Number of heartbeat cycles
+      const pointsPerSegment = 40;
+      
+      for (let seg = 0; seg < segments; seg++) {
+        for (let i = 0; i < pointsPerSegment; i++) {
+          const position = i / pointsPerSegment;
+          
+          // P-wave (small bump before main spike)
+          if (position >= 0.1 && position < 0.2) {
+            const t = (position - 0.1) / 0.1;
+            newData.push(20 + Math.sin(t * Math.PI) * 8);
+          }
+          // PR segment (flat)
+          else if (position >= 0.2 && position < 0.3) {
+            newData.push(20);
+          }
+          // QRS complex (main spike - THE PEAK)
+          else if (position >= 0.3 && position < 0.4) {
+            const t = (position - 0.3) / 0.1;
+            if (t < 0.3) {
+              // Q wave (small dip)
+              newData.push(20 - Math.sin(t * Math.PI * 3.33) * 5);
+            } else if (t < 0.7) {
+              // R wave (HUGE SPIKE)
+              const spikeT = (t - 0.3) / 0.4;
+              newData.push(20 + Math.sin(spikeT * Math.PI) * 65);
+            } else {
+              // S wave (small dip)
+              const sT = (t - 0.7) / 0.3;
+              newData.push(20 - Math.sin(sT * Math.PI) * 8);
+            }
+          }
+          // ST segment (flat recovery)
+          else if (position >= 0.4 && position < 0.55) {
+            newData.push(20);
+          }
+          // T-wave (recovery wave)
+          else if (position >= 0.55 && position < 0.75) {
+            const t = (position - 0.55) / 0.2;
+            newData.push(20 + Math.sin(t * Math.PI) * 15);
+          }
+          // Baseline (normal flat line)
+          else {
+            newData.push(20 + (Math.random() - 0.5) * 1); // Slight noise for realism
+          }
         }
       }
       return newData;
     };
 
-    setPulseData(generatePulse());
+    setPulseData(generateRealisticPulse());
+    
+    // Animate the wave by updating offset
+    const interval = setInterval(() => {
+      setOffset(prev => (prev + 0.5) % 100);
+    }, 30);
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Generate SVG path from pulse data
   const generatePath = () => {
     if (pulseData.length === 0) return '';
     
-    let path = `M 0 ${100 - pulseData[0]}`;
-    pulseData.forEach((value, index) => {
-      const x = (index / pulseData.length) * 100;
+    const offsetIndex = Math.floor((offset / 100) * pulseData.length);
+    const extendedData = [...pulseData, ...pulseData];
+    const visibleData = extendedData.slice(offsetIndex, offsetIndex + pulseData.length);
+    
+    let path = `M 0 ${100 - visibleData[0]}`;
+    visibleData.forEach((value, index) => {
+      const x = (index / visibleData.length) * 100;
       const y = 100 - value;
       path += ` L ${x} ${y}`;
     });
@@ -60,9 +99,9 @@ export const NetworkHealthMonitor = () => {
               <path d="M 50 0 L 0 0 0 50" fill="none" stroke="currentColor" strokeWidth="1" className="text-primary/50"/>
             </pattern>
             <linearGradient id="pulseGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.2"/>
-              <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="0.8"/>
-              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.2"/>
+              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.3"/>
+              <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="1"/>
+              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.3"/>
             </linearGradient>
           </defs>
           <rect width="100" height="100" fill="url(#grid)" />
@@ -72,13 +111,13 @@ export const NetworkHealthMonitor = () => {
 
       {/* Animated pulse line */}
       <svg 
-        className="relative z-10 w-full h-full animate-pulse-wave" 
+        className="relative z-10 w-full h-full" 
         viewBox="0 0 100 100" 
         preserveAspectRatio="none"
       >
         <defs>
           <filter id="glow">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
             <feMerge>
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>
@@ -91,37 +130,13 @@ export const NetworkHealthMonitor = () => {
           d={generatePath()}
           fill="none"
           stroke="url(#pulseGradient)"
-          strokeWidth="2"
+          strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           filter="url(#glow)"
-          className="pulse-line"
+          className="drop-shadow-lg"
         />
-        
-        {/* Moving dot indicator */}
-        <circle 
-          cx="50" 
-          cy="20" 
-          r="2" 
-          fill="hsl(var(--primary))"
-          className="animate-pulse"
-        >
-          <animate
-            attributeName="cx"
-            values="0;100;0"
-            dur="3s"
-            repeatCount="indefinite"
-          />
-        </circle>
       </svg>
-
-      {/* Status text */}
-      <div className="absolute bottom-2 right-2 text-xs font-mono text-primary/70 animate-fade-in">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-          <span>Network Healthy</span>
-        </div>
-      </div>
 
       {/* Heartbeat indicator */}
       <div className="absolute top-2 left-2 text-xs font-mono text-primary/70 animate-fade-in">
@@ -135,3 +150,4 @@ export const NetworkHealthMonitor = () => {
     </div>
   );
 };
+
