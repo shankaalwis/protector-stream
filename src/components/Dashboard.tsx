@@ -14,6 +14,7 @@ import AnomalyChart from './AnomalyChart';
 import AlertDetailCard from './AlertDetailCard';
 import AuraChat from './AuraChat';
 import { ModeToggle } from './theme-toggle';
+import { NetworkHealthMonitor } from './NetworkHealthMonitor';
 import guarddogImage from '@/assets/guarddog.png';
 import barkSound from '@/assets/dog-bark.mp3';
 import { 
@@ -625,21 +626,11 @@ export const Dashboard = () => {
             </div>
           </div>
           
-          {/* Infographic Icons */}
-          <div className="hidden lg:flex items-center gap-4 ml-8">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in">
-                <Shield className="h-8 w-8 text-primary" />
-              </div>
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:100ms]">
-                <Activity className="h-8 w-8 text-primary" />
-              </div>
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:200ms]">
-                <Monitor className="h-8 w-8 text-primary" />
-              </div>
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:300ms]">
-                <Lock className="h-8 w-8 text-primary" />
-              </div>
+          {/* Network Health Monitor - ECG Style */}
+          <div className="hidden lg:block ml-8 w-[400px] h-[120px]">
+            <div className="relative h-full rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/30 p-4 shadow-lg overflow-hidden backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-pulse"></div>
+              <NetworkHealthMonitor />
             </div>
           </div>
         </div>

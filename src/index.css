@@ -422,4 +422,31 @@
   .error-shake {
     animation: errorShake 0.4s ease-in-out, errorPulse 0.4s ease-in-out;
   }
+
+  /* Network Health Monitor Animations */
+  @keyframes pulse-wave {
+    0%, 100% {
+      opacity: 0.8;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-line {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-pulse-wave {
+    animation: pulse-wave 2s ease-in-out infinite;
+  }
+
+  .pulse-line {
+    animation: slide-line 3s linear infinite;
+  }
 }
