@@ -308,21 +308,25 @@ export const Dashboard = () => {
 
 
   const fetchMetrics = async () => {
-    // Fetch anomalies from the last 24 hours
+    if (!user) return;
+    
+    // Fetch anomalies from the last 24 hours for current user
     const twentyFourHoursAgo = new Date();
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
     
     const { count: anomalyCount, error: anomalyError } = await supabase
       .from('anomaly_alerts')
       .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
       .gte('created_at', twentyFourHoursAgo.toISOString());
     
-    console.log('Anomaly count from last 24h:', anomalyCount, 'Error:', anomalyError);
+    console.log('Anomaly count from last 24h for current user:', anomalyCount, 'Error:', anomalyError);
     
     const { data, error } = await supabase
       .from('network_metrics')
       .select('*')
-      .single();
+      .eq('user_id', user.id)
+      .maybeSingle();
     
     if (!error && data) {
       setMetrics({
