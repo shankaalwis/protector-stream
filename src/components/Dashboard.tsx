@@ -717,30 +717,52 @@ export const Dashboard = () => {
       </div>
       
       <div className="space-y-6">
-        {alerts.filter(alert => alert.status !== 'closed').map((alert) => {
-          const alertDevice = devices.find(d => d.id === alert.device_id);
-          console.log('Rendering alert:', alert.id, 'Chat visible:', alertChatVisible[alert.id]);
-          return (
-            <AlertDetailCard
-              key={alert.id}
-              alert={alert}
-              device={alertDevice}
-              chatMessages={alertChatMessages[alert.id] || []}
-              chatInput={alertChatInputs[alert.id] || ''}
-              onChatInputChange={(value) => setAlertChatInputs(prev => ({
-                ...prev,
-                [alert.id]: value
-              }))}
-              onSendMessage={() => sendAlertMessage(alert.id)}
-              onKeyPress={(e) => handleAlertKeyPress(e, alert.id)}
-              onCloseAlert={() => closeAlert(alert.id)}
-              onBlockDevice={() => alertDevice && updateDeviceStatus(alertDevice.id, 'blocked')}
-              onUnblockDevice={() => alertDevice && updateDeviceStatus(alertDevice.id, 'safe')}
-              isAnalysisVisible={alertChatVisible[alert.id] || false}
-              onToggleAnalysis={() => getAIAnalysis(alert.id)}
-            />
-          );
-        })}
+        {alerts.filter(alert => alert.status !== 'closed').length === 0 ? (
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-background border border-primary/10 p-12">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/3 rounded-full blur-3xl"></div>
+            <div className="relative z-10 text-center max-w-md mx-auto">
+              <div className="mb-6 flex justify-center">
+                <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20">
+                  <ShieldCheck className="h-12 w-12 text-primary" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-foreground mb-3">All Clear</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                No active security alerts at this time. All threats have been resolved and your network is operating securely.
+              </p>
+              <div className="mt-6 pt-6 border-t border-border/50">
+                <p className="text-sm text-muted-foreground">
+                  Continuous monitoring is active and protecting your infrastructure.
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          alerts.filter(alert => alert.status !== 'closed').map((alert) => {
+            const alertDevice = devices.find(d => d.id === alert.device_id);
+            console.log('Rendering alert:', alert.id, 'Chat visible:', alertChatVisible[alert.id]);
+            return (
+              <AlertDetailCard
+                key={alert.id}
+                alert={alert}
+                device={alertDevice}
+                chatMessages={alertChatMessages[alert.id] || []}
+                chatInput={alertChatInputs[alert.id] || ''}
+                onChatInputChange={(value) => setAlertChatInputs(prev => ({
+                  ...prev,
+                  [alert.id]: value
+                }))}
+                onSendMessage={() => sendAlertMessage(alert.id)}
+                onKeyPress={(e) => handleAlertKeyPress(e, alert.id)}
+                onCloseAlert={() => closeAlert(alert.id)}
+                onBlockDevice={() => alertDevice && updateDeviceStatus(alertDevice.id, 'blocked')}
+                onUnblockDevice={() => alertDevice && updateDeviceStatus(alertDevice.id, 'safe')}
+                isAnalysisVisible={alertChatVisible[alert.id] || false}
+                onToggleAnalysis={() => getAIAnalysis(alert.id)}
+              />
+            );
+          })
+        )}
       </div>
     </div>
     );
