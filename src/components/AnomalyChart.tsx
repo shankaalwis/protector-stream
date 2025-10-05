@@ -181,6 +181,20 @@ const AnomalyChart: React.FC = () => {
     // Load initial data
     const loadInitialData = async () => {
       try {
+        // Load MQTT protocol violation alerts to inject as anomalies
+        const { data: mqttAlerts, error: mqttError } = await supabase
+          .from('security_alerts')
+          .select('*')
+          .gte('timestamp', new Date(Date.now() - CHART_WINDOW_MINUTES * 60 * 1000).toISOString())
+          .ilike('description', '%Potential Man-in-the-Middle Activity (MQTT Protocol Violation: Length Tampering)%')
+          .order('timestamp', { ascending: true });
+
+        if (mqttError) {
+          console.error('Error loading MQTT alerts:', mqttError);
+        } else if (mqttAlerts && mqttAlerts.length > 0) {
+          console.log(`Found ${mqttAlerts.length} MQTT protocol violation alerts to inject as anomalies`);
+        }
+
         const { data, error } = await supabase
           .from('anomaly_alerts')
           .select('*')
@@ -226,10 +240,43 @@ const AnomalyChart: React.FC = () => {
             }
           }
 
-          const finalData = [...paddedData, ...chartPoints].map((point, index) => ({
+          let finalData = [...paddedData, ...chartPoints].map((point, index) => ({
             ...point,
             timeIndex: index
           }));
+
+          // Inject MQTT protocol violation alerts as anomalies
+          if (mqttAlerts && mqttAlerts.length > 0) {
+            mqttAlerts.forEach(mqttAlert => {
+              const mqttTime = new Date(mqttAlert.timestamp);
+              const syntheticPoint: ChartDataPoint = {
+                time: mqttTime.toLocaleTimeString(),
+                packet_count: 9,
+                is_anomaly: true,
+                timestamp: mqttAlert.timestamp,
+                client_id: 'SB481',
+                timeIndex: 0 // Will be recalculated
+              };
+
+              // Find the right position to insert this point based on timestamp
+              const insertIndex = finalData.findIndex(point => new Date(point.timestamp) > mqttTime);
+              if (insertIndex === -1) {
+                finalData.push(syntheticPoint);
+              } else {
+                finalData.splice(insertIndex, 0, syntheticPoint);
+              }
+            });
+
+            // Recalculate time indices and ensure we still have TOTAL_DATA_POINTS
+            finalData = finalData
+              .slice(-TOTAL_DATA_POINTS)
+              .map((point, index) => ({
+                ...point,
+                timeIndex: index
+              }));
+
+            console.log(`Injected ${mqttAlerts.length} MQTT alerts as anomalies in the chart`);
+          }
           
           setAllChartData(finalData);
           setViewStartIndex(Math.max(0, TOTAL_DATA_POINTS - VISIBLE_DATA_POINTS));
