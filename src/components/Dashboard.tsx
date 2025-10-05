@@ -596,31 +596,51 @@ export const Dashboard = () => {
       {/* Clean Header */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-8 shadow-lg">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex gap-2">
-              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                <ShieldCheck className="h-5 w-5 text-primary" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex gap-2">
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                </div>
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <Activity className="h-5 w-5 text-primary" />
+                </div>
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <Lock className="h-5 w-5 text-primary" />
+                </div>
               </div>
-              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                <Activity className="h-5 w-5 text-primary" />
-              </div>
-              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                <Lock className="h-5 w-5 text-primary" />
+              <div className="ml-2">
+                <p className="text-sm font-medium text-muted-foreground">Welcome back,</p>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  {userProfile?.first_name && userProfile?.last_name 
+                    ? `${userProfile.first_name} ${userProfile.last_name}` 
+                    : user?.email}
+                </h2>
               </div>
             </div>
-            <div className="ml-2">
-              <p className="text-sm font-medium text-muted-foreground">Welcome back,</p>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                {userProfile?.first_name && userProfile?.last_name 
-                  ? `${userProfile.first_name} ${userProfile.last_name}` 
-                  : user?.email}
-              </h2>
+            <div className="mt-6">
+              <h1 className="text-5xl font-bold text-foreground mb-2">Security Overview</h1>
+              <p className="text-lg text-muted-foreground">Monitor your network security in real-time</p>
             </div>
           </div>
-          <div className="mt-6">
-            <h1 className="text-5xl font-bold text-foreground mb-2">Security Overview</h1>
-            <p className="text-lg text-muted-foreground">Monitor your network security in real-time</p>
+          
+          {/* Infographic Icons */}
+          <div className="hidden lg:flex items-center gap-4 ml-8">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in">
+                <Shield className="h-8 w-8 text-primary" />
+              </div>
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:100ms]">
+                <Activity className="h-8 w-8 text-primary" />
+              </div>
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:200ms]">
+                <Monitor className="h-8 w-8 text-primary" />
+              </div>
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:300ms]">
+                <Lock className="h-8 w-8 text-primary" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -769,31 +789,51 @@ export const Dashboard = () => {
       {/* Enhanced Header */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-8 shadow-lg">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex gap-2">
-              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                <AlertTriangle className="h-5 w-5 text-primary" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex gap-2">
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <AlertTriangle className="h-5 w-5 text-primary" />
+                </div>
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <Bell className="h-5 w-5 text-primary" />
+                </div>
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                </div>
               </div>
-              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                <Bell className="h-5 w-5 text-primary" />
-              </div>
-              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                <ShieldCheck className="h-5 w-5 text-primary" />
+              <div className="ml-2">
+                <p className="text-sm font-medium text-muted-foreground">Security Monitoring</p>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  {userProfile?.first_name && userProfile?.last_name 
+                    ? `${userProfile.first_name} ${userProfile.last_name}` 
+                    : user?.email}
+                </h2>
               </div>
             </div>
-            <div className="ml-2">
-              <p className="text-sm font-medium text-muted-foreground">Security Monitoring</p>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                {userProfile?.first_name && userProfile?.last_name 
-                  ? `${userProfile.first_name} ${userProfile.last_name}` 
-                  : user?.email}
-              </h2>
+            <div className="mt-6">
+              <h1 className="text-5xl font-bold text-foreground mb-2">Security Alerts</h1>
+              <p className="text-lg text-muted-foreground">Monitor and respond to security threats</p>
             </div>
           </div>
-          <div className="mt-6">
-            <h1 className="text-5xl font-bold text-foreground mb-2">Security Alerts</h1>
-            <p className="text-lg text-muted-foreground">Monitor and respond to security threats</p>
+          
+          {/* Infographic Icons */}
+          <div className="hidden lg:flex items-center gap-4 ml-8">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-danger/15 to-danger/5 border border-danger/30 hover:scale-110 transition-transform duration-300 animate-fade-in">
+                <AlertTriangle className="h-8 w-8 text-danger" />
+              </div>
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-warning/15 to-warning/5 border border-warning/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:100ms]">
+                <Bell className="h-8 w-8 text-warning" />
+              </div>
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:200ms]">
+                <Shield className="h-8 w-8 text-primary" />
+              </div>
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-success/15 to-success/5 border border-success/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:300ms]">
+                <Zap className="h-8 w-8 text-success" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -878,14 +918,33 @@ export const Dashboard = () => {
                 </h2>
               </div>
             </div>
-            <Button 
-              onClick={() => setShowAddDevice(true)}
-              className="btn-primary border border-primary/20 shadow-professional"
-              size="lg"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add Device
-            </Button>
+            <div className="flex items-center gap-6">
+              {/* Infographic Icons */}
+              <div className="hidden lg:flex items-center gap-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in">
+                    <Monitor className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:100ms]">
+                    <Activity className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-success/15 to-success/5 border border-success/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:200ms]">
+                    <CheckCircle className="h-6 w-6 text-success" />
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:300ms]">
+                    <Shield className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+              </div>
+              <Button 
+                onClick={() => setShowAddDevice(true)}
+                className="btn-primary border border-primary/20 shadow-professional"
+                size="lg"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Add Device
+              </Button>
+            </div>
           </div>
           <div className="mt-6">
             <h1 className="text-5xl font-bold text-foreground mb-2">My Devices</h1>
@@ -1049,31 +1108,51 @@ export const Dashboard = () => {
       {/* Enhanced Header */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-8 shadow-lg">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex gap-2">
-              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                <Settings className="h-5 w-5 text-primary" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex gap-2">
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <Settings className="h-5 w-5 text-primary" />
+                </div>
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <Lock className="h-5 w-5 text-primary" />
+                </div>
+                <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                  <Monitor className="h-5 w-5 text-primary" />
+                </div>
               </div>
-              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                <Lock className="h-5 w-5 text-primary" />
-              </div>
-              <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                <Monitor className="h-5 w-5 text-primary" />
+              <div className="ml-2">
+                <p className="text-sm font-medium text-muted-foreground">Account Configuration</p>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  {userProfile?.first_name && userProfile?.last_name 
+                    ? `${userProfile.first_name} ${userProfile.last_name}` 
+                    : user?.email}
+                </h2>
               </div>
             </div>
-            <div className="ml-2">
-              <p className="text-sm font-medium text-muted-foreground">Account Configuration</p>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                {userProfile?.first_name && userProfile?.last_name 
-                  ? `${userProfile.first_name} ${userProfile.last_name}` 
-                  : user?.email}
-              </h2>
+            <div className="mt-6">
+              <h1 className="text-5xl font-bold text-foreground mb-2">Settings</h1>
+              <p className="text-lg text-muted-foreground">Manage your account and device preferences</p>
             </div>
           </div>
-          <div className="mt-6">
-            <h1 className="text-5xl font-bold text-foreground mb-2">Settings</h1>
-            <p className="text-lg text-muted-foreground">Manage your account and device preferences</p>
+          
+          {/* Infographic Icons */}
+          <div className="hidden lg:flex items-center gap-4 ml-8">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in">
+                <Settings className="h-8 w-8 text-primary" />
+              </div>
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:100ms]">
+                <Lock className="h-8 w-8 text-primary" />
+              </div>
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:200ms]">
+                <Edit className="h-8 w-8 text-primary" />
+              </div>
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-success/15 to-success/5 border border-success/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:300ms]">
+                <CheckCircle className="h-8 w-8 text-success" />
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, Legend, BarChart, Bar } from "recharts";
-import { Activity, Shield, TrendingUp, ArrowLeft, Users, AlertTriangle, MessageSquare, Sparkles } from "lucide-react";
+import { Activity, Shield, TrendingUp, ArrowLeft, Users, AlertTriangle, MessageSquare, Sparkles, BarChart3 } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -298,58 +298,60 @@ export default function SiemDashboard() {
         {/* Enhanced Header */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-8 shadow-lg">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex gap-2">
-                  <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                    <Shield className="h-5 w-5 text-primary" />
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-2">
+                    <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                      <Shield className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                      <Activity className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                    </div>
                   </div>
-                  <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                    <Activity className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
-                    <TrendingUp className="h-5 w-5 text-primary" />
+                  <div className="ml-2">
+                    <p className="text-sm font-medium text-muted-foreground">Real-time Analytics</p>
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                      Security Intelligence
+                    </h2>
                   </div>
                 </div>
-                <div className="ml-2">
-                  <p className="text-sm font-medium text-muted-foreground">Security Intelligence</p>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                    Real-time Monitoring
-                  </h2>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => {
-                    setButtonClicked(true);
-                    setTimeout(() => {
-                      setIsChatOpen(true);
-                      setButtonClicked(false);
-                    }, 300);
-                  }}
-                  variant="outline"
-                  className={`flex items-center gap-2 relative transition-all hover:scale-105 ${
-                    buttonClicked ? 'button-morph' : ''
-                  }`}
-                >
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <span className="hidden sm:inline">Aura Assistant</span>
-                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-                </Button>
                 <Button
                   onClick={() => navigate('/')}
                   variant="outline"
-                  className="flex items-center gap-2"
+                  size="sm"
+                  className="border-primary/30 hover:bg-primary/10"
                 >
-                  <ArrowLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline">Back to Dashboard</span>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Dashboard
                 </Button>
               </div>
+              <div className="mt-6">
+                <h1 className="text-5xl font-bold text-foreground mb-2">SIEM Dashboard</h1>
+                <p className="text-lg text-muted-foreground">Real-time security intelligence and event monitoring</p>
+              </div>
             </div>
-            <div className="mt-6">
-              <h1 className="text-5xl font-bold text-foreground mb-2">SIEM Dashboard</h1>
-              <p className="text-lg text-muted-foreground">Real-time security intelligence and event monitoring</p>
+            
+            {/* Infographic Icons */}
+            <div className="hidden lg:flex items-center gap-4 ml-8">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in">
+                  <BarChart3 className="h-8 w-8 text-primary" />
+                </div>
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:100ms]">
+                  <TrendingUp className="h-8 w-8 text-primary" />
+                </div>
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:200ms]">
+                  <Activity className="h-8 w-8 text-primary" />
+                </div>
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-success/15 to-success/5 border border-success/30 hover:scale-110 transition-transform duration-300 animate-fade-in [animation-delay:300ms]">
+                  <Shield className="h-8 w-8 text-success" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
