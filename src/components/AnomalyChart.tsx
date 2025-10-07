@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AnomalyData {
   id: string;
@@ -32,6 +33,7 @@ const TOTAL_DATA_POINTS = (CHART_WINDOW_MINUTES * 60) / DATA_INTERVAL_SECONDS; /
 const VISIBLE_DATA_POINTS = 72; // Show 6 minutes worth of data at once (72 points)
 
 const AnomalyChart: React.FC = () => {
+  const { user } = useAuth();
   const [allChartData, setAllChartData] = useState<ChartDataPoint[]>([]);
   const [viewStartIndex, setViewStartIndex] = useState(0);
   const [isAtLatest, setIsAtLatest] = useState(true);
@@ -66,7 +68,9 @@ const AnomalyChart: React.FC = () => {
 
   // Set up real-time subscription to anomaly_alerts table
   useEffect(() => {
-    console.log('Setting up real-time subscription to anomaly_alerts...');
+    if (!user) return;
+    
+    console.log('Setting up real-time subscription to anomaly_alerts for user:', user.id);
     
     const channel = supabase
       .channel('anomaly-alerts-changes')
@@ -75,10 +79,11 @@ const AnomalyChart: React.FC = () => {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'anomaly_alerts'
+          table: 'anomaly_alerts',
+          filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('New anomaly alert received:', payload);
+          console.log('New anomaly alert received in AnomalyChart:', payload);
           const newAlert = payload.new as AnomalyData;
           
           // Update chart data - keep last 360 data points (30 minutes)
@@ -180,24 +185,42 @@ const AnomalyChart: React.FC = () => {
 
     // Load initial data
     const loadInitialData = async () => {
+      if (!user) return;
+      
       try {
-        // Load MQTT protocol violation alerts to inject as anomalies
-        const { data: mqttAlerts, error: mqttError } = await supabase
-          .from('security_alerts')
-          .select('*')
-          .gte('timestamp', new Date(Date.now() - CHART_WINDOW_MINUTES * 60 * 1000).toISOString())
-          .ilike('description', '%Potential Man-in-the-Middle Activity (MQTT Protocol Violation: Length Tampering)%')
-          .order('timestamp', { ascending: true });
+        // Load MQTT protocol violation alerts to inject as anomalies (filtered by user's devices)
+        const { data: userDevices } = await supabase
+          .from('devices')
+          .select('id')
+          .eq('user_id', user.id);
+        
+        const deviceIds = userDevices?.map(d => d.id) || [];
+        
+        let mqttAlerts = null;
+        if (deviceIds.length > 0) {
+          const { data, error: mqttError } = await supabase
+            .from('security_alerts')
+            .select('*')
+            .in('device_id', deviceIds)
+            .gte('timestamp', new Date(Date.now() - CHART_WINDOW_MINUTES * 60 * 1000).toISOString())
+            .ilike('description', '%Potential Man-in-the-Middle Activity (MQTT Protocol Violation: Length Tampering)%')
+            .order('timestamp', { ascending: true });
+          
+          if (mqttError) {
+            console.error('Error loading MQTT alerts:', mqttError);
+          } else {
+            mqttAlerts = data;
+          }
+        }
 
-        if (mqttError) {
-          console.error('Error loading MQTT alerts:', mqttError);
-        } else if (mqttAlerts && mqttAlerts.length > 0) {
+        if (mqttAlerts && mqttAlerts.length > 0) {
           console.log(`Found ${mqttAlerts.length} MQTT protocol violation alerts to inject as anomalies`);
         }
 
         const { data, error } = await supabase
           .from('anomaly_alerts')
           .select('*')
+          .eq('user_id', user.id)
           .gte('timestamp', new Date(Date.now() - CHART_WINDOW_MINUTES * 60 * 1000).toISOString())
           .order('timestamp', { ascending: false })
           .limit(TOTAL_DATA_POINTS);
@@ -316,7 +339,7 @@ const AnomalyChart: React.FC = () => {
       supabase.removeChannel(securityAlertsChannel);
       clearInterval(intervalId);
     };
-  }, []);
+  }, [user]);
 
   // Get visible chart data based on current view
   const visibleChartData = allChartData.slice(viewStartIndex, viewStartIndex + VISIBLE_DATA_POINTS);
