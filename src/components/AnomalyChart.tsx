@@ -68,12 +68,15 @@ const AnomalyChart: React.FC = () => {
 
   // Set up real-time subscription to anomaly_alerts table
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      console.log('AnomalyChart: No user, skipping subscription setup');
+      return;
+    }
     
-    console.log('Setting up real-time subscription to anomaly_alerts for user:', user.id);
+    console.log('AnomalyChart: Setting up real-time subscription for user:', user.id);
     
     const channel = supabase
-      .channel('anomaly-alerts-changes')
+      .channel('anomaly-chart-realtime')
       .on(
         'postgres_changes',
         {
@@ -83,11 +86,12 @@ const AnomalyChart: React.FC = () => {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('New anomaly alert received in AnomalyChart:', payload);
+          console.log('🔔 AnomalyChart: New anomaly alert received!', payload);
           const newAlert = payload.new as AnomalyData;
           
           // Update chart data - keep last 360 data points (30 minutes)
           setAllChartData(prevData => {
+            console.log('📊 AnomalyChart: Updating chart with new data point');
             const alertTime = new Date(newAlert.timestamp);
             const newDataPoint: ChartDataPoint = {
               time: alertTime.toLocaleTimeString(),
@@ -106,12 +110,17 @@ const AnomalyChart: React.FC = () => {
               timeIndex: index
             }));
             
-            // If we're at the latest view, move the window to show the new data
-            if (isAtLatest) {
-              setViewStartIndex(Math.max(0, recalculatedData.length - VISIBLE_DATA_POINTS));
-            }
+            console.log('📊 AnomalyChart: Chart data updated, new length:', recalculatedData.length);
             
             return recalculatedData;
+          });
+          
+          // Always move to latest view when new data arrives
+          setIsAtLatest(true);
+          setViewStartIndex(prev => {
+            const newIndex = Math.max(0, allChartData.length - VISIBLE_DATA_POINTS);
+            console.log('📊 AnomalyChart: Moving to latest view, index:', newIndex);
+            return newIndex;
           });
           
           // Update anomaly status
@@ -334,12 +343,12 @@ const AnomalyChart: React.FC = () => {
 
     // Cleanup subscription and interval on unmount
     return () => {
-      console.log('Cleaning up real-time subscriptions');
+      console.log('AnomalyChart: Cleaning up real-time subscriptions');
       supabase.removeChannel(channel);
       supabase.removeChannel(securityAlertsChannel);
       clearInterval(intervalId);
     };
-  }, [user]);
+  }, [user?.id]);
 
   // Get visible chart data based on current view
   const visibleChartData = allChartData.slice(viewStartIndex, viewStartIndex + VISIBLE_DATA_POINTS);
