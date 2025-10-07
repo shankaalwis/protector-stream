@@ -726,7 +726,7 @@ export const Dashboard = () => {
         
         <Card className="card-professional group hover:scale-105 hover:-translate-y-1 transition-all duration-300 border-[hsl(var(--dark-sky-blue))]/40 bg-gradient-to-br from-[hsl(var(--dark-sky-blue-subtle))]/20 to-[hsl(var(--dark-sky-blue-lighter))]/10 animate-fade-in [animation-delay:200ms]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-subheading text-[hsl(var(--dark-sky-blue))]">ML Anomalies (24h)</CardTitle>
+            <CardTitle className="text-subheading text-[hsl(var(--dark-sky-blue))]">ML Anomalies</CardTitle>
             <div className="p-3 rounded-2xl bg-gradient-to-br from-[hsl(var(--dark-sky-blue))]/20 to-[hsl(var(--dark-sky-blue-light))]/15 group-hover:from-[hsl(var(--dark-sky-blue))]/30 group-hover:to-[hsl(var(--dark-sky-blue-light))]/25 transition-all duration-300 group-hover:rotate-12">
               <BarChart3 className="h-6 w-6 text-[hsl(var(--dark-sky-blue))] group-hover:scale-110 transition-transform duration-300" />
             </div>
