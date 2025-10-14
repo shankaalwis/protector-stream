@@ -8,6 +8,7 @@ import { Dashboard } from "@/components/Dashboard";
 import SiemDashboard from "@/pages/SiemDashboard";
 import Reports from "@/pages/Reports";
 import AuraAssistant from "@/pages/AuraAssistant";
+import ColorPaletteInfographic from "@/pages/ColorPaletteInfographic";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -42,6 +43,7 @@ const App = () => {
               <Route path="/siem-dashboard" element={user ? <SiemDashboard /> : <Navigate to="/" />} />
               <Route path="/reports" element={user ? <Reports /> : <Navigate to="/" />} />
               <Route path="/aura" element={user ? <AuraAssistant /> : <Navigate to="/" />} />
+              <Route path="/color-palette" element={<ColorPaletteInfographic />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </BrowserRouter>
