@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, Grid3x3, Layers, Sparkles } from "lucide-react";
+import Wireframe1Dashboard from "@/components/Wireframe1Dashboard";
+import Wireframe2AlertDetail from "@/components/Wireframe2AlertDetail";
 
 const WireframeDocumentation = () => {
   return (
@@ -46,12 +48,8 @@ const WireframeDocumentation = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Image Placeholder */}
-            <div className="bg-muted/30 border-2 border-dashed border-primary/30 rounded-lg p-12 text-center">
-              <p className="text-lg font-semibold text-primary">
-                [IMAGE: Low Fidelity Wireframe 1 - Main Dashboard (F-Pattern/12-Column Grid)]
-              </p>
-            </div>
+            {/* Wireframe 1 */}
+            <Wireframe1Dashboard />
 
             {/* Rationale */}
             <div className="space-y-3">
@@ -137,12 +135,8 @@ const WireframeDocumentation = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Image Placeholder */}
-            <div className="bg-muted/30 border-2 border-dashed border-primary/30 rounded-lg p-12 text-center">
-              <p className="text-lg font-semibold text-primary">
-                [IMAGE: Low Fidelity Wireframe 2 - LLM Guidance Card & Mitigation Actions]
-              </p>
-            </div>
+            {/* Wireframe 2 */}
+            <Wireframe2AlertDetail />
 
             {/* Rationale */}
             <div className="space-y-3">
