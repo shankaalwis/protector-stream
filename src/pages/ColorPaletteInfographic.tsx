@@ -1,199 +1,9 @@
-import { Shield, AlertTriangle, CheckCircle, XCircle, Info } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Shield } from "lucide-react";
 
 const ColorPaletteInfographic = () => {
-  const colorGroups = [
-    {
-      title: "Primary Brand Identity",
-      description: "Dark Sky Blue - Trust, Intelligence & Stability",
-      icon: Shield,
-      colors: [
-        {
-          name: "Dark Sky Blue",
-          variable: "--dark-sky-blue",
-          hsl: "200 100% 30%",
-          usage: "Primary brand color, buttons, headers, key UI elements",
-          class: "bg-[hsl(200,100%,30%)]",
-        },
-        {
-          name: "Dark Sky Blue Light",
-          variable: "--dark-sky-blue-light",
-          hsl: "200 100% 35%",
-          usage: "Hover states, lighter accents",
-          class: "bg-[hsl(200,100%,35%)]",
-        },
-        {
-          name: "Dark Sky Blue Dark",
-          variable: "--dark-sky-blue-dark",
-          hsl: "200 100% 25%",
-          usage: "Active states, darker accents",
-          class: "bg-[hsl(200,100%,25%)]",
-        },
-        {
-          name: "Dark Sky Blue Lighter",
-          variable: "--dark-sky-blue-lighter",
-          hsl: "200 100% 40%",
-          usage: "Subtle highlights, backgrounds",
-          class: "bg-[hsl(200,100%,40%)]",
-        },
-        {
-          name: "Dark Sky Blue Subtle",
-          variable: "--dark-sky-blue-subtle",
-          hsl: "200 50% 85%",
-          usage: "Very light backgrounds, borders",
-          class: "bg-[hsl(200,50%,85%)]",
-        },
-      ],
-    },
-    {
-      title: "Alert Severity Status",
-      description: "Semantic Coding for ML Anomaly Detection",
-      icon: AlertTriangle,
-      colors: [
-        {
-          name: "Critical (Red)",
-          variable: "--danger",
-          hsl: "354 70% 54%",
-          usage: "Critical threats, immediate action required, blocked status",
-          class: "bg-[hsl(354,70%,54%)]",
-          severity: "CRITICAL",
-        },
-        {
-          name: "Alert Red (Triggered)",
-          variable: "--alert-red",
-          hsl: "0 84% 60%",
-          usage: "Active triggered alerts, requires urgent attention",
-          class: "bg-[hsl(0,84%,60%)]",
-          severity: "TRIGGERED",
-        },
-        {
-          name: "High (Amber/Orange)",
-          variable: "--warning",
-          hsl: "45 100% 51%",
-          usage: "High-priority threats, attention needed, elevated risk",
-          class: "bg-[hsl(45,100%,51%)]",
-          severity: "HIGH",
-        },
-        {
-          name: "Low (Green)",
-          variable: "--success",
-          hsl: "134 61% 41%",
-          usage: "Safe status, low-risk events, successful operations",
-          class: "bg-[hsl(134,61%,41%)]",
-          severity: "LOW",
-        },
-      ],
-    },
-    {
-      title: "Alert Red Variants",
-      description: "Dedicated Red Palette for Triggered Alerts",
-      icon: XCircle,
-      colors: [
-        {
-          name: "Alert Red",
-          variable: "--alert-red",
-          hsl: "0 84% 60%",
-          usage: "Primary alert color for triggered anomalies",
-          class: "bg-[hsl(0,84%,60%)]",
-        },
-        {
-          name: "Alert Red Dark",
-          variable: "--alert-red-dark",
-          hsl: "0 84% 50%",
-          usage: "Borders, darker accents for alerts",
-          class: "bg-[hsl(0,84%,50%)]",
-        },
-        {
-          name: "Alert Red Light",
-          variable: "--alert-red-light",
-          hsl: "0 84% 70%",
-          usage: "Hover states, lighter alert backgrounds",
-          class: "bg-[hsl(0,84%,70%)]",
-        },
-        {
-          name: "Alert Red Subtle",
-          variable: "--alert-red-subtle",
-          hsl: "0 50% 90%",
-          usage: "Very light backgrounds for alert cards",
-          class: "bg-[hsl(0,50%,90%)]",
-        },
-      ],
-    },
-    {
-      title: "Operational Status",
-      description: "System & Network Status Indicators",
-      icon: CheckCircle,
-      colors: [
-        {
-          name: "Success Green",
-          variable: "--success",
-          hsl: "134 61% 41%",
-          usage: "Operational, healthy systems, successful actions",
-          class: "bg-[hsl(134,61%,41%)]",
-        },
-        {
-          name: "Warning Amber",
-          variable: "--warning",
-          hsl: "45 100% 51%",
-          usage: "Degraded performance, needs attention",
-          class: "bg-[hsl(45,100%,51%)]",
-        },
-        {
-          name: "Danger Red",
-          variable: "--danger",
-          hsl: "354 70% 54%",
-          usage: "System failure, blocked devices, critical errors",
-          class: "bg-[hsl(354,70%,54%)]",
-        },
-      ],
-    },
-    {
-      title: "Interface Foundation",
-      description: "Base Colors for Light & Dark Modes",
-      icon: Info,
-      colors: [
-        {
-          name: "Background",
-          variable: "--background",
-          hsl: "0 0% 100% (Light) / 222.2 84% 4.9% (Dark)",
-          usage: "Primary background for pages and main content areas",
-          class: "bg-background border-2 border-border",
-        },
-        {
-          name: "Foreground",
-          variable: "--foreground",
-          hsl: "0 0% 20% (Light) / 210 40% 98% (Dark)",
-          usage: "Primary text color, high contrast reading",
-          class: "bg-foreground",
-        },
-        {
-          name: "Card Background",
-          variable: "--card",
-          hsl: "0 0% 100% (Light) / 222.2 84% 4.9% (Dark)",
-          usage: "Background for cards, panels, and sections",
-          class: "bg-card border-2 border-border",
-        },
-        {
-          name: "Muted",
-          variable: "--muted",
-          hsl: "240 5% 96% (Light) / 217.2 32.6% 17.5% (Dark)",
-          usage: "Muted backgrounds, secondary sections",
-          class: "bg-muted",
-        },
-        {
-          name: "Border",
-          variable: "--border",
-          hsl: "240 6% 75% (Light) / 217.2 32.6% 25% (Dark)",
-          usage: "Borders, dividers, separators",
-          class: "bg-border",
-        },
-      ],
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center space-y-4 mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -206,112 +16,259 @@ const ColorPaletteInfographic = () => {
             Color Palette & Semantic Use
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            A comprehensive color system designed for rapid security response, low cognitive load, 
-            and absolute user trust in high-stakes threat detection scenarios.
+            HSL-based color system for rapid security response, low cognitive load, and absolute trust
           </p>
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-            <Info className="h-4 w-4" />
-            All colors use HSL format for consistent theming across light and dark modes
-          </div>
         </div>
 
-        {/* Color Groups */}
-        {colorGroups.map((group, groupIndex) => (
-          <Card key={groupIndex} className="p-8 space-y-6 card-professional">
-            {/* Group Header */}
-            <div className="flex items-start gap-4 border-b border-border pb-4">
-              <div className="p-3 rounded-xl bg-primary/10">
-                <group.icon className="h-6 w-6 text-primary" />
+        {/* Main Infographic Card */}
+        <div className="bg-card border-2 border-border rounded-3xl p-12 shadow-2xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            
+            {/* LEFT COLUMN: Primary Brand & Alert Severity */}
+            <div className="space-y-10">
+              {/* Primary Brand Identity */}
+              <div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-3 h-3 rounded-full bg-primary"></div>
+                  <h3 className="text-2xl font-bold text-foreground">Primary Brand Identity</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6 italic">
+                  Dark Sky Blue - Trust, Intelligence & Stability
+                </p>
+                <div className="grid grid-cols-5 gap-3">
+                  <div className="space-y-2">
+                    <div className="h-24 rounded-lg bg-[hsl(200,100%,30%)] shadow-lg"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Base</p>
+                    <p className="text-xs text-center text-muted-foreground">200 100% 30%</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-24 rounded-lg bg-[hsl(200,100%,35%)] shadow-lg"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Light</p>
+                    <p className="text-xs text-center text-muted-foreground">200 100% 35%</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-24 rounded-lg bg-[hsl(200,100%,25%)] shadow-lg"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Dark</p>
+                    <p className="text-xs text-center text-muted-foreground">200 100% 25%</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-24 rounded-lg bg-[hsl(200,100%,40%)] shadow-lg"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Lighter</p>
+                    <p className="text-xs text-center text-muted-foreground">200 100% 40%</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-24 rounded-lg bg-[hsl(200,50%,85%)] shadow-lg border border-border"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Subtle</p>
+                    <p className="text-xs text-center text-muted-foreground">200 50% 85%</p>
+                  </div>
+                </div>
+                <div className="mt-4 p-3 bg-primary/5 rounded-lg">
+                  <p className="text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">Usage:</span> Buttons, headers, links, key UI elements, brand identity
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-foreground mb-1">
-                  {group.title}
-                </h3>
-                <p className="text-muted-foreground">{group.description}</p>
-              </div>
-            </div>
 
-            {/* Color Swatches */}
-            <div className="grid grid-cols-1 gap-4">
-              {group.colors.map((color, colorIndex) => (
-                <div
-                  key={colorIndex}
-                  className="flex items-stretch gap-4 p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow"
-                >
-                  {/* Color Swatch */}
-                  <div className="flex-shrink-0 space-y-2">
-                    <div
-                      className={`w-32 h-32 rounded-xl shadow-lg ${color.class} flex items-center justify-center text-white font-mono text-xs`}
-                    >
-                      {color.severity && (
-                        <span className="px-3 py-1 rounded-full bg-black/30 backdrop-blur-sm font-semibold">
-                          {color.severity}
-                        </span>
-                      )}
+              {/* Alert Severity Status */}
+              <div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-3 h-3 rounded-full bg-danger"></div>
+                  <h3 className="text-2xl font-bold text-foreground">Alert Severity Status</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6 italic">
+                  Semantic Coding for ML Anomaly Detection
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-32 h-16 rounded-lg bg-[hsl(0,84%,60%)] shadow-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">TRIGGERED</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-mono text-sm font-semibold text-foreground">Alert Red</p>
+                      <p className="text-xs text-muted-foreground">hsl(0 84% 60%)</p>
+                      <p className="text-xs text-muted-foreground mt-1">Active triggered alerts, urgent attention</p>
                     </div>
                   </div>
-
-                  {/* Color Info */}
-                  <div className="flex-1 space-y-2">
-                    <div>
-                      <h4 className="text-lg font-semibold text-foreground">
-                        {color.name}
-                      </h4>
-                      <code className="text-sm font-mono text-primary bg-primary/5 px-2 py-1 rounded">
-                        {color.variable}
-                      </code>
+                  <div className="flex items-center gap-4">
+                    <div className="w-32 h-16 rounded-lg bg-[hsl(354,70%,54%)] shadow-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">CRITICAL</span>
                     </div>
-                    
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-muted-foreground">
-                        HSL Value:
-                      </p>
-                      <code className="text-sm font-mono text-foreground bg-muted px-3 py-1.5 rounded-lg block w-fit">
-                        hsl({color.hsl})
-                      </code>
+                    <div className="flex-1">
+                      <p className="font-mono text-sm font-semibold text-foreground">Danger Red</p>
+                      <p className="text-xs text-muted-foreground">hsl(354 70% 54%)</p>
+                      <p className="text-xs text-muted-foreground mt-1">Critical threats, immediate action required</p>
                     </div>
-
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Usage Context:
-                      </p>
-                      <p className="text-sm text-foreground leading-relaxed">
-                        {color.usage}
-                      </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-32 h-16 rounded-lg bg-[hsl(45,100%,51%)] shadow-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">HIGH</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-mono text-sm font-semibold text-foreground">Warning Amber</p>
+                      <p className="text-xs text-muted-foreground">hsl(45 100% 51%)</p>
+                      <p className="text-xs text-muted-foreground mt-1">High-priority threats, attention needed</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-32 h-16 rounded-lg bg-[hsl(134,61%,41%)] shadow-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">LOW</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-mono text-sm font-semibold text-foreground">Success Green</p>
+                      <p className="text-xs text-muted-foreground">hsl(134 61% 41%)</p>
+                      <p className="text-xs text-muted-foreground mt-1">Safe status, low-risk events, successful operations</p>
                     </div>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
-          </Card>
-        ))}
 
-        {/* Design Principles Footer */}
-        <Card className="p-8 bg-primary/5 border-primary/20">
-          <h3 className="text-xl font-semibold text-foreground mb-4">
-            Design Principles
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6 text-sm">
-            <div className="space-y-2">
-              <h4 className="font-semibold text-foreground">🎯 Semantic Clarity</h4>
-              <p className="text-muted-foreground">
-                Colors instantly communicate threat severity and system status without reading text
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h4 className="font-semibold text-foreground">⚡ Rapid Response</h4>
-              <p className="text-muted-foreground">
-                High-contrast dark mode and semantic coding enable TTR &lt; 5 seconds
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h4 className="font-semibold text-foreground">🛡️ Trust & Reliability</h4>
-              <p className="text-muted-foreground">
-                Professional Dark Sky Blue palette conveys stability and intelligence
-              </p>
+            {/* RIGHT COLUMN: Alert Red Variants & Interface Foundation */}
+            <div className="space-y-10">
+              {/* Alert Red Variants */}
+              <div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-3 h-3 rounded-full bg-[hsl(0,84%,60%)]"></div>
+                  <h3 className="text-2xl font-bold text-foreground">Alert Red Variants</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6 italic">
+                  Dedicated Red Palette for Triggered Alerts
+                </p>
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="space-y-2">
+                    <div className="h-24 rounded-lg bg-[hsl(0,84%,60%)] shadow-lg"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Base</p>
+                    <p className="text-xs text-center text-muted-foreground">0 84% 60%</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-24 rounded-lg bg-[hsl(0,84%,50%)] shadow-lg"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Dark</p>
+                    <p className="text-xs text-center text-muted-foreground">0 84% 50%</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-24 rounded-lg bg-[hsl(0,84%,70%)] shadow-lg"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Light</p>
+                    <p className="text-xs text-center text-muted-foreground">0 84% 70%</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-24 rounded-lg bg-[hsl(0,50%,90%)] shadow-lg border border-border"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Subtle</p>
+                    <p className="text-xs text-center text-muted-foreground">0 50% 90%</p>
+                  </div>
+                </div>
+                <div className="mt-4 p-3 bg-danger/5 rounded-lg">
+                  <p className="text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">Usage:</span> Alert cards, borders, hover states, background emphasis
+                  </p>
+                </div>
+              </div>
+
+              {/* Interface Foundation */}
+              <div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-3 h-3 rounded-full bg-foreground"></div>
+                  <h3 className="text-2xl font-bold text-foreground">Interface Foundation</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6 italic">
+                  Base Colors for Light & Dark Modes
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-20 h-12 rounded-lg bg-background border-2 border-border shadow-inner"></div>
+                    <div className="flex-1">
+                      <p className="text-xs font-mono font-semibold text-foreground">Background</p>
+                      <p className="text-xs text-muted-foreground">Primary page background</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-20 h-12 rounded-lg bg-foreground shadow-lg"></div>
+                    <div className="flex-1">
+                      <p className="text-xs font-mono font-semibold text-foreground">Foreground</p>
+                      <p className="text-xs text-muted-foreground">Primary text color</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-20 h-12 rounded-lg bg-card border-2 border-border shadow-lg"></div>
+                    <div className="flex-1">
+                      <p className="text-xs font-mono font-semibold text-foreground">Card</p>
+                      <p className="text-xs text-muted-foreground">Cards, panels, sections</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-20 h-12 rounded-lg bg-muted shadow-inner"></div>
+                    <div className="flex-1">
+                      <p className="text-xs font-mono font-semibold text-foreground">Muted</p>
+                      <p className="text-xs text-muted-foreground">Secondary backgrounds</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-20 h-12 rounded-lg bg-border"></div>
+                    <div className="flex-1">
+                      <p className="text-xs font-mono font-semibold text-foreground">Border</p>
+                      <p className="text-xs text-muted-foreground">Dividers, separators</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Operational Status */}
+              <div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-3 h-3 rounded-full bg-success"></div>
+                  <h3 className="text-2xl font-bold text-foreground">Operational Status</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-6 italic">
+                  System & Network Health Indicators
+                </p>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-2">
+                    <div className="h-20 rounded-lg bg-[hsl(134,61%,41%)] shadow-lg"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Success</p>
+                    <p className="text-xs text-center text-muted-foreground">Operational</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-20 rounded-lg bg-[hsl(45,100%,51%)] shadow-lg"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Warning</p>
+                    <p className="text-xs text-center text-muted-foreground">Degraded</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-20 rounded-lg bg-[hsl(354,70%,54%)] shadow-lg"></div>
+                    <p className="text-xs font-mono text-center text-foreground">Danger</p>
+                    <p className="text-xs text-center text-muted-foreground">Critical</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </Card>
+
+          {/* Design Principles Footer */}
+          <div className="mt-12 pt-8 border-t-2 border-border">
+            <h3 className="text-xl font-bold text-foreground mb-6 text-center">Design Principles</h3>
+            <div className="grid md:grid-cols-3 gap-6 text-center">
+              <div className="space-y-2">
+                <div className="text-3xl mb-2">🎯</div>
+                <h4 className="font-semibold text-foreground">Semantic Clarity</h4>
+                <p className="text-sm text-muted-foreground">
+                  Colors instantly communicate threat severity without reading text
+                </p>
+              </div>
+              <div className="space-y-2">
+                <div className="text-3xl mb-2">⚡</div>
+                <h4 className="font-semibold text-foreground">Rapid Response</h4>
+                <p className="text-sm text-muted-foreground">
+                  High-contrast design enables TTR &lt; 5 seconds
+                </p>
+              </div>
+              <div className="space-y-2">
+                <div className="text-3xl mb-2">🛡️</div>
+                <h4 className="font-semibold text-foreground">Trust & Reliability</h4>
+                <p className="text-sm text-muted-foreground">
+                  Professional palette conveys stability and intelligence
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
