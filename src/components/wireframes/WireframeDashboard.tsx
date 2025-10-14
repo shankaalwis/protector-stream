@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home, Shield, AlertTriangle, Activity, Monitor, TrendingUp, Users, Menu } from "lucide-react";
+import { Home, Shield, AlertTriangle, Activity, Monitor, TrendingUp, Users, Menu, BarChart3, FileText, LogOut, Sparkles, CheckCircle, XCircle, Clock, MapPin, Edit, Plus } from "lucide-react";
 
 const WireframeDashboard = () => {
   return (
