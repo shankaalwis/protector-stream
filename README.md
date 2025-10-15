@@ -1,6 +1,11 @@
-# Smart Home Security SIEM Platform
-
-This repository contains a Vite + React application for monitoring home and small-office networks, along with Supabase edge functions that power AI-driven threat summaries and the Aura assistant.
+A Web-Based Anomaly Detection and Firewall Management Solution Using Machine Learning and a Large Language Model
+Project Proposal CSG3101.2 – Applied Project Group 01
+Supervisor Mr. Jude Kiruparatnam
+Team Members Shanka Alwis - 10685892 (c)
+Thiveekshan Gunasegaran – 10685900
+Manhith Ransilu Sanjeewa – 10686639
+Rashini Dulya Dias 10677999
+Thanoj Nimsara Sahabandu – 10696408
 
 ## Getting Started
 
