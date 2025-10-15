@@ -49,24 +49,31 @@ serve(async (req) => {
       status: device.status
     } : null;
 
-    // Get Lovable API key from environment
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) {
-      throw new Error('LOVABLE_API_KEY not found in environment variables');
+    // Load AI provider configuration from environment
+    const aiApiKey = Deno.env.get('AI_API_KEY');
+    const aiApiUrl = Deno.env.get('AI_API_URL');
+    const aiModel = Deno.env.get('AI_MODEL') ?? 'google/gemini-2.5-flash';
+
+    if (!aiApiKey) {
+      throw new Error('AI_API_KEY not found in environment variables');
     }
 
-    // Helper function to call Lovable AI Gateway with exponential backoff
-    async function callLovableAI(messages: any[], isConversational = false, maxRetries = 3) {
+    if (!aiApiUrl) {
+      throw new Error('AI_API_URL not found in environment variables');
+    }
+
+    // Helper function to call the configured AI provider with exponential backoff
+    async function callAiProvider(messages: any[], isConversational = false, maxRetries = 3) {
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
-          const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          const response = await fetch(aiApiUrl, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${lovableApiKey}`,
+              'Authorization': `Bearer ${aiApiKey}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              model: 'google/gemini-2.5-flash',
+              model: aiModel,
               messages,
               temperature: isConversational ? 0.7 : 0.1, // Higher temperature for conversational responses
               max_tokens: 1000
@@ -75,13 +82,13 @@ serve(async (req) => {
 
           if (!response.ok) {
             const errorText = await response.text();
-            console.error(`Lovable AI error (attempt ${attempt + 1}/${maxRetries}):`, errorText);
+            console.error(`AI provider error (attempt ${attempt + 1}/${maxRetries}):`, errorText);
             
             if (response.status === 429) {
               throw new Error('Rate limits exceeded, please try again later.');
             }
             if (response.status === 402) {
-              throw new Error('Payment required, please add funds to your Lovable AI workspace.');
+              throw new Error('Payment required by the configured AI provider.');
             }
             
             if (attempt < maxRetries - 1) {
@@ -90,7 +97,7 @@ serve(async (req) => {
               await new Promise(resolve => setTimeout(resolve, delay));
               continue;
             }
-            throw new Error(`Lovable AI error: ${response.status} - ${errorText}`);
+            throw new Error(`AI provider error: ${response.status} - ${errorText}`);
           }
 
           return await response.json();
@@ -198,8 +205,8 @@ CONVERSATION RULES:
       ];
 
       console.log('Sending messages to AI:', { systemMessageLength: systemMessage.length, historyLength: conversationHistory.length });
-      const aiData = await callLovableAI(messages, true); // true for conversational mode
-      console.log('Lovable AI conversational response:', JSON.stringify(aiData, null, 2));
+      const aiData = await callAiProvider(messages, true); // true for conversational mode
+      console.log('AI provider conversational response:', JSON.stringify(aiData, null, 2));
 
       aiResponse = aiData.choices?.[0]?.message?.content || 'Unable to generate response at this time.';
       
@@ -260,8 +267,8 @@ Respond with valid JSON only.`;
         { role: 'user', content: 'Analyze this security alert.' }
       ];
 
-      const aiData = await callLovableAI(messages, false); // false for structured analysis
-      console.log('Lovable AI response:', JSON.stringify(aiData, null, 2));
+      const aiData = await callAiProvider(messages, false); // false for structured analysis
+      console.log('AI provider response:', JSON.stringify(aiData, null, 2));
 
       // Extract and parse the AI response
       let rawResponse = aiData.choices?.[0]?.message?.content;

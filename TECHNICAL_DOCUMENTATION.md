@@ -231,7 +231,7 @@ Edge Function → CORS Handler → Authentication → Business Logic → Respons
 
 #### **1. aura-chat**
 - **Purpose:** AI-powered security assistant
-- **Technology:** Lovable AI Gateway (Gemini)
+- **Technology:** Configurable AI provider (Gemini model by default)
 - **Authentication:** JWT required
 - **Features:**
   - Conversational AI for security queries
@@ -517,8 +517,9 @@ Managed via Supabase Dashboard:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `SUPABASE_DB_URL`
 - `RESEND_API_KEY`
-- `LOVABLE_API_KEY`
-- `GEMINI_API_KEY`
+- `AI_API_KEY`
+- `AI_API_URL`
+- `AI_MODEL` (optional override)
 
 ---
 
@@ -581,11 +582,12 @@ export const useAuth = () => {
 
 ## 8. External Integrations
 
-### 8.1 Lovable AI Gateway (Gemini)
+### 8.1 AI Provider (Gemini default)
 
-- **Purpose:** Power Aura AI assistant
-- **Model:** Google Gemini (via Lovable AI Gateway)
-- **API Key:** `LOVABLE_API_KEY` (secret)
+- **Purpose:** Power Aura AI assistant and automated analyses
+- **Model:** Configurable via `AI_MODEL` (defaults to Google Gemini)
+- **API Key:** `AI_API_KEY` (secret)
+- **Endpoint:** `AI_API_URL`
 - **Features:**
   - Streaming responses
   - Context injection (user data, devices, alerts)
