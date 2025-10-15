@@ -91,20 +91,27 @@ Guidelines:
 Current conversation context:
 ${messages.slice(-5).map((m: any) => `${m.role}: ${m.content}`).join('\n')}`;
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    const aiApiKey = Deno.env.get('AI_API_KEY');
+    const aiApiUrl = Deno.env.get('AI_API_URL');
+    const aiModel = Deno.env.get('AI_MODEL') ?? 'google/gemini-2.5-flash';
+
+    if (!aiApiKey) {
+      throw new Error('AI_API_KEY not configured');
     }
 
-    // Call Lovable AI Gateway with Gemini
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    if (!aiApiUrl) {
+      throw new Error('AI_API_URL not configured');
+    }
+
+    // Call the configured AI provider
+    const response = await fetch(aiApiUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${aiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: aiModel,
         messages: [
           { role: 'system', content: systemPrompt },
           ...messages
